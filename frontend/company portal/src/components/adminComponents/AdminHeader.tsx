@@ -6,10 +6,22 @@ import {
   } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useNavigate } from "react-router-dom";
+import { useSnackbar } from "notistack";
+import { adminAxiosInstance } from "../../api/admin.axios";
+import { adminLogout } from "../../store/slices/adminSlice";
+import { useDispatch  } from "react-redux";
 
 
 export default function AdminHeader() {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const { enqueueSnackbar } = useSnackbar();
+    const handleLogout = async()=>{
+      let response = await adminAxiosInstance.post("/logout");
+      dispatch(adminLogout());
+      enqueueSnackbar(response.data.message , {variant : "success"});
+      navigate("/admin/login");
+    }
   return (
     <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
@@ -30,7 +42,7 @@ export default function AdminHeader() {
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={()=>navigate("/admin/profile")}>Profile</DropdownMenuItem>
                 <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem onClick={()=>navigate("/admin/login")}>Logout</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

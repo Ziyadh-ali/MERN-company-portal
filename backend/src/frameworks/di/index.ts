@@ -5,8 +5,8 @@ import { UseCaseRegistry } from "./useCase.registry";
 
 export class DependencyInjection {
   static registerAll(): void {
+    RepositoryRegistry.registerRepositories();
     UseCaseRegistry.registerUseCases();
     ControllerRegistry.registerControllers();
-    RepositoryRegistry.registerRepositories();
   }
 }

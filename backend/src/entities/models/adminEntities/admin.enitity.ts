@@ -1,5 +1,7 @@
+import { ObjectId } from "mongoose";
+
 export interface Admin {
-    _id?: string;
+    _id?: ObjectId | string;
     name?: string;
     email: string;
     password: string;

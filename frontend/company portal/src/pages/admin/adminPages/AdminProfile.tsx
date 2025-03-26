@@ -1,9 +1,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Button } from "../ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
+import { Button } from "../../../components/ui/button";
 // import { Progress } from "@radix-ui/react-progress";
-import AdminSideBar from "./AdminSideBar";
-import AdminHeader from "./AdminHeader";
+import AdminSideBar from "../../../components/adminComponents/AdminSideBar";
+import AdminHeader from "../../../components/adminComponents/AdminHeader";
 
 
 export default function AdminProfile() {

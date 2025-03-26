@@ -1,19 +1,42 @@
-import { inject, injectable } from "tsyringe";
+import { injectable, inject } from "tsyringe";
 import { IAdminRepository } from "../../entities/repositoryInterfaces/admin/admin.repository";
 import { Admin } from "../../entities/models/adminEntities/admin.enitity";
+import { PasswordBcrypt } from "../../frameworks/security/password.bcrypt";
 import { JwtService } from "../../adapters/service/jwt.service";
 import { AdminLoginResponse } from "../../entities/adminInterface/adminLogin.interface";
-import { PasswordBcrypt } from "../../frameworks/security/password.bcrypt";
+import { IAdminAuthUseCase } from "../../entities/useCaseInterface/IAdaminAuthUseCase";
+
 
 @injectable()
-export class AdminLogin {
+export class AdminAuthUseCase implements IAdminAuthUseCase {
     constructor(
         @inject("IAdminRepository") private adminRepository: IAdminRepository,
-        @inject("JwtService") private jwtService: JwtService,
         @inject("PasswordBcrypt") private passwordBcrypt: PasswordBcrypt,
-    ) {}
+        @inject("JwtService") private jwtService: JwtService,
+    ) { }
 
-    async execute(email: string, password: string): Promise<AdminLoginResponse | null> {
+    async createAdmin(email: string, password: string): Promise<Admin> {
+        try {
+            const existingAdmin = await this.adminRepository.findByEmail(email);
+            if (existingAdmin) {
+                throw new Error("Admin already exists");
+            }
+
+            const hashedPassword = await this.passwordBcrypt.hash(password);
+
+            const admin: Admin = {
+                email,
+                password: hashedPassword,
+                role: "admin"
+            };
+            await this.adminRepository.save(admin);
+            return admin;
+        } catch (error) {
+            throw new Error(`Failed to create admin : ${error}`);
+        }
+    }
+
+    async login(email: string, password: string): Promise<AdminLoginResponse | null> {
         const admin = await this.adminRepository.findByEmail(email);
         if (!admin) {
             throw new Error("Admin not found");
@@ -48,7 +71,7 @@ export class AdminLogin {
                 role: admin.role,
                 createdAt: admin.createdAt,
                 updatedAt: admin.updatedAt,
-              }
+            }
         }
     }
 }

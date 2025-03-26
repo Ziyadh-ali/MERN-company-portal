@@ -1,13 +1,19 @@
 import { container } from "tsyringe";
 import { AdminController } from "../../adapters/controllers/admin/adminController";
-import { AdminRefreshController } from "../../adapters/controllers/admin/AdminRefreshController";
-import { AdminRefresh } from "../../adapters/controllers/admin/adminRefresh";
+import { RefreshController } from "../../adapters/controllers/refreshController";
 import { DependencyInjection } from "./index";
+import { AdminUserManagement } from "../../adapters/controllers/admin/AdminUserManagement";
+import { UserController } from "../../adapters/controllers/user/userController";
+import { UserProfile } from "../../adapters/controllers/user/userProfileController";
 
 DependencyInjection.registerAll()
 
 export const adminController = container.resolve(AdminController);
 
-export const adminRefreshController = container.resolve(AdminRefreshController);
+export const refreshController = container.resolve(RefreshController);
 
-export const adminRefresh = container.resolve(AdminRefresh);
+export const adminUserManagement = container.resolve(AdminUserManagement);
+
+export const userController = container.resolve(UserController);
+
+export const userProfile = container.resolve(UserProfile);

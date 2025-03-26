@@ -1,8 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Progress } from "../ui/progress";
-import AdminSideBar from "./AdminSideBar";
-import AdminHeader from "./AdminHeader";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
+import { Progress } from "../../../components/ui/progress";
+import AdminSideBar from "../../../components/adminComponents/AdminSideBar";
+import AdminHeader from "../../../components/adminComponents/AdminHeader";
 
 
 function AdminDashBoard() {

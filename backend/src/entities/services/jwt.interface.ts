@@ -1,7 +1,8 @@
 import { JwtPayload } from "jsonwebtoken";
+import { ObjectId } from "mongoose";
 
 export interface TJwtPayload extends JwtPayload {
-  id?: string;
+  id?: ObjectId | string;
   email : string;
   role: string;
 }

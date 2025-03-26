@@ -1,8 +1,11 @@
 import express , { Application } from "express";
+import morgan from "morgan";
 import cors from "cors";
 import helmet from "helmet";
 import { AdminRoute } from "../routes/adminRoutes";
 import cookieParser from "cookie-parser";
+import { config } from "../../shared/config";
+import { UserRoute } from "../routes/userRoutes";
 
 export class Server {
     private app : Application;
@@ -16,7 +19,15 @@ export class Server {
     }
 
     private setupMiddlewares():void {
-        this.app.use(cors());
+        this.app.use(morgan("dev"))
+        this.app.use(
+            cors({
+              origin: config.cors.ALLOWED_ORIGIN,
+              methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+              allowedHeaders: ["Authorization", "Content-Type", "stripe-signature"],
+              credentials: true,
+            })
+          );
         this.app.use(helmet());
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
@@ -25,6 +36,8 @@ export class Server {
 
     private configureRoutes() : void {
         const adminRoute = new AdminRoute();
+        const userRoute = new UserRoute()
+        this.app.use("/",userRoute.getRoute());  
         this.app.use("/admin",adminRoute.getRouter());
     }
 

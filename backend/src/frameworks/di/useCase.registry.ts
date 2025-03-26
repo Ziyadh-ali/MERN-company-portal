@@ -1,13 +1,16 @@
 import { container } from "tsyringe";
-import { AdminLogin } from "../../useCases/admin/adminLogin";
 import { JwtService } from "../../adapters/service/jwt.service";
 import { PasswordBcrypt } from "../security/password.bcrypt";
-import { CreateAdmin } from "../../useCases/admin/adminCreate";
+import { UserLogin } from "../../useCases/user/userLoginUseCase";
+import { AdminAuthUseCase } from "../../useCases/admin/AdminAuthUseCase";
+import { UserProfileUseCase } from "../../useCases/common/UserProfileUseCase";
+import { UserManagementUseCase } from "../../useCases/common/UserManagementUseCase";
+
 
 export class UseCaseRegistry {
     static registerUseCases(): void {
-        container.register("AdminLogin", {
-            useClass: AdminLogin,
+        container.register("IAdminAuthUseCase", {
+            useClass: AdminAuthUseCase,
         });
 
         container.register("JwtService", {
@@ -17,9 +20,17 @@ export class UseCaseRegistry {
         container.register("PasswordBcrypt", {
             useClass: PasswordBcrypt,
         })
-        
-        container.register("CreateAdmin" , {
-            useClass : CreateAdmin,
+
+        container.register("IUserProfileUseCase",{
+            useClass : UserProfileUseCase,
+        })
+
+        container.register("IUserManagementUseCase",{
+            useClass : UserManagementUseCase,
+        })
+
+        container.register("UserLogin",{
+            useClass : UserLogin,
         })
     }
 }

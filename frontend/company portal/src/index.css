@@ -122,3 +122,12 @@
     @apply bg-background text-foreground;
   }
 }
+.scrollbar-hidden::-webkit-scrollbar {
+  width: 0px;  /* Hides scrollbar */
+  height: 0px;
+}
+
+.scrollbar-hidden {
+  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  /* IE/Edge */
+}

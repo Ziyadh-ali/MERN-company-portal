@@ -19,8 +19,6 @@ export class JwtService implements AuthServiceInterface {
     }
 
     generateAccessToken(data: TJwtPayload): string {
-        console.log(`Access secret ${this.accessSecret} and expires in ${this.accessExpiresIn}`);
-        console.log(`Refresh secret ${this.refreshSecret} and expires in ${this.refreshExpiresIn}`);
         return jwt.sign(data , this.accessSecret, {expiresIn : this.accessExpiresIn as ms.StringValue});
     }
 
@@ -29,11 +27,19 @@ export class JwtService implements AuthServiceInterface {
     }
 
     verifyAccessToken(token: string): JwtPayload | null {
-        return jwt.verify(token, this.accessSecret) as TJwtPayload
+        try {
+            return jwt.verify(token, this.accessSecret) as TJwtPayload
+        } catch (error) {
+            throw new Error("Invalid or Expired Access Token");
+        }
     }
 
     verifyRefreshToken(token: string): JwtPayload | null {
-        return jwt.verify(token , this.refreshSecret) as TJwtPayload
+        try {
+            return jwt.verify(token, this.refreshSecret) as JwtPayload;
+        } catch (error) {
+            throw new Error("Invalid or Expired Refresh Token");
+        }
     }
 
     decodeRefreshToken(token: string): JwtPayload | null {

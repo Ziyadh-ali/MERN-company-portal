@@ -33,7 +33,6 @@ export const updateCookieWithAccessToken = (
         httpOnly: true,
         secure: isProduction,
         sameSite: "strict",
-        maxAge: 15 * 60 * 1000,
     });
 };
 
