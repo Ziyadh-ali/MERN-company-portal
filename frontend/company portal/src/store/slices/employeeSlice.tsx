@@ -21,7 +21,6 @@ const employeeSlice = createSlice({
     initialState,
     reducers : {
         employeeLogin : (state , action : PayloadAction<Employee>) => {
-            console.log("user" , action.payload)
             state.employee = action.payload;
             localStorage.setItem("employeeSession" , JSON.stringify(action.payload));
         },

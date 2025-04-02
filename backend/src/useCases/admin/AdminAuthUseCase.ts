@@ -5,6 +5,7 @@ import { PasswordBcrypt } from "../../frameworks/security/password.bcrypt";
 import { JwtService } from "../../adapters/service/jwt.service";
 import { AdminLoginResponse } from "../../entities/adminInterface/adminLogin.interface";
 import { IAdminAuthUseCase } from "../../entities/useCaseInterface/IAdaminAuthUseCase";
+import { MESSAGES } from "../../shared/constants";
 
 
 @injectable()
@@ -32,7 +33,7 @@ export class AdminAuthUseCase implements IAdminAuthUseCase {
             await this.adminRepository.save(admin);
             return admin;
         } catch (error) {
-            throw new Error(`Failed to create admin : ${error}`);
+            throw new Error(`Failed to create admin`);
         }
     }
 
@@ -45,7 +46,7 @@ export class AdminAuthUseCase implements IAdminAuthUseCase {
         if (password) {
             const isPasswordMatch = await this.passwordBcrypt.compare(password, admin.password);
             if (!isPasswordMatch) {
-                throw new Error("Invalid credentials");
+                throw new Error(MESSAGES.ERROR.AUTH.INVALID_CREDENTIALS);
             }
         }
 

@@ -1,15 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { JwtService } from '../service/jwt.service';
 import { injectable, inject } from 'tsyringe';
-import { TJwtPayload } from '../../entities/services/jwt.interface';
-import jwt from 'jsonwebtoken';
-import { updateCookieWithAccessToken } from '../../shared/utils/cookieHelper';
 import { HTTP_STATUS_CODES } from '../../shared/constants';
+import { IRefreshTokenUseCase } from '../../entities/useCaseInterface/IRefreshTokenUseCase';
 
 @injectable()
 export class RefreshController {
   constructor(
-    @inject('JwtService') private jwtService: JwtService,
+    @inject('IRefreshTokenUseCase') private refreshTokenUseCase: IRefreshTokenUseCase,
   ) { }
 
   async refreshToken(req: Request, res: Response): Promise<void> {
@@ -22,21 +19,7 @@ export class RefreshController {
         return;
       }
 
-      const decoded = this.jwtService.verifyRefreshToken(refreshToken) as TJwtPayload;
-
-      const newPayload = {
-          id : decoded.id,
-          email : decoded.email,
-          role : decoded.role,
-      }
-
-      const accessToken = this.jwtService.generateAccessToken(newPayload);
-
-      updateCookieWithAccessToken(
-        res,
-        accessToken,
-        `${role}_access_token`,
-      );
+      const { accessToken } = await this.refreshTokenUseCase.execute(refreshToken, res, role);
 
       res.status(HTTP_STATUS_CODES.OK).json({ accessToken });
     } catch (error) {

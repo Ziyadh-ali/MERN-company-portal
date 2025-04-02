@@ -6,15 +6,17 @@ import { Input } from "../../../components/ui/input";
 import AdminHeader from "../../../components/adminComponents/AdminHeader";
 import AdminSideBar from "../../../components/adminComponents/AdminSideBar";
 import AddUserModal from "../modals/AddUserModal";
-import { closeSnackbar, enqueueSnackbar, SnackbarKey } from "notistack";
+import { enqueueSnackbar } from "notistack";
 import { addUser, deleteUser, getUsers } from "../../../services/admin/adminUserM";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useConfirmDeleteModal } from "../../../components/useConfirm";
 
 function UserManagement() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [users, setUsers] = useState<any[]>([]);
+  const { confirmDelete, ConfirmDeleteModal } = useConfirmDeleteModal();
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(2);
   const [total, setTotal] = useState<number>(0);
@@ -79,27 +81,10 @@ function UserManagement() {
 
   //todo Function for handling user deletion --------------------------------------------------------------------------------
 
-  
-  const handleDelete = (userId : string) => {
-    enqueueSnackbar("Are you sure you want to delete this user?", {
-        variant: "warning",
-        action: (key) => (
-            <>
-                <Button onClick={() => confirmDelete(key , userId)}>Yes</Button>
-                <Button onClick={() => closeSnackbar(key)}>No</Button>
-            </>
-        ),
-        persist : true,
-    });
+
+  const handleDelete = (userId: string) => {
+    confirmDelete({ id: userId, name: "User" });
   };
-  const confirmDelete = async  (key: SnackbarKey , userId : string) => {
-    closeSnackbar(key);
-    const response = await deleteUser(userId);
-    enqueueSnackbar(response.message , {variant : "success"});
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
-};
 
 
 
@@ -203,7 +188,7 @@ function UserManagement() {
                     <th className="px-4 py-2">Name</th>
                     <th className="px-4 py-2">Role</th>
                     <th className="px-4 py-2">Status</th>
-                    <th className="px-4 py-2">Access Level</th>
+                    <th className="px-4 py-2">Email</th>
                     <th className="px-4 py-2">Last Login</th>
                     <th className="px-4 py-2">Actions</th>
                   </tr>
@@ -222,19 +207,19 @@ function UserManagement() {
                       <td className="px-4 py-2">
                         <span
                           className={`${user.status === "active"
-                              ? "text-green-600 bg-green-100"
-                              : "text-red-600 bg-red-100"
+                            ? "text-green-600 bg-green-100"
+                            : "text-red-600 bg-red-100"
                             } px-2 py-1 rounded-full text-xs`}
                         >
                           {user.status}
                         </span>
                       </td>
-                      <td className="px-4 py-2">{user.accessLevel}</td>
+                      <td className="px-4 py-2">{user.email}</td>
                       <td className="px-4 py-2">{user.lastLogin}</td>
                       <td className="px-4 py-2">
                         <div className="flex space-x-2">
-                          <button onClick={()=>navigate(`/admin/users/${user._id}`)} className="text-blue-600 hover:underline cursor-pointer">👁️</button>
-                          <button onClick={()=>handleDelete(user._id)} className="text-red-600 hover:underline cursor-pointer">🗑️</button>
+                          <button onClick={() => navigate(`/admin/users/${user._id}`)} className="text-blue-600 hover:underline cursor-pointer">👁️</button>
+                          <button onClick={() => handleDelete(user._id)} className="text-red-600 hover:underline cursor-pointer">🗑️</button>
                         </div>
                       </td>
                     </tr>
@@ -281,6 +266,19 @@ function UserManagement() {
           </CardContent>
         </Card>
       </div>
+      <ConfirmDeleteModal
+        onConfirm={async (id: string) => {
+          try {
+            const response = await deleteUser(id);
+            enqueueSnackbar(response.message, { variant: "success" });
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          } catch (error) {
+            enqueueSnackbar("Failed to delete user.", { variant: "error" });
+          }
+        }}
+      />
     </div>
   );
 }

@@ -3,8 +3,10 @@ import {
   adminController,
   refreshController,
   adminUserManagement,
+  leaveRequestController,
 } from '../di/resolver';
 import { verifyAuth } from '../../adapters/middlewares/authMiddleware';
+import { leaveTypeController } from '../di/resolver';
 
 export class AdminRoute {
   private router: express.Router;
@@ -60,14 +62,52 @@ export class AdminRoute {
         "/users/:userId",
         verifyAuth("admin"),
         (req: Request, res: Response) => adminUserManagement.deleteUser(req, res)
-      )
+      );
 
     this.router
       .get(
         "/managers",
         verifyAuth("admin"),
-      (req: Request, res: Response) => adminUserManagement.getManagers(req, res))
-      
+        (req: Request, res: Response) => adminUserManagement.getManagers(req, res));
+
+    this.router
+      .get(
+        "/leave/type",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => leaveTypeController.getAllLeaveTypes(req, res))
+
+      .post(
+        "/leave/type",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => leaveTypeController.createLeaveType(req, res))
+
+      .get(
+        "/leave/type/:id",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => leaveTypeController.getLeaveTypeById(req, res))
+
+      .delete(
+        "/leave/type/:id",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => leaveTypeController.deleteLeaveType(req, res))
+
+      .patch(
+        "/leave/type/:id",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => leaveTypeController.updateLeaveType(req, res))
+
+    this.router
+      .get(
+        "/leave/requests",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => leaveRequestController.getAllLeaveRequests(req , res)
+      )
+
+      .patch(
+        "/leave/requests/:leaveRequestId",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => leaveRequestController.updateLeaveRequestStatus(req , res)
+      )
   }
 
   public getRouter(): express.Router {

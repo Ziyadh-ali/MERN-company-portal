@@ -12,7 +12,7 @@ export const UserSchema = new Schema<IUserModel>(
         profilePic : { type: String,default : ""},
         phone : { type: Number, default : 1234567890},
         address : { type: String, default : ""},
-        manager : { type: String , default : ""},
+        manager : { type: String , default : "67d3fb40609f7c890f6eb579"},
         joinedAt : { type: Date, default: Date.now() },
     },
     {

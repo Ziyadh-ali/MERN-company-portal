@@ -12,7 +12,11 @@ import { useNavigate } from "react-router-dom";
 import { logoutService } from "../../services/user/userService";
 import { RootState } from "../../store/store";
 
-export const UserHeader = () => {
+interface Props {
+    heading : string,
+}
+
+export const UserHeader : React.FC<Props> = ({heading}) => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -31,7 +35,7 @@ export const UserHeader = () => {
     return (<div className="flex justify-between items-center mb-6">
         <div>
             <h1 className="text-2xl font-semibold text-gray-800">
-                Welcome back,
+                {heading}
             </h1>
             <p className="text-sm text-gray-600">Here’s what’s happening today</p>
         </div>

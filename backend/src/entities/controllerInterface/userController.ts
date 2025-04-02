@@ -11,4 +11,9 @@ export interface IUserProfile {
         req : Request , 
         res : Response
     ) : Promise<void>;
+
+    changePassword(
+        req : Request , 
+        res : Response
+    ) : Promise<void>;
 }

@@ -28,12 +28,10 @@ const EmployeeLoginPage = () => {
     onSubmit: async (values, { setSubmitting }) => {
       try {
         const response = await loginService(values);
-        console.log(response.user)
         dispatch(employeeLogin(response.user));
         enqueueSnackbar(response.message, { variant: "success" });
         navigate("/dashboard");
       } catch (error) {
-
         if (error instanceof AxiosError) {
           enqueueSnackbar(error.response?.data?.message || "An unexpected error occurred", { variant: "error" });
         } else {

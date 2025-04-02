@@ -24,7 +24,8 @@ export default function AdminSideBar() {
           {[
             { path: "/admin/dashboard", label: "Dashboard", icon: "📊" },
             { path: "/admin/users", label: "User Management", icon: "👥" },
-            { path: "/admin/leave", label: "Leave Management", icon: "📅" },
+            { path: "/admin/leave/requests", label: "Leave Management", icon: "📅" },
+            { path: "/admin/leave/types", label: "Leave Type Management", icon: "📅" },
             { path: "/admin/payroll", label: "Payroll", icon: "💰" },
             { path: "/admin/attendance", label: "Attendance", icon: "⏰" },
             { path: "/admin/overview", label: "Overview", icon: "📈" },
@@ -35,6 +36,7 @@ export default function AdminSideBar() {
             <NavLink
               key={path}
               to={path}
+              end
               className={({ isActive }) =>
                 `flex items-center space-x-2 p-2 rounded-md transition ${
                   isActive ? "bg-blue-100 text-blue-600" : "text-gray-600 hover:bg-gray-100"

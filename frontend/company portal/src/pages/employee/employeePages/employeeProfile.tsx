@@ -7,8 +7,10 @@ import { UserHeader } from "../../../components/userComponents/userHeader";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
-import { getProfileDetails } from "../../../services/user/userService";
-import axios from "axios";
+import { changePasswordService, getProfileDetails } from "../../../services/user/userService";
+import axios, { AxiosError } from "axios";
+import ChangePasswordModal from "../modals/ChangePasswordModal";
+import { enqueueSnackbar } from "notistack";
 
 // User interface
 export interface User {
@@ -49,6 +51,26 @@ const EmployeeProfilePage = () => {
         fetchUsers()
     }, [employee?._id]);
 
+    const handleChangePass = async (updatedPass: {
+        currentPassword: string,
+        newPassword: string,
+    }) => {
+        try {
+            if (employee?._id) {
+                const response = await changePasswordService(employee?._id, updatedPass.currentPassword, updatedPass.newPassword);
+                enqueueSnackbar(response.message, { variant: "success" });
+                
+            }
+        } catch (error) {
+            console.log(error);
+            if (error instanceof AxiosError) {
+                enqueueSnackbar(error.response?.data?.message || "An unexpected error occurred", { variant: "error" });
+            } else {
+                enqueueSnackbar("An unexpected error occurred", { variant: "error" });
+            }
+        }
+    }
+
 
     const formatRole = (role: string) => {
         switch (role) {
@@ -70,7 +92,7 @@ const EmployeeProfilePage = () => {
 
             {/* Main Content */}
             <div className="flex-1 p-6">
-                <UserHeader />
+                <UserHeader heading="Profile Page"/>
                 <div className="bg-white shadow-md rounded-lg p-6 mb-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
@@ -106,7 +128,7 @@ const EmployeeProfilePage = () => {
                         </div>
                         <div className="flex space-x-2">
                             <Button className="bg-blue-600 text-white" onClick={() => naviagte(`/profile/${user?._id}`)}>Edit Profile</Button>
-                            <Button className="bg-blue-600 text-white">Change Password</Button>
+                            <ChangePasswordModal onUpdate={handleChangePass} />
                         </div>
                     </div>
                 </div>

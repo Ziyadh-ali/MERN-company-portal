@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
 import { setAuthCookies, clearAuthCookies } from "../../../shared/utils/cookieHelper";
-import { HTTP_STATUS_CODES } from "../../../shared/constants";
+import { HTTP_STATUS_CODES, MESSAGES } from "../../../shared/constants";
 import { IAdminAuthUseCase } from "../../../entities/useCaseInterface/IAdaminAuthUseCase";
 
 @injectable()
@@ -14,6 +14,7 @@ export class AdminController {
 
     async login(req: Request, res: Response) {
         const { email, password } = req.body;   
+        console.log(req.body)
         try {
             const response = await this.adminAuthUseCase.login(email, password);
             
@@ -28,7 +29,7 @@ export class AdminController {
 
                 res.status(HTTP_STATUS_CODES.OK).json({
                     success: true,
-                    message: "Login successfull",
+                    message: MESSAGES.SUCCESS.LOGIN_SUCCESS,
                     admin: response.admin,
                 });
             }
@@ -46,7 +47,7 @@ export class AdminController {
             clearAuthCookies(res , "admin_access_token" , "admin_refresh_token");
             res.status(200).json({
                 success: true,
-                message: "Logout successfull",
+                message: MESSAGES.SUCCESS.LOGOUT_SUCCESS,
             });
         } catch (error) {
             res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({ message: 'Failed to logout' });

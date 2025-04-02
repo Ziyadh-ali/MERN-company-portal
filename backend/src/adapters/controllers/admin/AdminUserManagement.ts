@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { injectable, inject } from "tsyringe";
-import { HTTP_STATUS_CODES } from "../../../shared/constants";
+import { HTTP_STATUS_CODES, MESSAGES } from "../../../shared/constants";
 import { IUserManagementUseCase } from "../../../entities/useCaseInterface/IUserManagementUseCase";
 import { IUserProfileUseCase } from "../../../entities/useCaseInterface/IUserProfileUseCase";
 
@@ -16,7 +16,7 @@ export class AdminUserManagement {
         try {
             const response = await this.userManagementUseCase.addUser(userData);
 
-            res.status(HTTP_STATUS_CODES.CREATED).json({ response, message: "User added successfully" });
+            res.status(HTTP_STATUS_CODES.CREATED).json({ response, message: MESSAGES.SUCCESS.USER_CREATED });
         } catch (error) {
             console.log("error adding user", error);
             res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
@@ -78,7 +78,7 @@ export class AdminUserManagement {
         try {
             const { userId} = req.params;
             await this.userManagementUseCase.deleteUser(userId);
-            res.status(HTTP_STATUS_CODES.OK).json({message : "User Deleted"});
+            res.status(HTTP_STATUS_CODES.OK).json({message : MESSAGES.SUCCESS.USER_DELETED});
         } catch (error) {
             res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({message : "Error deleting user"});
         }

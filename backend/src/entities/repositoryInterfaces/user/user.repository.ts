@@ -1,4 +1,3 @@
-import { ObjectId } from "mongoose";
 import { User } from "../../models/userEntities/user.enitity";
 export interface IUserRepository {
     save(data : Partial<User>) : Promise<User>

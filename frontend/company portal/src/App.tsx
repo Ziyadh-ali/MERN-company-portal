@@ -12,6 +12,9 @@ import EmployeeDashBoard from "./pages/employee/employeePages/employeeDashboard"
 import EditProfilePage from "./pages/employee/employeePages/employeeEditProfile"
 import EmployeeProfilePage from "./pages/employee/employeePages/employeeProfile"
 import AdminEditUserPage from "./pages/admin/adminPages/AdminUserEdit"
+import LeavePage from "./pages/employee/employeePages/employeeLeavePage"
+import LeaveTypeManagementPage from "./pages/admin/adminPages/LeaveTypeManagement"
+import LeaveManagementPage from "./pages/admin/adminPages/LeaveManagement"
 
 function App() {
 
@@ -34,6 +37,8 @@ function App() {
               <Route path="profile/:id" element={<EditProfilePage/>} />
 
               <Route path="profile" element={<EmployeeProfilePage/>} />
+
+              <Route path="leave" element={<LeavePage/>} />
 
             </Route>
 
@@ -58,6 +63,10 @@ function App() {
               <Route path="users/:userId" element={<UserDetails />} />
 
               <Route path="users/:userId/edit" element={<AdminEditUserPage />} />
+
+              <Route path="leave/types" element={<LeaveTypeManagementPage />} />
+
+              <Route path="leave/requests" element={<LeaveManagementPage />} />
 
             </Route>
 
