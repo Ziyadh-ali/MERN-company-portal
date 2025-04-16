@@ -2,15 +2,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import UserSidebar from "../../../components/userComponents/userSidebar";
-import { UserHeader } from "../../../components/userComponents/userHeader";
+import { EmployeeHeader } from "../../../components/employeeComponents/employeeHeader";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import { changePasswordService, getProfileDetails } from "../../../services/user/userService";
-import axios, { AxiosError } from "axios";
+import  { AxiosError } from "axios";
 import ChangePasswordModal from "../modals/ChangePasswordModal";
 import { enqueueSnackbar } from "notistack";
+import EmployeeSidebar from "../../../components/employeeComponents/employeeSidebar";
 
 // User interface
 export interface User {
@@ -43,13 +43,10 @@ const EmployeeProfilePage = () => {
                 setUser(response.details);
             } catch (error) {
                 console.log(error);
-                if (axios.isAxiosError(error)) {
-
-                }
             }
         }
         fetchUsers()
-    }, [employee?._id]);
+    }, [employee]);
 
     const handleChangePass = async (updatedPass: {
         currentPassword: string,
@@ -88,11 +85,11 @@ const EmployeeProfilePage = () => {
     return (
         <div className="flex min-h-screen bg-gray-100">
             {/* Sidebar */}
-            <UserSidebar />
+            <EmployeeSidebar />
 
             {/* Main Content */}
             <div className="flex-1 p-6">
-                <UserHeader heading="Profile Page"/>
+                <EmployeeHeader heading="Profile Page"/>
                 <div className="bg-white shadow-md rounded-lg p-6 mb-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">

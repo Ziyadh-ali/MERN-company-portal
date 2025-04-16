@@ -1,5 +1,5 @@
 import { Schema } from "mongoose";
-import { ILeaveType } from "../models/user/LeaveTypeModel";
+import { ILeaveType } from "../models/LeaveTypeModel";
 
 export const LeaveTypeSchema = new Schema<ILeaveType>(
     {

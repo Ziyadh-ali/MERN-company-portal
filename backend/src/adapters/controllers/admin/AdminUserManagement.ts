@@ -1,20 +1,20 @@
 import { Request, Response } from "express";
 import { injectable, inject } from "tsyringe";
 import { HTTP_STATUS_CODES, MESSAGES } from "../../../shared/constants";
-import { IUserManagementUseCase } from "../../../entities/useCaseInterface/IUserManagementUseCase";
-import { IUserProfileUseCase } from "../../../entities/useCaseInterface/IUserProfileUseCase";
+import { IEmployeeProfileUseCase } from "../../../entities/useCaseInterface/IEmployeeProfileUseCase";
+import { IEmployeeManagementUseCase } from "../../../entities/useCaseInterface/IEmployeeManagementUseCase";
 
 @injectable()
 export class AdminUserManagement {
     constructor(
-        @inject("IUserManagementUseCase") private userManagementUseCase: IUserManagementUseCase,
-        @inject("IUserProfileUseCase") private userProfileUseCase: IUserProfileUseCase,
+        @inject("IEmployeeManagementUseCase") private employeeManagementUseCase: IEmployeeManagementUseCase,
+        @inject("IEmployeeProfileUseCase") private employeeProfileUseCase: IEmployeeProfileUseCase,
     ) { }
 
     async addUser(req: Request, res: Response): Promise<void> {
         const { userData } = req.body;
         try {
-            const response = await this.userManagementUseCase.addUser(userData);
+            const response = await this.employeeManagementUseCase.addEmployee(userData);
 
             res.status(HTTP_STATUS_CODES.CREATED).json({ response, message: MESSAGES.SUCCESS.USER_CREATED });
         } catch (error) {
@@ -36,7 +36,7 @@ export class AdminUserManagement {
             };
 
 
-            const result = await this.userManagementUseCase.getUsers(
+            const result = await this.employeeManagementUseCase.getEmployees(
                 filter,
                 Number(page),
                 Number(pageSize),
@@ -46,7 +46,7 @@ export class AdminUserManagement {
                 .status(HTTP_STATUS_CODES.OK)
                 .json({
                     success: true,
-                    data: result.users,
+                    data: result.employees,
                     total: result.total,
                     active : result.active,
                     inactive : result.inactive,
@@ -66,7 +66,7 @@ export class AdminUserManagement {
         try {
             const {userId} = req.params;
 
-            const userDetails = await this.userProfileUseCase.getUserDetails(userId);
+            const userDetails = await this.employeeProfileUseCase.getEmployeeDetails(userId);
             
             res.status(HTTP_STATUS_CODES.OK).json({user : userDetails});
         } catch (error) {
@@ -77,7 +77,7 @@ export class AdminUserManagement {
     async deleteUser(req : Request , res : Response) : Promise<void> {
         try {
             const { userId} = req.params;
-            await this.userManagementUseCase.deleteUser(userId);
+            await this.employeeManagementUseCase.deleteEmployee(userId);
             res.status(HTTP_STATUS_CODES.OK).json({message : MESSAGES.SUCCESS.USER_DELETED});
         } catch (error) {
             res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({message : "Error deleting user"});
@@ -86,7 +86,7 @@ export class AdminUserManagement {
 
     async getManagers(req : Request , res : Response) : Promise<void> {
         try {
-            const response = await this.userManagementUseCase.getManagers();
+            const response = await this.employeeManagementUseCase.getManagers();
             res.status(HTTP_STATUS_CODES.OK).json({
                 success : true,
                 message : "Managers found",
@@ -118,7 +118,7 @@ export class AdminUserManagement {
                     });
                 }
     
-                const user = await this.userProfileUseCase.updateUser(userId, userData);
+                const user = await this.employeeProfileUseCase.updateEmployee(userId, userData);
                 if (user) {
                     res.status(HTTP_STATUS_CODES.OK).json({
                         success: true,

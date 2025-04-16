@@ -3,13 +3,13 @@ import { IRefreshTokenUseCase } from "../../entities/useCaseInterface/IRefreshTo
 import { JwtService } from "../../adapters/service/jwt.service";
 import { updateCookieWithAccessToken } from "../../shared/utils/cookieHelper";
 import { Response } from "express";
-import { TJwtPayload } from "../../entities/services/jwt.interface";
+import { IJwtService, TJwtPayload } from "../../entities/services/jwt.interface";
 
 
 @injectable()
 export class RefreshTokenUseCase implements IRefreshTokenUseCase {
     constructor(
-        @inject('JwtService') private jwtService: JwtService,
+        @inject("IJwtService") private jwtService: IJwtService,
     ) { }
     async execute(refreshToken: string , res : Response , role : string): Promise<{ accessToken: string; }> {
         try {
@@ -26,7 +26,7 @@ export class RefreshTokenUseCase implements IRefreshTokenUseCase {
             updateCookieWithAccessToken(
                 res,
                 accessToken,
-                `${role}_access_token`,
+                role === "admin" ? "_access_token" : "access_token",
             );
 
             return {accessToken}

@@ -7,6 +7,7 @@ export interface LeaveRequest {
     startDate: Date;
     endDate: Date;
     reason?: string;
+    duration ?: "full" | "morning" | "afternoon";
     status?: "Pending" | "Approved" | "Rejected";
     rejectionReason ?: string;
     assignedManager?: ObjectId | string;

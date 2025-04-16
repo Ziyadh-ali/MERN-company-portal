@@ -1,21 +1,26 @@
 import { injectable } from "tsyringe";
-import { TJwtPayload ,AuthServiceInterface} from "../../entities/services/jwt.interface";
+import { TJwtPayload ,IJwtService} from "../../entities/services/jwt.interface";
 import  jwt ,{JwtPayload,Secret } from "jsonwebtoken";
 import { config } from "../../shared/config";
 import ms from "ms";
 
 @injectable()
-export class JwtService implements AuthServiceInterface {
+export class JwtService implements IJwtService {
     private accessSecret : Secret;
     private accessExpiresIn : string;
     private refreshSecret : Secret;
     private refreshExpiresIn : string;
+    private resetTokenSecret : string;
+    private resetTokenExpiresIn : string;
     constructor(){
         this.accessSecret = config.jwt.ACCESS_SECRET_KEY,
         this.accessExpiresIn = config.jwt.ACCESS_EXPIRES_IN,
 
         this.refreshSecret = config.jwt.REFRESH_SECRET_KEY,
-        this.refreshExpiresIn = config.jwt.REFRESH_EXPIRES_IN
+        this.refreshExpiresIn = config.jwt.REFRESH_EXPIRES_IN,
+
+        this.resetTokenSecret = config.jwt.RESET_PASSWORD_SECRET_KEY,
+        this.resetTokenExpiresIn = config.jwt.RESET_TOKEN_EXPIRES_IN
     }
 
     generateAccessToken(data: TJwtPayload): string {
@@ -46,4 +51,18 @@ export class JwtService implements AuthServiceInterface {
         const decode = jwt.decode(token) as JwtPayload;
         return decode;
     }
+
+    generateResetToken(email: string): string {
+        return jwt.sign({email : email} , this.resetTokenSecret ,{expiresIn : this.resetTokenExpiresIn as ms.StringValue});
+    }
+
+    verifyResetToken(resetToken: string): {email : string} | null {
+        try {
+            const decoded = jwt.verify(resetToken, this.resetTokenSecret) as {email : string};
+            return decoded;
+        } catch (error) {
+            return null;
+        }
+    }
+
 }

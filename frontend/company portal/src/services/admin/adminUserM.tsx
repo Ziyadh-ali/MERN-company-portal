@@ -1,5 +1,10 @@
 import { adminAxiosInstance } from "../../api/admin.axios";
 
+export const adminLoginService = async (data: { email: string, password: string }) => {
+    const response = await adminAxiosInstance.post("/login", data);
+    return response.data;
+}
+
 export const addUser = async (userData: {
     fullName: string;
     email: string;
@@ -11,8 +16,14 @@ export const addUser = async (userData: {
     return response.data;
 }
 
+interface EmployeeFilter {
+    role?: string;
+    status?: string;
+    department?: string;
+    [key: string]: string | undefined;
+}
 export const getUsers = async (
-    filter: any,
+    filter: EmployeeFilter,
     page: number,
     pageSize: number,
 ) => {
@@ -38,30 +49,20 @@ export const getManagers = async () => {
 }
 
 export const updateUserService = async (userId: string, formData: FormData) => {
-    try {
-        const response = await adminAxiosInstance.patch(`/users/${userId}`, formData);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
-};
+    const response = await adminAxiosInstance.patch(`/users/${userId}`, formData);
+    return response.data;
+
+}
 
 export const getLeaveTypesService = async () => {
-    try {
-        const response = await adminAxiosInstance.get("/leave/type");
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+    const response = await adminAxiosInstance.get("/leave/type");
+    return response.data;
+
 }
 
 export const deleteLeaveTypeService = async (id: string) => {
-    try {
-        const response = await adminAxiosInstance.delete(`/leave/type/${id}`);
-        return response.data;
-    } catch (error) {
-        throw error
-    }
+    const response = await adminAxiosInstance.delete(`/leave/type/${id}`);
+    return response.data;
 }
 
 export const createLeaveTypeService = async (
@@ -73,14 +74,9 @@ export const createLeaveTypeService = async (
         requiresApproval?: boolean;
     }
 ) => {
-    try {
-        const response = await adminAxiosInstance.post(`/leave/type`, data);
-        return response.data;
-    } catch (error) {
-        throw error
-    }
+    const response = await adminAxiosInstance.post(`/leave/type`, data);
+    return response.data;
 }
-
 export const updateLeaveTypeService = async (
     id: string,
     data: {
@@ -91,36 +87,24 @@ export const updateLeaveTypeService = async (
         requiresApproval?: boolean;
     }
 ) => {
-    try {
-        const response = await adminAxiosInstance.patch(`/leave/type/${id}`, data);
-        return response.data;
-    } catch (error) {
-        throw error
-    }
+    const response = await adminAxiosInstance.patch(`/leave/type/${id}`, data);
+    return response.data;
 }
 
 export const getAllLeaveRequestsService = async () => {
-    try {
-        const response = await adminAxiosInstance.get("/leave/requests");
-        return response.data;
-    } catch (error) {
-        throw error
-    }
+    const response = await adminAxiosInstance.get("/leave/requests");
+    return response.data;
 }
 
-export const updateLeaveRequestStatusService = async (leaveRequestId: string, status: "Approved" | "Rejected" , userId : string) => {
-    try {
-        const response = await adminAxiosInstance.patch(`/leave/requests/${leaveRequestId}`, {
-            status,
-            userId
-        }, {
-            headers: {
-                "Content-Type": "application/json"
-            }
+export const updateLeaveRequestStatusService = async (leaveRequestId: string, status: "Approved" | "Rejected", userId: string) => {
+    const response = await adminAxiosInstance.patch(`/leave/requests/${leaveRequestId}`, {
+        status,
+        userId
+    }, {
+        headers: {
+            "Content-Type": "application/json"
         }
-        );
-        return response.data;
-    } catch (error) {
-        throw error
     }
+    );
+    return response.data;
 }

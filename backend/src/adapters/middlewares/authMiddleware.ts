@@ -2,12 +2,13 @@ import { Request, Response, NextFunction } from "express";
 import { JwtService } from "../service/jwt.service";
 import { JwtPayload } from "jsonwebtoken";
 import { HTTP_STATUS_CODES } from "../../shared/constants";
+import { ObjectId } from "mongoose";
 
 const tokenService = new JwtService();
 
 
 export interface CustomJwtPayload extends JwtPayload {
-    _id: string;
+    _id: string | ObjectId;
     email: string;
     role: string;
     access_token: string;
@@ -20,16 +21,16 @@ export interface CustomRequest extends Request {
 
 const extractToken = (
     req: Request,
-    role: "admin" | "user",
+    role: "admin" | "employee",
 ): { accessToken: string; refreshToken: string } | null => {
     return {
-        accessToken: req.cookies[`${role}_access_token`] || null,
-        refreshToken: req.cookies[`${role}_refresh_token`] || null,
+        accessToken: req.cookies[role === "admin" ? "_access_token" : "access_token"] || null,
+        refreshToken: req.cookies[role === "admin" ? "_refresh_token" : "refresh_token"] || null,
     };
 };
 
 export const verifyAuth = (
-    role :"admin" | "user"
+    role :"admin" | "employee"
 ) => {
     return (req: Request, res: Response,next : NextFunction) => {
         try {

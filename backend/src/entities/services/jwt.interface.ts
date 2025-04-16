@@ -7,10 +7,12 @@ export interface TJwtPayload extends JwtPayload {
   role: string;
 }
 
-export interface AuthServiceInterface {
+export interface IJwtService {
   generateAccessToken(data: TJwtPayload): string;
   generateRefreshToken(data: TJwtPayload): string;
   verifyAccessToken(token: string): JwtPayload | null;
   verifyRefreshToken(token: string): JwtPayload | null;
   decodeRefreshToken(token: string): JwtPayload | null;
+  generateResetToken(email : string) : string;
+  verifyResetToken(resetToken : string) : {email : string} | null
 }

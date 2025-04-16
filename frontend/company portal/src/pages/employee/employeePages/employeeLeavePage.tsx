@@ -1,9 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../components/ui/table";
-import { Eye, X } from "lucide-react";
-import UserSidebar from "../../../components/userComponents/userSidebar";
-import { UserHeader } from "../../../components/userComponents/userHeader";
+import { X } from "lucide-react";
+import { EmployeeHeader, } from "../../../components/employeeComponents/employeeHeader";
 import { useEffect, useState } from "react";
 import {
   addLeaveRequestService,
@@ -15,9 +14,9 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import AddLeaveRequestModal, { LeaveRequest } from "../modals/AddLeaveRequestModal";
 import { enqueueSnackbar } from "notistack";
-import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
 import { useConfirmDeleteModal } from "../../../components/useConfirm";
+import EmployeeSidebar from "../../../components/employeeComponents/employeeSidebar";
 
 // User interface
 export interface User {
@@ -89,7 +88,7 @@ const LeavePage = () => {
     }
     fethchLeaveBalance();
     fetchLeaveHistory();
-  }, [])
+  }, [employee?._id])
 
   const handleLeaveAdd = async (data: LeaveRequest) => {
     const newData = { ...data, employeeId: employee?._id }
@@ -103,11 +102,11 @@ const LeavePage = () => {
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
-      <UserSidebar />
+      <EmployeeSidebar />
 
       {/* Main Content */}
       <div className="flex-1 p-6">
-        <UserHeader heading="Leave Page" />
+        <EmployeeHeader heading="Leave Page" />
 
         {/* Leave Types Section */}
         <div className="mb-6">

@@ -33,6 +33,7 @@ const AddUserModal = ({ onAddUser }: AddUserModalProps) => {
     },
     validationSchema: addUserSchema,
     onSubmit: (values) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...userData } = values
       onAddUser(userData)
     },
@@ -41,7 +42,7 @@ const AddUserModal = ({ onAddUser }: AddUserModalProps) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-blue-600 text-white">+ Add User</Button>
+        <Button className="bg-blue-600 text-white">+ Add Employee</Button>
       </DialogTrigger>
       <DialogContent
         className="rounded-xl max-w-md max-h-[80vh] overflow-y-auto
@@ -49,7 +50,7 @@ const AddUserModal = ({ onAddUser }: AddUserModalProps) => {
         hover:scrollbar-thumb-black-400 scrollbar-thumb-rounded-full"
       >
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold text-gray-800">Add New User</DialogTitle>
+          <DialogTitle className="text-lg font-semibold text-gray-800">Add New Employee</DialogTitle>
         </DialogHeader>
         <form onSubmit={formik.handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -123,8 +124,8 @@ const AddUserModal = ({ onAddUser }: AddUserModalProps) => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="hr">HR</SelectItem>
-                <SelectItem value="it">IT</SelectItem>
-                <SelectItem value="design">Design</SelectItem>
+                <SelectItem value="softwareDeveloper">Software Development</SelectItem>
+                <SelectItem value="projectManagement">Project Management</SelectItem>
               </SelectContent>
             </Select>
             {formik.touched.department && formik.errors.department ? (

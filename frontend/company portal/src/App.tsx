@@ -15,6 +15,9 @@ import AdminEditUserPage from "./pages/admin/adminPages/AdminUserEdit"
 import LeavePage from "./pages/employee/employeePages/employeeLeavePage"
 import LeaveTypeManagementPage from "./pages/admin/adminPages/LeaveTypeManagement"
 import LeaveManagementPage from "./pages/admin/adminPages/LeaveManagement"
+import { ResetPasswordPage } from "./pages/employee/employeePages/resetPasswordPage"
+import AttendancePage from "./pages/employee/employeePages/AttendancePage"
+import MeetingPage from "./pages/employee/employeePages/MeetingPage"
 
 function App() {
 
@@ -28,6 +31,8 @@ function App() {
 
               <Route path="login" element={<EmployeeLogin />} />
 
+              <Route path="/reset-password" element={<ResetPasswordPage/>} />
+
             </Route>
 
             <Route element={<EmployeeProtect />}>
@@ -40,6 +45,10 @@ function App() {
 
               <Route path="leave" element={<LeavePage/>} />
 
+              <Route path="attendance" element={<AttendancePage/>} />
+
+              <Route path="meeting" element={<MeetingPage/>} />
+              
             </Route>
 
           </Route>

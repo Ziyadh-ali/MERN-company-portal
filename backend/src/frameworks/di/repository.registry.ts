@@ -1,9 +1,11 @@
 import { container } from "tsyringe";
 import { AdminRepository } from "../../adapters/repositories/admin/AdminRepository";
-import { UserRepository } from "../../adapters/repositories/user/UserRepository";
+import { EmployeeRepository } from "../../adapters/repositories/employee/EmployeeRepository";
 import { LeaveTypeRepository } from "../../adapters/repositories/LeaveTypeRepository";
 import { LeaveBalanceRepository } from "../../adapters/repositories/LeaveBalanceRepository";
 import { LeaveRequestRepository } from "../../adapters/repositories/LeaveRequestRepository";
+import { AttendanceRepository } from "../../adapters/repositories/AttendanceRepository";
+import { MeetingRepository } from "../../adapters/repositories/MeetingRepository";
 
 
 export class RepositoryRegistry {
@@ -12,8 +14,8 @@ export class RepositoryRegistry {
             useClass : AdminRepository,
         });
 
-        container.register("IUserRepository",{
-            useClass : UserRepository,
+        container.register("IEmployeeRepository",{
+            useClass : EmployeeRepository,
         });
 
         container.register("ILeaveTypeRepository",{
@@ -26,6 +28,14 @@ export class RepositoryRegistry {
 
         container.register("ILeaveRequestRepository",{
             useClass : LeaveRequestRepository,
+        });
+        
+        container.register("IAttendanceRepository",{
+            useClass : AttendanceRepository,
+        });
+
+        container.register("IMeetingRepository",{
+            useClass : MeetingRepository,
         });
     }
 }

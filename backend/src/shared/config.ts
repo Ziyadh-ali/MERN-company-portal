@@ -12,6 +12,8 @@ export const config = {
         REFRESH_SECRET_KEY: process.env.REFRESH_SECRET_KEY || "your-refresh-key",
         ACCESS_EXPIRES_IN: process.env.ACCESS_EXPIRES_IN || "",
         REFRESH_EXPIRES_IN: process.env.REFRESH_EXPIRES_IN || "",
+        RESET_PASSWORD_SECRET_KEY : process.env.RESET_PASSWORD_SECRET_KEY || "",
+        RESET_TOKEN_EXPIRES_IN : process.env.RESET_TOKEN_EXPIRES_IN || "", 
     },
 
     cors : {
@@ -22,6 +24,11 @@ export const config = {
         CLOUD_NAME : process.env.CLOUD_NAME,
         CLOUDINARY_API_KEY : process.env.CLOUDINARY_API_KEY,
         CLOUDINARY_API_SECRET : process.env.CLOUDINARY_API_SECRET
+    },
+
+    email : {
+        EMAIL_USER : process.env.EMAIL_USER,
+        EMAIL_PASS : process.env.EMAIL_PASS,
     }
 
 }

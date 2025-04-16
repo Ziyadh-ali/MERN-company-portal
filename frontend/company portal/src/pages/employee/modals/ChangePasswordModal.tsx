@@ -33,6 +33,7 @@ const ChangePasswordModal = ({ onUpdate }: ChangePasswordModalProps) => {
     },
     validationSchema: changePassValidatorSchema,
     onSubmit: async (values, { resetForm }) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const {confirmPassword , ...updateData} = values;
         onUpdate(updateData);
         resetForm();

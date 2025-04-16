@@ -1,9 +1,11 @@
 import { eventHandler } from "./eventHandler";
 import { leaveBalanceUseCase, leaveTypeRepository } from "../frameworks/di/resolver";
 
-eventHandler.on("USER_CREATED", async (userId: string) => {
+eventHandler.on("EMPLOYEE_CREATED", async (employeeId: string) => {
     try {
         const leaveTypes = await leaveTypeRepository.getAllLeaveTypes();
+
+        console.log(employeeId)
 
         const leaveBalances = leaveTypes
             .map(leave => ({
@@ -17,8 +19,8 @@ eventHandler.on("USER_CREATED", async (userId: string) => {
             return;
         }
 
-        await leaveBalanceUseCase.initializeLeaveBalance(userId, leaveBalances);
-        console.log(`Leave balance initialized for user: ${userId}`);
+        await leaveBalanceUseCase.initializeLeaveBalance(employeeId, leaveBalances);
+        console.log(`Leave balance initialized for user: ${employeeId}`);
     } catch (error) {
         console.error("Error initializing leave balance:", error);
     }
@@ -26,16 +28,16 @@ eventHandler.on("USER_CREATED", async (userId: string) => {
 
 eventHandler.on("LEAVE_TYPE_ADDED", async (leaveTypeId: string, totalDays: number) => {
     try {
-        await leaveBalanceUseCase.addLeaveTypeToAllUsers(leaveTypeId, totalDays);
+        await leaveBalanceUseCase.addLeaveTypeToAllEmployees(leaveTypeId, totalDays);
         console.log(`New leave type (${leaveTypeId}) added to all users.`);
     } catch (error) {
         console.error("Error updating leave balances for new leave type:", error);
     }
 });
 
-eventHandler.on("USER_DELETED" , async (userId : string)=> {
+eventHandler.on("EMPLOYEE_DELETED" , async (employeeId : string)=> {
     try {
-        await leaveBalanceUseCase.deleteLeaveBalance(userId);
+        await leaveBalanceUseCase.deleteLeaveBalance(employeeId);
         console.log("Leave balance deleted");
     } catch (error) {
         console.log("error deleting user leave balance");

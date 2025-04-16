@@ -12,7 +12,7 @@ export class RefreshController {
   async refreshToken(req: Request, res: Response): Promise<void> {
     try {
       const role = req.params.role;
-      const refreshToken = req.cookies[`${role}_refresh_token`];
+      const refreshToken = req.cookies[role === "admin" ? "_refresh_token" : "refresh_token"];
 
       if (!refreshToken) {
         res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ message: 'Unauthorized: No refresh token provided' });

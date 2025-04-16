@@ -2,7 +2,7 @@ import { ObjectId } from "mongoose";
 
 export interface LeaveBalance {
     _id ?: ObjectId | string;
-    userId: string;
+    employeeId: ObjectId | string;
     leaveBalances: {
         leaveTypeId: string;
         availableDays: number;

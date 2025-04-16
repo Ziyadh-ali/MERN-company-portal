@@ -1,19 +1,20 @@
 import { injectable, inject } from "tsyringe";
 import { IAdminRepository } from "../../entities/repositoryInterfaces/admin/admin.repository";
 import { Admin } from "../../entities/models/adminEntities/admin.enitity";
-import { PasswordBcrypt } from "../../frameworks/security/password.bcrypt";
-import { JwtService } from "../../adapters/service/jwt.service";
 import { AdminLoginResponse } from "../../entities/adminInterface/adminLogin.interface";
 import { IAdminAuthUseCase } from "../../entities/useCaseInterface/IAdaminAuthUseCase";
 import { MESSAGES } from "../../shared/constants";
+import { loginSchema } from "../../shared/validation/user.validator";
+import { IJwtService } from "../../entities/services/jwt.interface";
+import { IBcrypt } from "../../frameworks/security/bcrypt.interface";
 
 
 @injectable()
 export class AdminAuthUseCase implements IAdminAuthUseCase {
     constructor(
         @inject("IAdminRepository") private adminRepository: IAdminRepository,
-        @inject("PasswordBcrypt") private passwordBcrypt: PasswordBcrypt,
-        @inject("JwtService") private jwtService: JwtService,
+        @inject("IBcrypt") private passwordBcrypt: IBcrypt,
+        @inject("IJwtService") private jwtService: IJwtService,
     ) { }
 
     async createAdmin(email: string, password: string): Promise<Admin> {
@@ -38,6 +39,10 @@ export class AdminAuthUseCase implements IAdminAuthUseCase {
     }
 
     async login(email: string, password: string): Promise<AdminLoginResponse | null> {
+        // const validationResult = loginSchema.safeParse({ email, password });
+        // if (!validationResult.success) {
+        //     throw new Error(JSON.stringify(validationResult.error.format()));
+        // }
         const admin = await this.adminRepository.findByEmail(email);
         if (!admin) {
             throw new Error("Admin not found");
@@ -50,6 +55,7 @@ export class AdminAuthUseCase implements IAdminAuthUseCase {
             }
         }
 
+
         const accessToken = this.jwtService.generateAccessToken({
             id: admin._id || "",
             email: admin.email,
@@ -60,7 +66,8 @@ export class AdminAuthUseCase implements IAdminAuthUseCase {
             id: admin._id || "",
             email: admin.email,
             role: admin.role,
-        })
+        });
+        
 
         return {
             refreshToken,

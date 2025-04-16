@@ -26,9 +26,6 @@ export interface LeaveRequest {
     status?: "Pending" | "Approved" | "Rejected";
 }
 
-// Mock approval/rejection services (Replace with API calls)
-const approveLeaveRequestService = async (id: string) => ({ data: { _id: id, status: "Approved" } });
-const rejectLeaveRequestService = async (id: string) => ({ data: { _id: id, status: "Rejected" } });
 
 const LeaveManagementPage = () => {
     const { enqueueSnackbar } = useSnackbar();
@@ -56,7 +53,7 @@ const LeaveManagementPage = () => {
             }
         };
         fetchLeaveRequests();
-    }, []);
+    }, [enqueueSnackbar]);
 
     // Handle approve/reject actions
     const handleApprove = async (id: string , userId : string) => {
@@ -112,7 +109,7 @@ const LeaveManagementPage = () => {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {leaveRequests.map((request) => (
+                                    {leaveRequests.length >0 ? leaveRequests.map((request) => (
                                         <TableRow key={request._id}>
                                             <TableCell>{request.employeeId.fullName}</TableCell>
                                             <TableCell>{request.employeeId.role}</TableCell>
@@ -143,7 +140,7 @@ const LeaveManagementPage = () => {
                                                 )}
                                             </TableCell>
                                         </TableRow>
-                                    ))}
+                                    )) : ""}
                                 </TableBody>
                             </Table>
                         ) : (

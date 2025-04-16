@@ -1,9 +1,9 @@
 import { Schema } from "mongoose";
-import { ILeaveBalance } from "../models/user/LeaveBalanceModel";
+import { ILeaveBalance } from "../models/LeaveBalanceModel";
 
 export const LeaveBalanceSchema = new Schema<ILeaveBalance>(
     {
-        userId: { type: String, required: true, unique: true },
+        employeeId: { type: Schema.Types.ObjectId, ref : "Employee" ,  required: true},
         leaveBalances: [
             {
                 leaveTypeId: { type: String, required: true },

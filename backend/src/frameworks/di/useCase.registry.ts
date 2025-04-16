@@ -1,14 +1,19 @@
 import { container } from "tsyringe";
 import { JwtService } from "../../adapters/service/jwt.service";
 import { PasswordBcrypt } from "../security/password.bcrypt";
-import { UserLoginUseCase } from "../../useCases/user/userLoginUseCase";
+import { EmployeeLoginUseCase } from "../../useCases/employee/employeeLoginUseCase";
 import { AdminAuthUseCase } from "../../useCases/admin/AdminAuthUseCase";
-import { UserProfileUseCase } from "../../useCases/common/UserProfileUseCase";
-import { UserManagementUseCase } from "../../useCases/common/UserManagementUseCase";
+import { EmployeeProfileUseCase } from "../../useCases/common/EmployeeProfileUseCase";
+import { EmployeeManagementUseCase } from "../../useCases/common/EmployeeManagementUseCase";
 import { RefreshTokenUseCase } from "../../useCases/common/RefreshTokenUseCase";
 import { LeaveTypeUseCase } from "../../useCases/LeaveTypeUseCase";
 import { LeaveBalanceUseCase } from "../../useCases/LeaveBalanceUseCase";
 import { LeaveRequestUseCase } from "../../useCases/LeaveRequestUseCase";
+import { EmailService } from "../../adapters/service/mailer";
+import { ForgotPasswordUseCase } from "../../useCases/employee/ForgotPasswordUseCase";
+import { ResetPasswordUseCase } from "../../useCases/employee/ResetPasswordUseCase";
+import { AttendanceUseCase } from "../../useCases/AttendanceUseCase";
+import { MeetingUseCase } from "../../useCases/MeetingUseCase";
 
 
 export class UseCaseRegistry {
@@ -17,24 +22,24 @@ export class UseCaseRegistry {
             useClass: AdminAuthUseCase,
         });
 
-        container.register("JwtService", {
+        container.register("IJwtService", {
             useClass: JwtService,
         });
 
-        container.register("PasswordBcrypt", {
+        container.register("IBcrypt", {
             useClass: PasswordBcrypt,
         });
 
-        container.register("IUserProfileUseCase",{
-            useClass : UserProfileUseCase,
+        container.register("IEmployeeProfileUseCase",{
+            useClass : EmployeeProfileUseCase,
         });
 
-        container.register("IUserManagementUseCase",{
-            useClass : UserManagementUseCase,
+        container.register("IEmployeeManagementUseCase",{
+            useClass : EmployeeManagementUseCase,
         });
 
-        container.register("IUserLoginUseCase",{
-            useClass : UserLoginUseCase,
+        container.register("IEmployeeLoginUseCase",{
+            useClass : EmployeeLoginUseCase,
         });
 
         container.register("IRefreshTokenUseCase", {
@@ -52,5 +57,25 @@ export class UseCaseRegistry {
         container.register("ILeaveRequestUseCase" ,{
             useClass : LeaveRequestUseCase,
         });
+
+        container.register("IEmailService",{
+            useClass : EmailService,
+        });
+
+        container.register("IForgotPasswordUseCase",{
+            useClass : ForgotPasswordUseCase,
+        });
+
+        container.register("IResetPasswordUseCase",{
+            useClass : ResetPasswordUseCase
+        });
+
+        container.register("IAttendanceUseCase",{
+            useClass : AttendanceUseCase
+        });
+
+        container.register("IMeetingUseCase",{
+            useClass : MeetingUseCase,
+        })
     }
 }

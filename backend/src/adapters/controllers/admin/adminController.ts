@@ -13,8 +13,7 @@ export class AdminController {
 
 
     async login(req: Request, res: Response) {
-        const { email, password } = req.body;   
-        console.log(req.body)
+        const { email, password } = req.body;
         try {
             const response = await this.adminAuthUseCase.login(email, password);
             
@@ -23,14 +22,14 @@ export class AdminController {
                     res,
                     response.accessToken,
                     response.refreshToken,
-                    "admin_access_token",
-                    "admin_refresh_token",
+                    "_access_token",
+                    "_refresh_token",
                 );
 
                 res.status(HTTP_STATUS_CODES.OK).json({
                     success: true,
                     message: MESSAGES.SUCCESS.LOGIN_SUCCESS,
-                    admin: response.admin,
+                    loginData: response.admin,
                 });
             }
         } catch (error) {

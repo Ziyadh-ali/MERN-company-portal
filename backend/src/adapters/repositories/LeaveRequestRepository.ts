@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe";
 import { LeaveRequest } from "../../entities/models/LeaveRequest.entity";
 import { ILeaveRequestRepository } from "../../entities/repositoryInterfaces/ILeaveRequest.repository";
-import { LeaveRequestModel } from "../../frameworks/database/models/user/LeaveRequestModel";
+import { LeaveRequestModel } from "../../frameworks/database/models/LeaveRequestModel";
 
 @injectable()
 export class LeaveRequestRepository implements ILeaveRequestRepository {
@@ -59,8 +59,23 @@ export class LeaveRequestRepository implements ILeaveRequestRepository {
     }
 
     async setRejectionReason(leaveRequestId: string, reason: string): Promise<void> {
-        await LeaveRequestModel.findByIdAndUpdate(leaveRequestId , {
-            rejectionReason : reason,
+        await LeaveRequestModel.findByIdAndUpdate(leaveRequestId, {
+            rejectionReason: reason,
+        });
+    }
+
+    async getLeaveRequestForDate(employeeId: string, date: Date): Promise<LeaveRequest | null> {
+
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        return await LeaveRequestModel.findOne({
+            employeeId,
+            startDate: { $lte: endOfDay },
+            endDate: { $gte: startOfDay }
         });
     }
 }

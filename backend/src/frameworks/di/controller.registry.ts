@@ -2,11 +2,14 @@ import { container } from "tsyringe";
 import { AdminController } from "../../adapters/controllers/admin/adminController";
 import { RefreshController } from "../../adapters/controllers/refreshController";
 import { AdminUserManagement } from "../../adapters/controllers/admin/AdminUserManagement";
-import { UserController } from "../../adapters/controllers/user/userController";
-import { UserProfile } from "../../adapters/controllers/user/userProfileController";
+import { EmployeeController } from "../../adapters/controllers/employee/employeeController";
+import { EmployeeProfile } from "../../adapters/controllers/employee/employeeProfileController";
 import { LeaveTypeController } from "../../adapters/controllers/LeaveTypeController";
 import { LeaveBalanceController } from "../../adapters/controllers/LeaveBalanceController";
 import { LeaveRequestController } from "../../adapters/controllers/LeaveRequestController";
+import { ForgotPasswordController } from "../../adapters/controllers/employee/ForgotPasswordController";
+import { ResetPasswordController } from "../../adapters/controllers/employee/ResetPasswordController";
+import { MeetingController } from "../../adapters/controllers/MeetingController";
 
 export class ControllerRegistry {
     static registerControllers() : void {
@@ -22,12 +25,12 @@ export class ControllerRegistry {
             useClass : AdminUserManagement,
         });
         
-        container.register("UserController", {
-            useClass : UserController,
+        container.register("EmployeeController", {
+            useClass : EmployeeController,
         });
         
-        container.register("IUserProfile", {
-            useClass : UserProfile,
+        container.register("IEmployeeProfile", {
+            useClass : EmployeeProfile,
         });
 
         container.register("ILeaveTypeController", {
@@ -41,5 +44,17 @@ export class ControllerRegistry {
         container.register("LeaveRequestController",{
             useClass : LeaveRequestController,
         });
+
+        container.register("ForgotPasswordController",{
+            useClass : ForgotPasswordController,
+        });
+
+        container.register("ResetPasswordController" , {
+            useClass : ResetPasswordController,
+        });
+
+        container.register("MeetingController",{
+            useClass : MeetingController
+        })
     }
 }

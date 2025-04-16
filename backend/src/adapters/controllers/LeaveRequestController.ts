@@ -3,13 +3,14 @@ import { ILeaveRequestUseCase } from "../../entities/useCaseInterface/ILeaveRequ
 import { Request , Response } from "express";
 import { MESSAGES } from "../../shared/constants";
 import { HTTP_STATUS_CODES } from "../../shared/constants";
-import { IUserProfileUseCase } from "../../entities/useCaseInterface/IUserProfileUseCase";
+import { IEmployeeProfileUseCase } from "../../entities/useCaseInterface/IEmployeeProfileUseCase";
+
 
 @injectable()
 export class LeaveRequestController {
     constructor(
         @inject("ILeaveRequestUseCase") private leaveRequestUseCase : ILeaveRequestUseCase,
-        @inject("IUserProfileUseCase") private userProfileUseCase : IUserProfileUseCase,
+        @inject("IEmployeeProfileUseCase") private employeeProfileUseCase : IEmployeeProfileUseCase,
     ){}
 
     async createLeaveRequest(req : Request , res : Response ): Promise<void> {
@@ -21,7 +22,7 @@ export class LeaveRequestController {
                     message: "Datas not provided",
                 });
             }
-            const user = await this.userProfileUseCase.getUserDetails(data?.employeeId);
+            const user = await this.employeeProfileUseCase.getEmployeeDetails(data?.employeeId);
             const newData = {
                 ...data,
                 assignedManager : user?.manager  || "defaultManager" ,
@@ -51,8 +52,8 @@ export class LeaveRequestController {
 
     async getLeaveRequestsByEmployee(req: Request, res: Response): Promise<void> {
         try {
-            const { userId } = req.params;
-            const leaveRequests = await this.leaveRequestUseCase.getLeaveRequestByEmployee(userId);
+            const { employeeId } = req.params;
+            const leaveRequests = await this.leaveRequestUseCase.getLeaveRequestByEmployee(employeeId);
             res.status(HTTP_STATUS_CODES.OK).json({ success: true, leaveRequests });
         } catch (error) {
             console.error(error);

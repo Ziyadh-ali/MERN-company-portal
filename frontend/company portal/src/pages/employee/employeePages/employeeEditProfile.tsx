@@ -8,8 +8,8 @@ import { useEffect, useState } from "react";
 import { getProfileDetails, updateProfileService } from "../../../services/user/userService";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
-import UserSidebar from "../../../components/userComponents/userSidebar";
 import { ErrorBoundary } from 'react-error-boundary';
+import EmployeeSidebar from "../../../components/employeeComponents/employeeSidebar";
 
 interface IUserModel {
   fullName: string;
@@ -34,6 +34,41 @@ const EditProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<IUserModel | null>(null);
 
+  const formik = useFormik({
+    initialValues: {
+      fullName: "",
+      email: "",
+      phone: "",
+      address: "",
+      profilePic: null,
+    },
+    validationSchema: profileValidationSchema,
+    enableReinitialize: true,
+    onSubmit: async (values, { setSubmitting }) => {
+
+      try {
+        const formData = new FormData();
+        Object.entries(values).forEach(([key, value]) => {
+          if (value !== null && value !== undefined) {
+            formData.append(key, value);
+          }
+        });
+        console.log(formData);
+        const employeeId = employee?._id ? employee._id : "";
+
+        const response = await updateProfileService(employeeId, formData);
+
+        enqueueSnackbar(response.message, { variant: "success" });
+        navigate("/profile");
+      } catch (error) {
+        console.error("FULL Submission Error:", error);
+        enqueueSnackbar("An error occurred during submission", { variant: "error" });
+      } finally {
+        setSubmitting(false);
+      }
+    },
+  });
+
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -56,40 +91,7 @@ const EditProfilePage = () => {
     fetchUserProfile();
   }, [employee?._id]);
 
-  const formik = useFormik({
-    initialValues: {
-      fullName: "",
-      email: "",
-      phone: "",
-      address: "",
-      profilePic: null,
-    },
-    validationSchema: profileValidationSchema,
-    enableReinitialize: true,
-    onSubmit: async (values, { setSubmitting }) => {
 
-      try {
-        const formData = new FormData();
-        Object.entries(values).forEach(([key, value]) => {
-          if (value !== null && value !== undefined) {
-            formData.append(key, value as any);
-          }
-        });
-        console.log(formData);
-        const employeeId = employee?._id ? employee._id : "";
-
-        const response = await updateProfileService(employeeId, formData);
-
-        enqueueSnackbar(response.message, { variant: "success" });
-        navigate("/profile");
-      } catch (error) {
-        console.error("FULL Submission Error:", error);
-        enqueueSnackbar("An error occurred during submission", { variant: "error" });
-      } finally {
-        setSubmitting(false);
-      }
-    },
-  });
 
   return (
     <ErrorBoundary
@@ -100,14 +102,14 @@ const EditProfilePage = () => {
       }}
     >
       <div className="flex min-h-screen bg-gray-100">
-        <UserSidebar />
+        <EmployeeSidebar />
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="w-full max-w-lg bg-white shadow-md rounded-lg p-8">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Edit Profile</h2>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                formik.handleSubmit(e as any);
+                formik.handleSubmit(e);
               }}
               className="space-y-4"
             >

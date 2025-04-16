@@ -2,23 +2,73 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui
 import { Button } from "../../../components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
 import { Progress } from "../../../components/ui/progress";
+import { EmployeeHeader } from "../../../components/employeeComponents/employeeHeader";
+import { useEffect, useState } from "react";
+import { checkInService, checkOutService, getTodayAttendance } from "../../../services/user/userService";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store/store";
+import { enqueueSnackbar } from "notistack";
+import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
+import EmployeeSidebar from "../../../components/employeeComponents/employeeSidebar";
 
-import UserSidebar from "../../../components/userComponents/userSidebar";
-import { UserHeader } from "../../../components/userComponents/userHeader";
-
-
+export interface Attendance {
+    _id?: string,
+    employeeId: string,
+    date: Date,
+    checkInTime: Date | null,
+    checkOutTime: Date | null,
+    status: "Present" | "Absent" | "Late" | "Leave" | "Pending",
+}
 
 const EmployeeDashboard = () => {
+    const navigate = useNavigate();
+    const [refreshKey, setRefreshKey] = useState(0);
+    const { employee } = useSelector((state: RootState) => state.employee);
+    const [todayAttendance, setTodayAttendance] = useState<Attendance>()
+
+    useEffect(() => {
+        const fetchAttendanceData = async () => {
+            try {
+                const response = await getTodayAttendance(employee ? employee?._id : "")
+                setTodayAttendance(response.todayAttendance);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+        fetchAttendanceData();
+    }, [employee, refreshKey]);
+
+    const handleCheckIn = async () => {
+        try {
+            const response = await checkInService(employee ? employee?._id : "");
+            enqueueSnackbar(response.message, { variant: "success" });
+            setRefreshKey(prev => prev + 1);
+        } catch (error) {
+            console.log(error);
+            enqueueSnackbar((error instanceof AxiosError) ? error.response?.data.message : "Error in checkin", { variant: "error" });
+        }
+    }
+    const handleCheckOut = async () => {
+        try {
+            const response = await checkOutService(employee ? employee?._id : "");
+            enqueueSnackbar(response.message, { variant: "success" });
+            setRefreshKey(prev => prev + 1);
+        } catch (error) {
+            console.log(error);
+            enqueueSnackbar((error instanceof AxiosError) ? error.response?.data.message : "Error in checkout", { variant: "error" });
+        }
+    }
 
     return (
         <div className="flex min-h-screen bg-gray-100">
             {/* Sidebar */}
-            <UserSidebar />
+            <EmployeeSidebar />
 
             {/* Main Content */}
             <div className="flex-1 p-6">
                 {/* Header */}
-                <UserHeader heading = "Dashboard"/>
+                <EmployeeHeader heading="Dashboard" />
                 {/* Dashboard Sections */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <Card>
@@ -26,11 +76,31 @@ const EmployeeDashboard = () => {
                             <CardTitle className="text-sm text-gray-600">Attendance</CardTitle>
                         </CardHeader>
                         <CardContent className="text-center">
-                            <p className="text-sm text-gray-600 mb-2">
-                                <span className="inline-block w-3 h-3 bg-green-500 rounded-full mr-2"></span>
-                                Clocked in at 9:00 AM
-                            </p>
-                            <Button className="w-full bg-blue-600 text-white">Clock Out</Button>
+                            {todayAttendance?.checkInTime && (
+                                <p className="text-sm text-gray-600 mb-2">
+                                    Clocked in at: {new Date(todayAttendance.checkInTime).toLocaleTimeString()}
+                                </p>
+                            )}
+                            {todayAttendance?.checkOutTime && (
+                                <p className="text-sm text-gray-600 mb-2">
+                                    Clocked out at: {new Date(todayAttendance.checkOutTime).toLocaleTimeString()}
+                                </p>
+                            )}
+                            {!todayAttendance?.checkInTime && !todayAttendance?.checkOutTime && (
+                                <>
+                                    <p className="text-sm text-red-500 mb-2">Please check in before 10:00 AM</p>
+                                    <Button onClick={handleCheckIn} className="w-full bg-blue-600 text-white">Clock in</Button>
+                                </>
+                            )}
+
+                            {todayAttendance?.checkInTime && !todayAttendance?.checkOutTime && (
+                                <Button onClick={handleCheckOut} className="w-full bg-blue-600 text-white">Clock out</Button>
+                            )}
+
+                            {todayAttendance?.checkInTime && todayAttendance?.checkOutTime && (
+                                <Button disabled className="w-full bg-gray-400 text-white cursor-not-allowed">You're done for today</Button>
+                            )}
+
                         </CardContent>
                     </Card>
 
@@ -48,7 +118,7 @@ const EmployeeDashboard = () => {
                                 <p className="text-sm text-gray-600">Vacation</p>
                                 <p className="text-sm text-gray-800">10 days</p>
                             </div>
-                            <Button variant="outline" className="w-full">
+                            <Button onClick={()=>{navigate("/leave")}} variant="outline" className="w-full">
                                 Apply for Leave
                             </Button>
                         </CardContent>
@@ -78,7 +148,7 @@ const EmployeeDashboard = () => {
                         </CardContent>
                     </Card> */}
 
-                    {/* Current Project */}
+                    {/* Current Project */} 
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-sm text-gray-600">Current Project</CardTitle>

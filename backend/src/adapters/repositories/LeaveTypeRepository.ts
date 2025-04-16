@@ -1,6 +1,6 @@
 import { ILeaveTypeRepository } from "../../entities/repositoryInterfaces/ILeaveType.repository";
 import { LeaveType } from "../../entities/models/LeaveType.entity";
-import { LeaveTypeModel } from "../../frameworks/database/models/user/LeaveTypeModel";
+import { LeaveTypeModel } from "../../frameworks/database/models/LeaveTypeModel";
 import { LeaveTypeDTO } from "../../entities/dtos/LeaveTypeDTO";
 import { injectable } from "tsyringe";
 

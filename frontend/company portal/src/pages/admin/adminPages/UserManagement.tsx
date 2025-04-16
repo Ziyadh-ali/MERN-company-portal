@@ -13,16 +13,40 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useConfirmDeleteModal } from "../../../components/useConfirm";
 
+interface EmployeeFilter {
+  role?: string;
+  status?: string;
+  department?: string;
+  [key: string]: string | undefined;
+}
+
+export interface User {
+  _id: string;
+  fullName: string;
+  email: string;
+  phone: number;
+  address: string;
+  profilePic: string;
+  department: string;
+  role: string;
+  status: "active" | "inactive"; // or just string if it can be more
+  manager: string;
+  joinedAt: string; // use Date if you parse it
+  createdAt: string;
+  updatedAt: string;
+}
+
+
 function UserManagement() {
   const navigate = useNavigate();
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const { confirmDelete, ConfirmDeleteModal } = useConfirmDeleteModal();
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(2);
   const [total, setTotal] = useState<number>(0);
   const [active, setActive] = useState<number>(0);
   const [inactive, setInactive] = useState<number>(0);
-  const [filter, setFilter] = useState<any>({
+  const [filter, setFilter] = useState<EmployeeFilter>({
     role: "all",
     status: "all",
     department: "all",
@@ -38,10 +62,12 @@ function UserManagement() {
 
       try {
         const response = await getUsers(filter, page, pageSize);
+        console.log(response.data)
         setUsers(response.data);
         setTotal(response.total);
         setActive(response.active);
         setInactive(response.inactive);
+        setPageSize(2)
       } catch (err) {
         console.log(err);
         setUsers([]);
@@ -52,7 +78,8 @@ function UserManagement() {
     };
 
     fetchUsers();
-  }, [page, pageSize, filter]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, filter ]);
 
   //TODO  Function for handling adding user- ------------------------------------------------------------------------------------
 
@@ -95,7 +122,7 @@ function UserManagement() {
   };
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilter((prevFilter: any) => ({
+    setFilter((prevFilter: EmployeeFilter) => ({
       ...prevFilter,
       [key]: value === "all" ? undefined : value,
     }));
@@ -195,7 +222,7 @@ function UserManagement() {
                 </thead>
                 <tbody>
                   {users.map((user) => (
-                    <tr key={user.id} className="border-b">
+                    <tr key={user._id} className="border-b">
                       <td className="px-4 py-2 flex items-center space-x-2">
                         <Avatar className="w-8 h-8">
                           <AvatarImage src={user.profilePic} alt={user.fullName} />
@@ -215,7 +242,7 @@ function UserManagement() {
                         </span>
                       </td>
                       <td className="px-4 py-2">{user.email}</td>
-                      <td className="px-4 py-2">{user.lastLogin}</td>
+                      <td className="px-4 py-2"></td>
                       <td className="px-4 py-2">
                         <div className="flex space-x-2">
                           <button onClick={() => navigate(`/admin/users/${user._id}`)} className="text-blue-600 hover:underline cursor-pointer">👁️</button>
@@ -275,6 +302,7 @@ function UserManagement() {
               window.location.reload();
             }, 1000);
           } catch (error) {
+            console.log(error)
             enqueueSnackbar("Failed to delete user.", { variant: "error" });
           }
         }}

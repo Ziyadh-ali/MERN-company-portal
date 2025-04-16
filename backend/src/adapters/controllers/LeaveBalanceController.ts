@@ -2,7 +2,6 @@ import { inject , injectable } from "tsyringe";
 import { Request , Response } from "express";
 import { HTTP_STATUS_CODES, MESSAGES } from "../../shared/constants";
 import { ILeaveBalanceUseCase } from "../../entities/useCaseInterface/ILeaveBalanceUseCase";
-import { MongooseRawResultQueryMiddleware } from "mongoose";
 
 @injectable()
 export class LeaveBalanceController {
@@ -11,17 +10,15 @@ export class LeaveBalanceController {
     ) {}
 
     async getLeaveBalanceById (req : Request , res : Response) : Promise<void> {
-        const {userId} = req.params;
+        const {employeeId} = req.params;
         try {
-            if(!userId){
+            if(!employeeId){
                 res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
                     success : false,
                     message : MESSAGES.ERROR.USER.NO_USER_ID
                 });
             }
-            const leaveBalances = await this.leaveBalanceUseCase.getLeaveBalanceByUserId(userId);
-
-              
+            const leaveBalances = await this.leaveBalanceUseCase.getLeaveBalanceByEmployeeId(employeeId);
 
             res.status(HTTP_STATUS_CODES.OK).json({
                 success : true , 

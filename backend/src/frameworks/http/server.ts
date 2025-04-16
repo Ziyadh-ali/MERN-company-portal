@@ -5,7 +5,7 @@ import helmet from "helmet";
 import { AdminRoute } from "../routes/adminRoutes";
 import cookieParser from "cookie-parser";
 import { config } from "../../shared/config";
-import { UserRoute } from "../routes/userRoutes";
+import { UserRoute } from "../routes/employeeRoutes";
 
 export class Server {
     private app : Application;
@@ -24,7 +24,7 @@ export class Server {
             cors({
               origin: config.cors.ALLOWED_ORIGIN,
               methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-              allowedHeaders: ["Authorization", "Content-Type", "stripe-signature"],
+              allowedHeaders: ["Authorization", "Content-Type"],
               credentials: true,
             })
           );

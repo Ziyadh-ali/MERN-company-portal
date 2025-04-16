@@ -1,14 +1,14 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../../components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, } from "../../../components/ui/dialog";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
 import { useFormik } from "formik";
-import * as Yup from "yup";
 import { useEffect, useState } from "react";
 import { getAllLeaveTypesService } from "../../../services/user/userService";
 import { enqueueSnackbar } from "notistack";
 import { AxiosError } from "axios";
+import { leaveRequestSchema } from "../../../utils/leaveRequest.validation";
 
 // LeaveType interface (for selecting leave types)
 export interface LeaveType {
@@ -36,19 +36,8 @@ interface AddLeaveRequestModalProps {
     onAdd: (leaveRequest: LeaveRequest) => Promise<void>;
 }
 
-// Validation schema for the leave request form
-const leaveRequestSchema = Yup.object({
-    leaveTypeId: Yup.string().required("Leave type is required"),
-    startDate: Yup.date()
-        .required("Start date is required")
-        .min(new Date(), "Start date cannot be in the past"),
-    endDate: Yup.date()
-        .required("End date is required")
-        .min(Yup.ref("startDate"), "End date cannot be before start date"),
-    reason: Yup.string().required("Reason is required").min(5, "Reason must be at least 5 characters"),
-});
 
-const AddLeaveRequestModal = ({open, onClose, onAdd }: AddLeaveRequestModalProps) => {
+const AddLeaveRequestModal = ({ open, onClose, onAdd }: AddLeaveRequestModalProps) => {
     const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>();
 
     useEffect(() => {
@@ -69,11 +58,12 @@ const AddLeaveRequestModal = ({open, onClose, onAdd }: AddLeaveRequestModalProps
             startDate: "",
             endDate: "",
             reason: "",
+            duration : "",
         },
         validationSchema: leaveRequestSchema,
         onSubmit: async (values, { resetForm }) => {
-            console.log("Formik values:", values); // Log form values
-        console.log("Formik errors:", formik.errors); // Log errors
+            console.log("Formik values:", values);
+            console.log("Formik errors:", formik.errors);
 
             try {
                 await onAdd(values);
@@ -94,10 +84,7 @@ const AddLeaveRequestModal = ({open, onClose, onAdd }: AddLeaveRequestModalProps
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent
-                className="rounded-xl max-w-md max-h-[80vh] overflow-y-auto
-         scrollbar-hidden hover:scrollbar-thumb-black-400 scrollbar-thumb-rounded-full"
-            >
+            <DialogContent className="z-50 relative bg-white rounded-lg shadow-lg">
                 <DialogHeader>
                     <DialogTitle className="text-lg font-semibold text-gray-800">
                         Apply for Leave
@@ -113,6 +100,7 @@ const AddLeaveRequestModal = ({open, onClose, onAdd }: AddLeaveRequestModalProps
                             value={formik.values.leaveTypeId}
                             onValueChange={(value) => formik.setFieldValue("leaveTypeId", value)}
                         >
+
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select leave type" />
                             </SelectTrigger>
@@ -126,6 +114,28 @@ const AddLeaveRequestModal = ({open, onClose, onAdd }: AddLeaveRequestModalProps
                         </Select>
                         {formik.touched.leaveTypeId && formik.errors.leaveTypeId ? (
                             <div className="text-red-500 text-sm">{formik.errors.leaveTypeId}</div>
+                        ) : null}
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="duration" className="text-sm font-medium text-gray-700">
+                            Duration *
+                        </Label>
+                        <Select
+                            name="duration"
+                            value={formik.values.duration}
+                            onValueChange={(value) => formik.setFieldValue("duration", value)}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select leave duration" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="full">Full Day</SelectItem>
+                                <SelectItem value="morning">Morning Half Day</SelectItem>
+                                <SelectItem value="afternoon">Afternoon Half Day</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        {formik.touched.duration && formik.errors.duration ? (
+                            <div className="text-red-500 text-sm">{formik.errors.duration}</div>
                         ) : null}
                     </div>
                     <div className="space-y-2">
