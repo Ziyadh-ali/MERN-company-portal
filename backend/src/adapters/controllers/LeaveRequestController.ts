@@ -1,35 +1,43 @@
-import { injectable , inject } from "tsyringe";
+import { injectable, inject } from "tsyringe";
 import { ILeaveRequestUseCase } from "../../entities/useCaseInterface/ILeaveRequestUseCase";
-import { Request , Response } from "express";
+import { Request, Response } from "express";
 import { MESSAGES } from "../../shared/constants";
 import { HTTP_STATUS_CODES } from "../../shared/constants";
 import { IEmployeeProfileUseCase } from "../../entities/useCaseInterface/IEmployeeProfileUseCase";
+import { leaveRequestSchema } from "../../shared/validation/validator";
 
 
 @injectable()
 export class LeaveRequestController {
     constructor(
-        @inject("ILeaveRequestUseCase") private leaveRequestUseCase : ILeaveRequestUseCase,
-        @inject("IEmployeeProfileUseCase") private employeeProfileUseCase : IEmployeeProfileUseCase,
-    ){}
+        @inject("ILeaveRequestUseCase") private leaveRequestUseCase: ILeaveRequestUseCase,
+        @inject("IEmployeeProfileUseCase") private employeeProfileUseCase: IEmployeeProfileUseCase,
+    ) { }
 
-    async createLeaveRequest(req : Request , res : Response ): Promise<void> {
+    async createLeaveRequest(req: Request, res: Response): Promise<void> {
         try {
-            const {data} = req.body;
-            if(!data){
+            const { data } = req.body;
+
+            const validation = leaveRequestSchema.safeParse(data);
+            if (!validation.success) {
                 res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
                     success: false,
-                    message: "Datas not provided",
+                    message: "Validation failed",
+                    errors: validation.error.errors.map(err => ({
+                        field: err.path.join("."),
+                        message: err.message,
+                    })),
                 });
             }
+
             const user = await this.employeeProfileUseCase.getEmployeeDetails(data?.employeeId);
             const newData = {
                 ...data,
-                assignedManager : user?.manager  || "defaultManager" ,
+                assignedManager: user?.manager || "defaultManager",
             }
             const leaveRequest = await this.leaveRequestUseCase.createLeaveRequest(newData);
 
-            if(!leaveRequest) {
+            if (!leaveRequest) {
                 res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message: MESSAGES.ERROR.LEAVE.LEAVE_REQUEST_FAILED
@@ -69,23 +77,23 @@ export class LeaveRequestController {
             const { leaveRequestId } = req.params;
             const { status } = req.body;
             const { userId } = req.body;
-            const {rejectionReason} = req.body;
+            const { rejectionReason } = req.body;
 
-            if(status === "Rejected" && !rejectionReason) {
+            if (status === "Rejected" && !rejectionReason) {
                 res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message: MESSAGES.ERROR.LEAVE.NO_REJECTION
-                }); 
+                });
             }
 
             if (!["Approved", "Rejected"].includes(status)) {
                 res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message: MESSAGES.ERROR.LEAVE.INVALID_STATUS,
-                }); 
+                });
             }
 
-            const updated = await this.leaveRequestUseCase.updateLeaveRequestStatus(leaveRequestId, status ,rejectionReason? rejectionReason : null);
+            const updated = await this.leaveRequestUseCase.updateLeaveRequestStatus(leaveRequestId, status, rejectionReason ? rejectionReason : null);
             if (!updated) {
                 res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
                     success: false,

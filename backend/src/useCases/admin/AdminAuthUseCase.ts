@@ -4,7 +4,7 @@ import { Admin } from "../../entities/models/adminEntities/admin.enitity";
 import { AdminLoginResponse } from "../../entities/adminInterface/adminLogin.interface";
 import { IAdminAuthUseCase } from "../../entities/useCaseInterface/IAdaminAuthUseCase";
 import { MESSAGES } from "../../shared/constants";
-import { loginSchema } from "../../shared/validation/user.validator";
+import { loginSchema } from "../../shared/validation/validator";
 import { IJwtService } from "../../entities/services/jwt.interface";
 import { IBcrypt } from "../../frameworks/security/bcrypt.interface";
 

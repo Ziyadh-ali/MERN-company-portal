@@ -3,6 +3,8 @@ import { IEmployeeLoginUseCase } from "../../../entities/useCaseInterface/IEmplo
 import { inject, injectable } from "tsyringe";
 import { setAuthCookies, clearAuthCookies } from "../../../shared/utils/cookieHelper";
 import { HTTP_STATUS_CODES, MESSAGES } from "../../../shared/constants";
+import { loginSchema } from "../../../shared/validation/validator";
+import { ZodError } from "zod";
 
 @injectable()
 export class EmployeeController {
@@ -11,11 +13,11 @@ export class EmployeeController {
     ) { }
 
     async login(req: Request, res: Response): Promise<void> {
-        const { email, password } = req.body;
         try {
+            const { email, password } = loginSchema.parse(req.body);
             const response = await this.userLoginUseCase.login(email, password);
             if (response) {
-                if(response.user.status === "inactive"){
+                if (response.user.status === "inactive") {
                     res.status(HTTP_STATUS_CODES.FORBIDDEN).json({
                         success: false,
                         message: "You have blocked by admin",
@@ -35,27 +37,38 @@ export class EmployeeController {
                 });
             }
         } catch (error) {
+            if (error instanceof ZodError) {
+                 res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+                    success: false,
+                    message: "Validation error",
+                    errors: error.errors.map(err => ({
+                        field: err.path.join("."),
+                        message: err.message,
+                    })),
+                });
+            }
             if (error instanceof Error) {
                 res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({ message: error.message });
-            } else {
+            }
+            else {
                 console.error("An unknown error occurred");
             }
         }
     }
 
-    async logout(req : Request , res : Response) : Promise<void>{
+    async logout(req: Request, res: Response): Promise<void> {
         try {
 
             this.userLoginUseCase.logout(res);
-            
+
             res.status(HTTP_STATUS_CODES.OK).json({
-                success : true,
-                message : MESSAGES.SUCCESS.LOGOUT_SUCCESS,
+                success: true,
+                message: MESSAGES.SUCCESS.LOGOUT_SUCCESS,
             })
         } catch (error) {
             res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-                success : false,
-                message : "Failed to Logout",
+                success: false,
+                message: "Failed to Logout",
             });
         }
     }

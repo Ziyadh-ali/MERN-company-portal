@@ -10,7 +10,7 @@ import { enqueueSnackbar } from "notistack";
 import { addUser, deleteUser, getUsers } from "../../../services/admin/adminUserM";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useConfirmDeleteModal } from "../../../components/useConfirm";
 
 interface EmployeeFilter {
@@ -38,6 +38,7 @@ export interface User {
 
 
 function UserManagement() {
+  const location = useLocation()
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const { confirmDelete, ConfirmDeleteModal } = useConfirmDeleteModal();
@@ -53,33 +54,33 @@ function UserManagement() {
   });
   const [loading, setLoading] = useState<boolean>(false);
 
+  const fetchUsers = async () => {
+    setLoading(true);
+    console.log(loading);
+
+    try {
+      const response = await getUsers(filter, page, pageSize);
+      console.log(response.data)
+      setUsers(response.data);
+      setTotal(response.total);
+      setActive(response.active);
+      setInactive(response.inactive);
+      setPageSize(2)
+    } catch (err) {
+      console.log(err);
+      setUsers([]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // useEffect for fetching users -----------------------------------------------------------------------------------------
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
-      console.log(loading);
-
-      try {
-        const response = await getUsers(filter, page, pageSize);
-        console.log(response.data)
-        setUsers(response.data);
-        setTotal(response.total);
-        setActive(response.active);
-        setInactive(response.inactive);
-        setPageSize(2)
-      } catch (err) {
-        console.log(err);
-        setUsers([]);
-        setTotal(0);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUsers();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize, filter ]);
+  }, [page, pageSize, filter,location ]);
 
   //TODO  Function for handling adding user- ------------------------------------------------------------------------------------
 
@@ -93,9 +94,10 @@ function UserManagement() {
     try {
       const data = await addUser(userData);
       enqueueSnackbar(data.message, { variant: "success" });
+      fetchUsers()
       setTimeout(() => {
         window.location.reload();
-      }, 1000);
+      }, 500);
     } catch (error) {
       if (error instanceof AxiosError) {
         enqueueSnackbar(error.response?.data?.message || "An unexpected error occurred", { variant: "error" });
@@ -298,9 +300,7 @@ function UserManagement() {
           try {
             const response = await deleteUser(id);
             enqueueSnackbar(response.message, { variant: "success" });
-            setTimeout(() => {
-              window.location.reload();
-            }, 1000);
+            navigate("/admin/users")
           } catch (error) {
             console.log(error)
             enqueueSnackbar("Failed to delete user.", { variant: "error" });

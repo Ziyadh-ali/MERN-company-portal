@@ -4,6 +4,7 @@ import { injectable, inject } from "tsyringe";
 import { HTTP_STATUS_CODES, MESSAGES } from "../../shared/constants";
 import { IMeeting } from "../../entities/models/Meeting.entities";
 import { CustomRequest } from "../middlewares/authMiddleware";
+import { createMeetingSchema } from "../../shared/validation/validator";
 
 @injectable()
 export class MeetingController {
@@ -13,11 +14,19 @@ export class MeetingController {
 
     async createMeeting(req: Request, res: Response): Promise<void> {
         try {
-            const user = (req as CustomRequest).user
-            const { meeting, filter } = req.body;
+            const validatedBody = createMeetingSchema.parse(req.body);
 
-            meeting.createdBy = user.id;
-            const createdMeeting = await this.meetingUseCase.createMeeting(meeting, filter);
+            const { meeting , filter } = validatedBody;
+            const user = (req as CustomRequest).user
+
+
+            const meetingWithCreator: IMeeting = {
+                ...meeting,
+                createdBy: user.id,
+                date: new Date(),
+                status : "upcoming"
+            };
+            const createdMeeting = await this.meetingUseCase.createMeeting(meetingWithCreator, filter);
 
             res.status(HTTP_STATUS_CODES.OK).json({
                 message: MESSAGES.SUCCESS.METING_SCHEDULED,
@@ -97,9 +106,9 @@ export class MeetingController {
             const user = (req as CustomRequest).user;
             const { meeting, filter } = req.body;
             meeting.createdBy = user.id;
-    
+
             const updatedMeeting = await this.meetingUseCase.editMeeting(meeting, filter);
-    
+
             res.status(HTTP_STATUS_CODES.OK).json({
                 message: MESSAGES.SUCCESS.MEETING_UPDATED,
                 updatedMeeting,
@@ -111,7 +120,7 @@ export class MeetingController {
             });
         }
     }
-    
+
 
 
     async deleteMeeting(req: Request, res: Response): Promise<void> {

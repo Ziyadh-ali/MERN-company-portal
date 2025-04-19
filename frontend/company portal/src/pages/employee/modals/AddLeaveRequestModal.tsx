@@ -76,7 +76,14 @@ const AddLeaveRequestModal = ({ open, onClose, onAdd }: AddLeaveRequestModalProp
             } catch (error) {
                 console.error("Failed to submit leave request:", error);
                 if (error instanceof AxiosError) {
-                    enqueueSnackbar(error?.response?.data.message, { variant: "error" });
+                    const errorData = error.response?.data;
+                    if (errorData?.errors && Array.isArray(errorData.errors)) {
+                        errorData.errors.forEach((err: { field: string; message: string }) => {
+                            enqueueSnackbar(`${err.field}: ${err.message}`, { variant: "error" });
+                        });
+                    } else {
+                        enqueueSnackbar(errorData?.message || "An unexpected error occurred", { variant: "error" });
+                    }
                 }
             }
         },
@@ -84,7 +91,7 @@ const AddLeaveRequestModal = ({ open, onClose, onAdd }: AddLeaveRequestModalProp
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="z-50 relative bg-white rounded-lg shadow-lg">
+            <DialogContent className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 transform rounded-lg bg-white shadow-lg">
                 <DialogHeader>
                     <DialogTitle className="text-lg font-semibold text-gray-800">
                         Apply for Leave

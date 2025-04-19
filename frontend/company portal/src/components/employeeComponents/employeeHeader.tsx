@@ -59,7 +59,7 @@ export const EmployeeHeader : React.FC<Props> = ({heading}) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                     <DropdownMenuItem onClick={() => navigate(`/profile`)}>Profile</DropdownMenuItem>
-                    <DropdownMenuItem>Settings</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate(`/messages`)}>Messages</DropdownMenuItem>
                     <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>

@@ -18,6 +18,8 @@ import LeaveManagementPage from "./pages/admin/adminPages/LeaveManagement"
 import { ResetPasswordPage } from "./pages/employee/employeePages/resetPasswordPage"
 import AttendancePage from "./pages/employee/employeePages/AttendancePage"
 import MeetingPage from "./pages/employee/employeePages/MeetingPage"
+import ChatPage from "./pages/employee/employeePages/ChatPage"
+import HelpCenterPage from "./pages/employee/employeePages/HelpCentre"
 
 function App() {
 
@@ -48,6 +50,10 @@ function App() {
               <Route path="attendance" element={<AttendancePage/>} />
 
               <Route path="meeting" element={<MeetingPage/>} />
+
+              <Route path="messages" element={<ChatPage/>} />
+
+              <Route path="help-desk" element={<HelpCenterPage/>} />
               
             </Route>
 

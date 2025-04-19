@@ -6,6 +6,7 @@ import { LeaveBalanceRepository } from "../../adapters/repositories/LeaveBalance
 import { LeaveRequestRepository } from "../../adapters/repositories/LeaveRequestRepository";
 import { AttendanceRepository } from "../../adapters/repositories/AttendanceRepository";
 import { MeetingRepository } from "../../adapters/repositories/MeetingRepository";
+import { FaqRepository } from "../../adapters/repositories/FaqRepository";
 
 
 export class RepositoryRegistry {
@@ -36,6 +37,10 @@ export class RepositoryRegistry {
 
         container.register("IMeetingRepository",{
             useClass : MeetingRepository,
+        });
+
+        container.register("IFaqRepository",{
+            useClass : FaqRepository,
         });
     }
 }

@@ -19,7 +19,7 @@ interface AddUserModalProps {
   }) => void
 }
 
-const AddUserModal = ({ onAddUser }: AddUserModalProps) => {
+const AddUserModal = ({onAddUser }: AddUserModalProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showCPassword, setShowCPassword] = useState(false);
   const formik = useFormik({
@@ -35,7 +35,7 @@ const AddUserModal = ({ onAddUser }: AddUserModalProps) => {
     onSubmit: (values) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { confirmPassword, ...userData } = values
-      onAddUser(userData)
+      onAddUser(userData);
     },
   })
 

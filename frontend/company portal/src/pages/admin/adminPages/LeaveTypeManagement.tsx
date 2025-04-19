@@ -9,7 +9,6 @@ import { AddLeaveTypeModal, UpdateLeaveTypeModal } from "../modals/LeaveTypeKMod
 import { createLeaveTypeService, deleteLeaveTypeService, getLeaveTypesService, updateLeaveTypeService } from "../../../services/admin/adminUserM";
 import { useNavigate } from "react-router-dom";
 import { useConfirmDeleteModal } from "../../../components/useConfirm";
-import { AxiosError } from "axios";
 
 export interface LeaveType {
     _id?: string;
@@ -19,12 +18,6 @@ export interface LeaveType {
     isPaid?: boolean;
     requiresApproval?: boolean;
 }
-
-
-
-
-
-
 const LeaveTypeManagementPage = () => {
     const navigate = useNavigate()
     const { enqueueSnackbar } = useSnackbar();

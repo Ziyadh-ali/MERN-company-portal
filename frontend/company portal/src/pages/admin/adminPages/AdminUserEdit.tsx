@@ -65,7 +65,7 @@ const AdminEditUserPage = () => {
                         } else if (value instanceof File) {
                             formData.append(key, value);
                         } else {
-                            formData.append(key, value as any);
+                            formData.append(key, value );
                         }
                     }
                 });
@@ -138,7 +138,7 @@ const AdminEditUserPage = () => {
                         <form
                             onSubmit={(e) => {
                                 e.preventDefault();
-                                formik.handleSubmit(e as any);
+                                formik.handleSubmit(e);
                             }}
                             className="space-y-4"
                         >

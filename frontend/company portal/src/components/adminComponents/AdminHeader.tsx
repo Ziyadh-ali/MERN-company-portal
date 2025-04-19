@@ -17,7 +17,7 @@ export default function AdminHeader() {
     const dispatch = useDispatch();
     const { enqueueSnackbar } = useSnackbar();
     const handleLogout = async()=>{
-      let response = await adminAxiosInstance.post("/logout");
+      const response = await adminAxiosInstance.post("/logout");
       dispatch(adminLogout());
       enqueueSnackbar(response.data.message , {variant : "success"});
       navigate("/admin/login");

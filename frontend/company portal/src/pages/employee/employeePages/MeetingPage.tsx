@@ -169,7 +169,7 @@ const MeetingPage = () => {
 
                             {isHost && isMeetingOver && (
                                 <Button
-                                    className="w-full bg-orange-600 text-white"
+                                    className="w-full bg-blue-600 text-white"
                                     onClick={() => handleMarkAsCompleted(meeting._id)}
                                 >
                                     Mark as Completed

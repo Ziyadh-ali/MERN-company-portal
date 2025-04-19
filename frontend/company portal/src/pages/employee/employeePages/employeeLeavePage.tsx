@@ -137,6 +137,7 @@ const LeavePage = () => {
               <Button onClick={() => setOpenModal(true)} className="bg-blue-600 text-white">
                 Apply for Leave
               </Button>
+              
             </div>
             <AddLeaveRequestModal open={openModal} onClose={() => setOpenModal(false)} onAdd={handleLeaveAdd} />
           </div>
@@ -154,7 +155,7 @@ const LeavePage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {leaveHistory?.map((leave) => (
+                  {leaveHistory.length > 0 ? leaveHistory?.map((leave) => (
                     <TableRow key={leave._id}>
                       <TableCell>{leave.leaveTypeId.name}</TableCell>
                       <TableCell>{leave.startDate}</TableCell>
@@ -192,7 +193,7 @@ const LeavePage = () => {
                         </div>
                       </TableCell> : ""}
                     </TableRow>
-                  ))}
+                  )): <p>No leave requests</p>}
                 </TableBody>
               </Table>
             </CardContent>

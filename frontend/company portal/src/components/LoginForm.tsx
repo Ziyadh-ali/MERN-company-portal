@@ -1,4 +1,4 @@
-import { Navigate, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import { useSnackbar } from "notistack";
 import { AxiosError } from "axios";
@@ -24,10 +24,6 @@ const LoginForm = ({ role }: { role: "admin" | "employee" }) => {
         enqueueSnackbar("Please Login", { variant: "info" })
     }, []);
 
-    const handleForgotPassword = async (email: string) => {
-        alert(email);
-    }
-
     const formik = useFormik({
         initialValues: {
             email: "",
@@ -43,7 +39,14 @@ const LoginForm = ({ role }: { role: "admin" | "employee" }) => {
                 navigate(role === "admin" ? "/admin/dashboard" : "/login");
             } catch (error) {
                 if (error instanceof AxiosError) {
-                    enqueueSnackbar(error.response?.data?.message || "An unexpected error occurred", { variant: "error" });
+                    const errorData = error.response?.data;
+                    if (errorData?.errors && Array.isArray(errorData.errors)) {
+                        errorData.errors.forEach((err: { field: string; message: string }) => {
+                            enqueueSnackbar(`${err.field}: ${err.message}`, { variant: "error" });
+                        });
+                    } else {
+                        enqueueSnackbar(errorData?.message || "An unexpected error occurred", { variant: "error" });
+                    }
                 } else {
                     enqueueSnackbar("An unexpected error occurred", { variant: "error" });
                 }
@@ -79,7 +82,7 @@ const LoginForm = ({ role }: { role: "admin" | "employee" }) => {
                     </label>
                     <Input
                         id="email"
-                        type="email"
+                        type="text"
                         placeholder="Enter your email"
                         className="w-full"
                         {...formik.getFieldProps("email")}

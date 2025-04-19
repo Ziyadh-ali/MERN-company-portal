@@ -5,7 +5,7 @@ import { IEmployeeLoginUseCase } from "../../entities/useCaseInterface/IEmployee
 import { clearAuthCookies } from "../../shared/utils/cookieHelper";
 import { Response } from "express";
 import { MESSAGES } from "../../shared/constants";
-import { loginSchema } from "../../shared/validation/user.validator";
+import { loginSchema } from "../../shared/validation/validator";
 import { IJwtService } from "../../entities/services/jwt.interface";
 import { IBcrypt } from "../../frameworks/security/bcrypt.interface";
 

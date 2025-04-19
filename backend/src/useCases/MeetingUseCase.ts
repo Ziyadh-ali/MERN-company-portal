@@ -36,14 +36,13 @@ export class MeetingUseCase implements IMeetingUseCase {
             (p) => p.toString() !== meeting?.createdBy?.toString()
         );
 
-        const dateOnly = new Date(meeting.date); // "2025-04-15"
+        const dateOnly = new Date(meeting.date);
         const [hours, minutes] = meeting.startTime.split(":").map(Number);
         const meetingStart = new Date(dateOnly);
         meetingStart.setHours(hours, minutes, 0, 0);
 
         const meetingEnd = new Date(meetingStart.getTime() + meeting.duration * 60000);
 
-        // ✅ Host overlap check
         const hostMeetings = await this.meetingRepository.getMeetingsByHost(
             meeting.createdBy ? meeting.createdBy.toString() : ""
         );
@@ -60,7 +59,6 @@ export class MeetingUseCase implements IMeetingUseCase {
             throw new Error(MESSAGES.ERROR.MEETING.ALREADY_HAVE_MEETING);
         }
 
-        // ✅ Participant overlap check
         const allEmployeeMeetings = await Promise.all(
             filteredParticipants.map(p => this.meetingRepository.getMeetingsByEmployeeId(p))
         );
