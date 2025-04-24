@@ -7,7 +7,6 @@ import {
   DialogDescription,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { useSnackbar } from "notistack";
 
 interface DeleteItem {
   id: string;
@@ -21,6 +20,7 @@ interface ConfirmDeleteModalProps {
   onConfirm: (id: string) => Promise<void>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
   open,
   onOpenChange,
@@ -87,9 +87,9 @@ export const useConfirmDeleteModal = () => {
     setIsOpen(true);
   };
 
-  const handleConfirm = async (id: string) => {
-    throw new Error("handleConfirm must be provided by the consumer");
-  };
+  // const handleConfirm = async (id: string) => {
+  //   throw new Error("handleConfirm must be provided by the consumer");
+  // };
 
   const ConfirmDeleteModalComponent = ({
     onConfirm,

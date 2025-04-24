@@ -10,6 +10,8 @@ import { LeaveRequestController } from "../../adapters/controllers/LeaveRequestC
 import { ForgotPasswordController } from "../../adapters/controllers/employee/ForgotPasswordController";
 import { ResetPasswordController } from "../../adapters/controllers/employee/ResetPasswordController";
 import { MeetingController } from "../../adapters/controllers/MeetingController";
+import { FaqController } from "../../adapters/controllers/FaqController";
+import { MessageController } from "../../adapters/controllers/MessageController";
 
 export class ControllerRegistry {
     static registerControllers() : void {
@@ -55,6 +57,14 @@ export class ControllerRegistry {
 
         container.register("MeetingController",{
             useClass : MeetingController
-        })
+        });
+
+        container.register("FaqController",{
+            useClass : FaqController
+        });
+
+        container.register("MessageController",{
+            useClass : MessageController
+        });
     }
 }

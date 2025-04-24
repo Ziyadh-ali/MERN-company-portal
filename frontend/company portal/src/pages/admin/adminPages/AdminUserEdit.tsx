@@ -225,7 +225,7 @@ const AdminEditUserPage = () => {
                                     </SelectTrigger>
                                     <SelectContent>
                                         {Managers.map((manager) => (
-                                            <SelectItem key={manager?.fullName} value={manager?.fullName}>
+                                            <SelectItem key={manager?.fullName} value={manager._id || ""}>
                                                 {manager?.fullName} ({manager?.role === "hr" ? "HR" : "Project Manager"})
                                             </SelectItem>
                                         ))}

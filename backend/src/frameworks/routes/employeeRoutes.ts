@@ -9,7 +9,10 @@ import {
     forgotPasswordController,
     resetPasswordController,
     attendanceController,
-    meetingController
+    meetingController,
+    faqController,
+    adminUserManagement,
+    messageController
 } from "../di/resolver";
 import { verifyAuth } from "../../adapters/middlewares/authMiddleware";
 import upload from "../../adapters/service/multer";
@@ -44,6 +47,10 @@ export class UserRoute {
         this.router.post(
             "/reset-password",
             (req: Request, res: Response) => resetPasswordController.execute(req, res),
+        )
+        this.router.get(
+            "/employees",
+            (req: Request, res: Response) => adminUserManagement.getEmployeesForChat(req, res),
         )
 
         this.router
@@ -149,6 +156,30 @@ export class UserRoute {
                 verifyAuth("employee"),
                 (req: Request, res: Response) => meetingController.deleteMeeting(req, res)
             )
+
+        this.router
+            .post(
+                "/faq",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => faqController.createFaq(req, res)
+            )
+            .get(
+                "/faq",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => faqController.getFaqs(req, res)
+            )
+            .patch(
+                "/faq/:faqId",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => faqController.updateFaq(req, res)
+            )
+        
+            this.router
+                .get(
+                    "/messages",
+                    verifyAuth("employee"),
+                    (req: Request, res: Response) => messageController.getPrivateMessages(req, res)
+                )
     }
 
     public getRoute(): express.Router {

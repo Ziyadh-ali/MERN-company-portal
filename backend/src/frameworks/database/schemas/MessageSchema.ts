@@ -9,7 +9,7 @@ export const MessageSchema = new Schema<IMessageModel>(
         },
         sender: {
             type: Schema.Types.ObjectId,
-            ref: "User",
+            ref: "Employee",
             required: true,
         },
         roomId: {
@@ -19,7 +19,7 @@ export const MessageSchema = new Schema<IMessageModel>(
         },
         recipient: {
             type: Schema.Types.ObjectId,
-            ref: "User",
+            ref: "Employee",
             default: null,
         },
         replyTo: {
@@ -30,13 +30,13 @@ export const MessageSchema = new Schema<IMessageModel>(
         deliveredTo: [
             {
                 type: Schema.Types.ObjectId,
-                ref: "User",
+                ref: "Employee",
             },
         ],
         readBy: [
             {
                 type: Schema.Types.ObjectId,
-                ref: "User",
+                ref: "Employee",
             },
         ],
     },

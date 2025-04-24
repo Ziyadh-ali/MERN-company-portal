@@ -56,4 +56,8 @@ export class EmployeeManagementUseCase implements IEmployeeManagementUseCase {
             throw new Error("Error in finding managers");
         }
     }
+
+    async getEmployeesForChat(): Promise<Partial<Employee[]>> {
+        return await this.employeeRepository.getEmployeesForChat();
+    }
 } 

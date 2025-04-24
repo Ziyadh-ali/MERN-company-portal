@@ -9,6 +9,23 @@ export const loginSchema = z.object({
     .min(6, "Password must be at least 6 characters"),
 });
 
+
+export const faqValidationSchema = z.object({
+  topic: z
+    .string()
+    .min(3, "Topic must be at least 3 characters"),
+  description: z
+    .string()
+    .min(5, "Description must be at least 5 characters"),
+  questions: z.array(
+    z.object({
+      question: z.string().min(5, "Question must be at least 5 characters"),
+      answer: z.string().min(5, "Answer must be at least 5 characters"),
+    })
+  ).min(1, "At least one question is required")
+});
+
+
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 
@@ -62,6 +79,8 @@ export const leaveRequestSchema = z
       });
     }
   });
+
+
 
 //   import dayjs from 'dayjs';
 

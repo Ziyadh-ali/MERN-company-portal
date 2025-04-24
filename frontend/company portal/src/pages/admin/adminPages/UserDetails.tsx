@@ -9,72 +9,75 @@ import { useNavigate, useParams } from "react-router-dom";
 
 // Define the IUserModel interface based on the schema
 interface IUserModel {
-    _id : string,
-    fullName: string;
-    email: string;
-    role: string;
-    department: string;
-    status: string;
-    profilePic?: string;
-    phone?: number;
-    address?: string;
-    manager?: string;
-    joinedAt: Date;
-    createdAt?: Date;
-    updatedAt?: Date;
+  _id: string,
+  fullName: string;
+  email: string;
+  role: string;
+  department: string;
+  status: string;
+  profilePic?: string;
+  phone?: number;
+  address?: string;
+  manager?: {
+    _id: string;
+    fullName: string
+  };
+  joinedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 
 const UserDetailsPage = () => {
-    const navigate = useNavigate();
-    const { userId } = useParams();
-    const [user , setUser] = useState<IUserModel | null>(null);
+  const navigate = useNavigate();
+  const { userId } = useParams();
+  const [user, setUser] = useState<IUserModel | null>(null);
 
-    useEffect(() => {
-        const fetchUsers = async () => {
+  useEffect(() => {
+    const fetchUsers = async () => {
 
-            try {
-                if (userId) {
-                    const response = await getUserDetails(userId);
-                    setUser(response.user);
-                }
-            } catch (err) {
-                console.log(err);
-            }
-        };
-
-        fetchUsers();
-    }, [userId])
-    const formatRole = (role: string|undefined) => {
-        switch (role) {
-            case "hr":
-                return "HR Manager";
-            case "projectManager":
-                return "Project Manager";
-            case "developer":
-                return "Developer";
-            default:
-                return role;
+      try {
+        if (userId) {
+          const response = await getUserDetails(userId);
+          setUser(response.user);
         }
+      } catch (err) {
+        console.log(err);
+      }
     };
 
-    // Format the date for display
-    const formatDate = (date: Date) => {
-        return new Date(date).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-        });
-    };
+    fetchUsers();
+  }, [userId])
+  const formatRole = (role: string | undefined) => {
+    switch (role) {
+      case "hr":
+        return "HR Manager";
+      case "projectManager":
+        return "Project Manager";
+      case "developer":
+        return "Developer";
+      default:
+        return role;
+    }
+  };
 
-    return (
-        <div className="flex min-h-screen bg-gray-100">
-            <AdminSideBar />
+  // Format the date for display
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
-            <div className="flex-1 p-6">
-                <AdminHeader />
+  return (
+    <div className="flex min-h-screen bg-gray-100">
+      <AdminSideBar />
 
-                <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+      <div className="flex-1 p-6">
+        <AdminHeader />
+
+        <div className="bg-white shadow-md rounded-lg p-6 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Avatar className="w-20 h-20">
@@ -83,11 +86,13 @@ const UserDetailsPage = () => {
                   alt={user?.fullName}
                 />
                 <AvatarFallback>
-                  {user?.fullName
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .toUpperCase()}
+                  {typeof user?.fullName === "string"
+                    ? user.fullName
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()
+                    : "U"}
                 </AvatarFallback>
               </Avatar>
               <div>
@@ -97,18 +102,17 @@ const UserDetailsPage = () => {
                 <p className="text-sm text-gray-600">{formatRole(user?.role)}</p>
                 <p className="text-xs text-gray-500">ID: EMP1001</p>
                 <span
-                  className={`inline-block mt-1 px-3 py-1 text-xs font-medium rounded-full ${
-                    user?.status === "active"
+                  className={`inline-block mt-1 px-3 py-1 text-xs font-medium rounded-full ${user?.status === "active"
                       ? "text-green-600 bg-green-100"
                       : "text-red-600 bg-red-100"
-                  }`}
+                    }`}
                 >
-                  {user ? user?.status.charAt(0).toUpperCase() + user?.status.slice(1) :""}
+                  {user ? user?.status.charAt(0).toUpperCase() + user?.status.slice(1) : ""}
                 </span>
               </div>
             </div>
             <div className="flex space-x-2">
-              <Button onClick={()=>navigate(`/admin/users/${user?._id}/edit`)} className="bg-blue-600 text-white">Edit Profile</Button>
+              <Button onClick={() => navigate(`/admin/users/${user?._id}/edit`)} className="bg-blue-600 text-white">Edit Profile</Button>
               <Button variant="outline">
                 <span className="mr-2">⬇</span> Download Info
               </Button>
@@ -178,7 +182,7 @@ const UserDetailsPage = () => {
                     Reporting to:
                   </span>
                   <span className="text-sm text-gray-600">
-                    {user?.manager || "Not assigned"}
+                    {user?.manager?.fullName || "Not assigned"}
                   </span>
                 </div>
               </CardContent>
@@ -225,7 +229,7 @@ const UserDetailsPage = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-sm font-medium text-gray-800">
-                  {user? formatDate(user?.joinedAt): null}
+                  {user?.joinedAt && formatDate(user.joinedAt)}
                 </p>
               </CardContent>
             </Card>
@@ -260,9 +264,9 @@ const UserDetailsPage = () => {
             </Card>
           </div>
         </div>
-            </div>
-        </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default UserDetailsPage;

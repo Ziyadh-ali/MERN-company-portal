@@ -6,7 +6,7 @@ export interface Employee {
     email : string;
     department : string;
     role : "hr" | "developer" | "projectManager";
-    status : string,
+    status : "active" | "inactive",
     password : string;
     phone?: number,
     address?: string,

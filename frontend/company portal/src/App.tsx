@@ -19,7 +19,8 @@ import { ResetPasswordPage } from "./pages/employee/employeePages/resetPasswordP
 import AttendancePage from "./pages/employee/employeePages/AttendancePage"
 import MeetingPage from "./pages/employee/employeePages/MeetingPage"
 import ChatPage from "./pages/employee/employeePages/ChatPage"
-import HelpCenterPage from "./pages/employee/employeePages/HelpCentre"
+import AdminHelpCenterPage from "./pages/admin/adminPages/AdminHelpCenter"
+import EmployeeHelpCenterPage from "./pages/employee/employeePages/HelpCentre"
 
 function App() {
 
@@ -53,7 +54,7 @@ function App() {
 
               <Route path="messages" element={<ChatPage/>} />
 
-              <Route path="help-desk" element={<HelpCenterPage/>} />
+              <Route path="help-desk" element={<EmployeeHelpCenterPage/>} />
               
             </Route>
 
@@ -82,6 +83,8 @@ function App() {
               <Route path="leave/types" element={<LeaveTypeManagementPage />} />
 
               <Route path="leave/requests" element={<LeaveManagementPage />} />
+
+              <Route path="help" element={<AdminHelpCenterPage />} />
 
             </Route>
 

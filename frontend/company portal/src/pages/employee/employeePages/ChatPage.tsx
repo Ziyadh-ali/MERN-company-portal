@@ -5,26 +5,49 @@ import { Input } from "../../../components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "../../../components/ui/tabs";
 import { ScrollArea } from "../../../components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
-import { Send } from "lucide-react";
+import { Send, MoreVertical } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "../../../components/ui/dropdown-menu";
 import EmployeeSidebar from "../../../components/employeeComponents/employeeSidebar";
 import { EmployeeHeader } from "../../../components/employeeComponents/employeeHeader";
-import EmojiPicker, { EmojiClickData } from "emoji-picker-react"
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+import { useChat } from "../../../context/chatContext";
+import { getEmployeesForChatService, getPrivateMessagesService } from "../../../services/user/userService";
 
 interface ChatUser {
-    id: string;
-    name: string;
-    status: "Online" | "Offline";
-    latestMessage: string;
-    time: string;
-    avatar: string;
+    _id: string;
+    fullName: string;
+    role: string;
+    profilePic: string;
 }
 
-interface Message {
-    id: string;
-    sender: string;
-    text: string;
-    time: string;
-    sentByMe: boolean;
+interface CurrentUser {
+    _id: string;
+    email: string;
+    role: string;
+    profilePic: string;
+    fullName: string;
+}
+
+export interface ChatMessage {
+    _id: string;
+    content: string;
+    createdAt: string;
+    deliveredTo: string[];
+    readBy: string[];
+    recipient: string | null;
+    replyTo: string | null;
+    roomId: string | null;
+    sender: {
+        _id: string;
+        fullName: string;
+        email: string;
+    };
+    __v: number;
 }
 
 const ChatPage = () => {
@@ -32,113 +55,78 @@ const ChatPage = () => {
     const [activeTab, setActiveTab] = useState("individual");
     const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [users, setUsers] = useState<ChatUser[]>([]);
     const [newMessage, setNewMessage] = useState("");
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const currentUser: CurrentUser = JSON.parse(localStorage.getItem("employeeSession") || "{}");
 
-    // Mock data (replace with actual API call)
+    const { messages, setMessages, sendMessage, joinRoom , deleteMessage } = useChat();
+
+    useEffect(() => {
+        async function fetchEmployees() {
+            const response = await getEmployeesForChatService();
+            const filteredEmployees = response.employees.filter(
+                (emp: ChatUser) => emp._id !== currentUser._id
+            );
+            setUsers(filteredEmployees);
+        }
+        fetchEmployees();
+    }, [currentUser._id]);
+
     const handleEmojiClick = (emojiData: EmojiClickData) => {
         setNewMessage((prev) => prev + emojiData.emoji);
     };
-    const mockUsers: ChatUser[] = [
-        {
-            id: "1",
-            name: "Jane Smith",
-            status: "Online",
-            latestMessage: "Latest project updates...",
-            time: "10:30 AM",
-            avatar: "https://via.placeholder.com/40",
-        },
-        {
-            id: "2",
-            name: "Alex Johnson",
-            status: "Offline",
-            latestMessage: "Let me know when you're free",
-            time: "Yesterday",
-            avatar: "https://via.placeholder.com/40",
-        },
-        {
-            id: "3",
-            name: "Sarah Parker",
-            status: "Online",
-            latestMessage: "The design looks great!",
-            time: "2:15 PM",
-            avatar: "https://via.placeholder.com/40",
-        },
-    ];
-
-    const mockMessages: Message[] = [
-        {
-            id: "1",
-            sender: "Jane Smith",
-            text: "Hi John, how's the progress on the website redesign?",
-            time: "10:30 AM",
-            sentByMe: false,
-        },
-        {
-            id: "2",
-            sender: "John Doe",
-            text: "Hi Jane, I've completed the homepage design. Would you like to review it?",
-            time: "10:32 AM",
-            sentByMe: true,
-        },
-        {
-            id: "3",
-            sender: "Jane Smith",
-            text: "Yes, please share it with me. I'm particularly interested in seeing how the navigation menu turned out.",
-            time: "10:35 AM",
-            sentByMe: false,
-        },
-        {
-            id: "4",
-            sender: "John Doe",
-            text: "I've just sent you the link. The navigation has a dropdown for product categories as you suggested.",
-            time: "10:40 AM",
-            sentByMe: true,
-        },
-    ];
 
     useEffect(() => {
-        setSelectedUser(mockUsers[0]);
-        setMessages(mockMessages);
-    }, []);
+        setSelectedUser(users[0]);
+    }, [users]);
 
     useEffect(() => {
-        // Scroll to the latest message whenever messages change
+        if (selectedUser) {
+            const fetchMessages = async () => {
+                if (selectedUser) {
+                    const res = await getPrivateMessagesService(currentUser._id, selectedUser._id);
+                    console.log(res.messages);
+                    setMessages(res.messages);
+                }
+            };
+
+            fetchMessages();
+            joinRoom(selectedUser._id);
+        }
+    }, [selectedUser]);
+
+
+    useEffect(() => {
         scrollToBottom();
     }, [messages]);
 
-    // Filter users based on search query
     const filteredUsers = searchQuery
-        ? mockUsers.filter((user) =>
-            user.name.toLowerCase().includes(searchQuery.toLowerCase())
+        ? users.filter((user) =>
+            user.fullName.toLowerCase().includes(searchQuery.toLowerCase())
         )
-        : mockUsers;
+        : users;
 
-    // Scroll to the bottom of the chat
     const scrollToBottom = () => {
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
         }
     };
 
-    // Handle sending a message
     const handleSendMessage = () => {
         if (newMessage.trim() && selectedUser) {
-            const message: Message = {
-                id: Date.now().toString(),
-                sender: "John Doe",
-                text: newMessage,
-                time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-                sentByMe: true,
+            const message = {
+                content: newMessage,
+                sender: currentUser._id,
+                recipient: selectedUser._id,
+                timestamp: new Date().toISOString(),
             };
-            setMessages((prevMessages) => [...prevMessages, message]);
+            sendMessage(message);
             setNewMessage("");
         }
     };
 
-    // Handle key press for sending messages
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -146,19 +134,20 @@ const ChatPage = () => {
         }
     };
 
+    const handleDeleteMessage = (messageId: string) => {
+
+        deleteMessage(messageId , selectedUser?._id ? selectedUser?._id : "")
+
+        setMessages(messages.filter((msg) => msg._id !== messageId));
+    };
+
     return (
         <div className="flex h-screen bg-gray-100 overflow-hidden">
-            {/* Sidebar */}
             <EmployeeSidebar />
-
-            {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Header */}
                 <div className="p-6 pb-2">
                     <EmployeeHeader heading="Chat Dashboard" />
                 </div>
-
-                {/* Chat Interface */}
                 <div className="px-6 pb-6 flex-1 overflow-hidden">
                     <Card className="h-full flex flex-col overflow-hidden">
                         <CardHeader className="p-4 border-b">
@@ -179,33 +168,27 @@ const ChatPage = () => {
                             </div>
                         </CardHeader>
                         <div className="flex flex-1 overflow-hidden">
-                            {/* Chat List */}
                             <div className="w-1/3 border-r overflow-hidden flex flex-col">
                                 <ScrollArea className="flex-1">
                                     <div className="p-4 space-y-2">
                                         {filteredUsers.map((user) => (
                                             <div
-                                                key={user.id}
-                                                className={`flex items-center p-3 hover:bg-gray-100 cursor-pointer rounded-md ${selectedUser?.id === user.id ? "bg-gray-100" : ""
+                                                key={user._id}
+                                                className={`flex items-center p-3 hover:bg-gray-100 cursor-pointer rounded-md ${selectedUser?._id === user._id ? "bg-gray-100" : ""
                                                     }`}
                                                 onClick={() => setSelectedUser(user)}
                                             >
                                                 <Avatar className="h-10 w-10 mr-3 flex-shrink-0">
-                                                    <AvatarImage src={user.avatar} alt={user.name} />
-                                                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                                    <AvatarImage src={user.profilePic} alt={user.fullName} />
+                                                    <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
                                                 </Avatar>
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex justify-between items-center">
-                                                        <span className="font-medium text-gray-800 truncate">{user.name}</span>
-                                                        <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{user.time}</span>
+                                                        <span className="font-medium text-gray-800 truncate">{user.fullName}</span>
+                                                        {user.role !== "developer" ? (
+                                                            <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{user.role}</span>
+                                                        ) : ""}
                                                     </div>
-                                                    <div className="text-sm text-gray-600 truncate">{user.latestMessage}</div>
-                                                    <span
-                                                        className={`text-xs ${user.status === "Online" ? "text-green-500" : "text-gray-500"
-                                                            }`}
-                                                    >
-                                                        {user.status}
-                                                    </span>
                                                 </div>
                                             </div>
                                         ))}
@@ -213,58 +196,85 @@ const ChatPage = () => {
                                 </ScrollArea>
                             </div>
 
-                            {/* Chat Area */}
                             <div className="w-2/3 flex flex-col overflow-hidden">
                                 {selectedUser ? (
                                     <>
-                                        {/* Chat Header */}
                                         <div className="flex items-center p-4 border-b">
                                             <Avatar className="h-10 w-10 mr-3">
-                                                <AvatarImage src={selectedUser.avatar} alt={selectedUser.name} />
-                                                <AvatarFallback>{selectedUser.name.charAt(0)}</AvatarFallback>
+                                                <AvatarImage src={selectedUser.profilePic} alt={selectedUser.fullName} />
+                                                <AvatarFallback>{selectedUser.fullName.charAt(0)}</AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <h2 className="font-semibold text-gray-800">{selectedUser.name}</h2>
-                                                <span
-                                                    className={`text-xs ${selectedUser.status === "Online" ? "text-green-500" : "text-gray-500"
-                                                        }`}
-                                                >
-                                                    {selectedUser.status}
-                                                </span>
+                                                <h2 className="font-semibold text-gray-800">{selectedUser.fullName}</h2>
                                             </div>
                                         </div>
-
-                                        {/* Messages Area */}
                                         <div className="flex-1 overflow-hidden">
                                             <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
                                                 <div className="space-y-4">
-                                                    {messages.map((message) => (
-                                                        <div
-                                                            key={message.id}
-                                                            className={`flex ${message.sentByMe ? "justify-end" : "justify-start"}`}
-                                                        >
+                                                    {messages
+                                                        .filter(
+                                                            (msg) =>
+                                                                (msg.sender === selectedUser._id && msg.recipient === currentUser._id) ||
+                                                                (msg.recipient === selectedUser._id && msg.sender === currentUser._id)
+                                                        )
+                                                        .map((message) => (
                                                             <div
-                                                                className={`p-3 rounded-lg ${message.sentByMe
-                                                                    ? "bg-blue-600 text-white rounded-tr-none"
-                                                                    : "bg-gray-200 text-gray-800 rounded-tl-none"
-                                                                    } shadow-sm max-w-[80%]`}
+                                                                key={message._id}
+                                                                className={`flex relative ${message.sender === currentUser._id ? "justify-end" : "justify-start"
+                                                                    }`}
                                                             >
-                                                                <p className="break-words text-sm">{message.text}</p>
-                                                                <span
-                                                                    className={`text-xs block mt-1 ${message.sentByMe ? "text-blue-200" : "text-gray-500"
+                                                                <div
+                                                                    className={`p-3 rounded-lg shadow-sm max-w-[80%] flex items-start gap-2 ${message.sender === currentUser._id
+                                                                            ? "bg-blue-600 text-white rounded-tr-none"
+                                                                            : "bg-gray-200 text-gray-800 rounded-tl-none"
                                                                         }`}
                                                                 >
-                                                                    {message.time}
-                                                                </span>
+                                                                    <div className="flex-1">
+                                                                        <p className="break-words text-sm">{message.content}</p>
+                                                                        <span
+                                                                            className={`text-xs block mt-1 ${message.sender === currentUser._id
+                                                                                    ? "text-blue-200"
+                                                                                    : "text-gray-500"
+                                                                                }`}
+                                                                        >
+                                                                            {new Date(message.createdAt ?? "").toLocaleTimeString([], {
+                                                                                hour: "2-digit",
+                                                                                minute: "2-digit",
+                                                                            })}
+                                                                        </span>
+                                                                    </div>
+                                                                    {message.sender === currentUser._id && (
+                                                                        <DropdownMenu>
+                                                                            <DropdownMenuTrigger asChild>
+                                                                                <Button
+                                                                                    variant="ghost"
+                                                                                    size="sm"
+                                                                                    className="p-1 text-blue-200 hover:bg-transparent hover:text-blue-200 focus:outline-none"
+                                                                                >
+                                                                                    <MoreVertical className="h-4 w-4" />
+                                                                                </Button>
+                                                                            </DropdownMenuTrigger>
+                                                                            <DropdownMenuContent
+                                                                                align="end"
+                                                                                className="bg-white border border-gray-200 shadow-md"
+                                                                            >
+                                                                                <DropdownMenuItem
+                                                                                    onClick={() => handleDeleteMessage(message._id)}
+                                                                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                                                >
+                                                                                    Delete
+                                                                                </DropdownMenuItem>
+                                                                            </DropdownMenuContent>
+                                                                        </DropdownMenu>
+                                                                    )}
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    ))}
+                                                        ))}
                                                     <div ref={messagesEndRef} />
                                                 </div>
                                             </ScrollArea>
                                         </div>
 
-                                        {/* Message Input */}
                                         <div className="p-4 border-t relative">
                                             <div className="flex items-center gap-2">
                                                 <Button

@@ -14,68 +14,95 @@ import { ForgotPasswordUseCase } from "../../useCases/employee/ForgotPasswordUse
 import { ResetPasswordUseCase } from "../../useCases/employee/ResetPasswordUseCase";
 import { AttendanceUseCase } from "../../useCases/AttendanceUseCase";
 import { MeetingUseCase } from "../../useCases/MeetingUseCase";
+import { FaqUseCase } from "../../useCases/FaqUseCase";
+import { IAdminAuthUseCase } from "../../entities/useCaseInterface/IAdaminAuthUseCase";
+import { IJwtService } from "../../entities/services/jwt.interface";
+import { IBcrypt } from "../security/bcrypt.interface";
+import { IEmployeeProfileUseCase } from "../../entities/useCaseInterface/IEmployeeProfileUseCase";
+import { IEmployeeManagementUseCase } from "../../entities/useCaseInterface/IEmployeeManagementUseCase";
+import { IEmployeeLoginUseCase } from "../../entities/useCaseInterface/IEmployeeLoginUseCase";
+import { IRefreshTokenUseCase } from "../../entities/useCaseInterface/IRefreshTokenUseCase";
+import { ILeaveTypeUseCase } from "../../entities/useCaseInterface/ILeaveTypeUseCase";
+import { ILeaveBalanceUseCase } from "../../entities/useCaseInterface/ILeaveBalanceUseCase";
+import { ILeaveRequestUseCase } from "../../entities/useCaseInterface/ILeaveRequestUseCase";
+import { IEmailService } from "../../entities/services/IEmailService.interface";
+import { IForgotPasswordUseCase } from "../../entities/useCaseInterface/IForgotPassword";
+import { IResetPasswordUseCase } from "../../entities/useCaseInterface/IResetPasswordUseCase";
+import { IAttendanceUseCase } from "../../entities/useCaseInterface/IAttendanceUseCase";
+import { IMeetingUseCase } from "../../entities/useCaseInterface/IMeetingUseCase";
+import { IFaqUseCase } from "../../entities/useCaseInterface/IFaqUseCase";
+import { IMessageUseCase } from "../../entities/useCaseInterface/IMessageUseCase";
+import { MessageUseCase } from "../../useCases/MessageUseCase";
 
 
 export class UseCaseRegistry {
     static registerUseCases(): void {
-        container.register("IAdminAuthUseCase", {
+        container.register<IAdminAuthUseCase>("IAdminAuthUseCase", {
             useClass: AdminAuthUseCase,
         });
 
-        container.register("IJwtService", {
+        container.register<IJwtService>("IJwtService", {
             useClass: JwtService,
         });
 
-        container.register("IBcrypt", {
+        container.register<IBcrypt>("IBcrypt", {
             useClass: PasswordBcrypt,
         });
 
-        container.register("IEmployeeProfileUseCase",{
+        container.register<IEmployeeProfileUseCase>("IEmployeeProfileUseCase",{
             useClass : EmployeeProfileUseCase,
         });
 
-        container.register("IEmployeeManagementUseCase",{
+        container.register<IEmployeeManagementUseCase>("IEmployeeManagementUseCase",{
             useClass : EmployeeManagementUseCase,
         });
 
-        container.register("IEmployeeLoginUseCase",{
+        container.register<IEmployeeLoginUseCase>("IEmployeeLoginUseCase",{
             useClass : EmployeeLoginUseCase,
         });
 
-        container.register("IRefreshTokenUseCase", {
+        container.register<IRefreshTokenUseCase>("IRefreshTokenUseCase", {
             useClass : RefreshTokenUseCase,
         });
 
-        container.register("ILeaveTypeUseCase",{
+        container.register<ILeaveTypeUseCase>("ILeaveTypeUseCase",{
             useClass : LeaveTypeUseCase,
         });
 
-        container.register("ILeaveBalanceUseCase",{
+        container.register<ILeaveBalanceUseCase>("ILeaveBalanceUseCase",{
             useClass : LeaveBalanceUseCase,
         });
 
-        container.register("ILeaveRequestUseCase" ,{
+        container.register<ILeaveRequestUseCase>("ILeaveRequestUseCase" ,{
             useClass : LeaveRequestUseCase,
         });
 
-        container.register("IEmailService",{
+        container.register<IEmailService>("IEmailService",{
             useClass : EmailService,
         });
 
-        container.register("IForgotPasswordUseCase",{
+        container.register<IForgotPasswordUseCase>("IForgotPasswordUseCase",{
             useClass : ForgotPasswordUseCase,
         });
 
-        container.register("IResetPasswordUseCase",{
+        container.register<IResetPasswordUseCase>("IResetPasswordUseCase",{
             useClass : ResetPasswordUseCase
         });
 
-        container.register("IAttendanceUseCase",{
+        container.register<IAttendanceUseCase>("IAttendanceUseCase",{
             useClass : AttendanceUseCase
         });
 
-        container.register("IMeetingUseCase",{
+        container.register<IMeetingUseCase>("IMeetingUseCase",{
             useClass : MeetingUseCase,
-        })
+        });
+
+        container.register<IFaqUseCase>("IFaqUseCase",{
+            useClass : FaqUseCase,
+        });
+
+        container.register<IMessageUseCase>("IMessageUseCase",{
+            useClass : MessageUseCase,
+        });
     }
 }

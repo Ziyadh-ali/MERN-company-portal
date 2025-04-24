@@ -2,6 +2,7 @@ import { employeeAxiosInstance } from "../../api/employee.axios";
 import { EditMeeting } from "../../pages/employee/modals/editMeetingModal";
 
 
+
 export const employeeLoginService = async (data: {
   email: string,
   password: string,
@@ -119,34 +120,76 @@ export const scheduleMeetingService = async (meeting: {
   date: string;
   startTime: string;
   duration: number;
-}, filter : {role ?: string , department ?: string}) => {
+}, filter: { role?: string, department?: string }) => {
   const response = await employeeAxiosInstance.post("/meeting", {
-    meeting , filter
+    meeting, filter
   });
   return response.data;
 }
 
-export const getMeetingsService = async (employeeId : string) => {
+export const getMeetingsService = async (employeeId: string) => {
   const response = await employeeAxiosInstance.get(`/meeting/${employeeId}`);
   return response.data;
 }
 
-export const addMeetingLinkService = async (meetingId : string, link : string) => {
-  const response = await employeeAxiosInstance.patch(`/meeting/${meetingId}/link`,{link});
+export const addMeetingLinkService = async (meetingId: string, link: string) => {
+  const response = await employeeAxiosInstance.patch(`/meeting/${meetingId}/link`, { link });
   return response.data;
 }
 
-export const changeMeetingStatusService = async (meetingId : string) => {
-  const response = await employeeAxiosInstance.patch(`/meeting/${meetingId}/status`,{status : "completed"});
+export const changeMeetingStatusService = async (meetingId: string) => {
+  const response = await employeeAxiosInstance.patch(`/meeting/${meetingId}/status`, { status: "completed" });
   return response.data;
 }
 
-export const deleteMeetingService = async (meetingId : string) => {
+export const deleteMeetingService = async (meetingId: string) => {
   const response = await employeeAxiosInstance.delete(`/meeting/${meetingId}`);
   return response.data;
 }
 
-export const editMeetingService = async (meetingId : string,updatedMeeting : Partial<EditMeeting> ,filter :  {role?: string ,department?: string}) => {
-  const response = await employeeAxiosInstance.patch(`/meeting/${meetingId}`,{meeting :updatedMeeting,filter});
+export const editMeetingService = async (meetingId: string, updatedMeeting: Partial<EditMeeting>, filter: { role?: string, department?: string }) => {
+  const response = await employeeAxiosInstance.patch(`/meeting/${meetingId}`, { meeting: updatedMeeting, filter });
+  return response.data;
+}
+
+export const addFaqService = async (data: {
+  topic: string;
+  description: string;
+  questions: {
+    question: string;
+    answer: string;
+  }[]
+}) => {
+  const response = await employeeAxiosInstance.post("/faq", data);
+  return response.data;
+}
+export const editFaqService = async (faqId: string, updatedData: Partial<{
+  topic: string;
+  description: string;
+  questions: {
+    question: string;
+    answer: string;
+  }[]
+}>) => {
+  const response = await employeeAxiosInstance.patch(`/faq/${faqId}`, { updatedData });
+  return response.data;
+}
+
+export const deleteFaqService = async (faqId: string) => {
+  const response = await employeeAxiosInstance.delete(`/faq/${faqId}`);
+  return response.data;
+}
+export const getFaqService = async (searchQuery?: string) => {
+  const response = await employeeAxiosInstance.get(`/faq?search=${searchQuery}`);
+  return response.data;
+}
+
+export const getEmployeesForChatService = async () => {
+  const response = await employeeAxiosInstance.get("/employees");
+  return response.data;
+}
+
+export const getPrivateMessagesService = async (user1 : string , user2 : string) => {
+  const response = await employeeAxiosInstance.get(`/messages?user1=${user1}&user2=${user2}`);
   return response.data;
 }

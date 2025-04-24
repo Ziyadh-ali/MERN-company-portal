@@ -49,17 +49,17 @@ export class AdminRoute {
         (req: Request, res: Response) => adminUserManagement.getUsers(req, res)
       )
       .get(
-        "/users/:userId",
+        "/users/:employeeId",
         verifyAuth("admin"),
         (req: Request, res: Response) => adminUserManagement.getUserDetails(req, res)
       )
       .patch(
-        "/users/:userId",
+        "/users/:employeeId",
         verifyAuth("admin"),
         (req: Request, res: Response) => adminUserManagement.updateprofile(req, res)
       )
       .delete(
-        "/users/:userId",
+        "/users/:employeeId",
         verifyAuth("admin"),
         (req: Request, res: Response) => adminUserManagement.deleteUser(req, res)
       );

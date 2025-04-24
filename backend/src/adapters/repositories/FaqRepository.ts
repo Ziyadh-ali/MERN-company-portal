@@ -19,7 +19,7 @@ export class FaqRepository implements IFaqRepository {
 
         const faqs = await FaqModel.find({
             $or: [
-                { title: regex },
+                { topic: regex },
                 { description: regex },
                 { "questions.question": regex },
                 { "questions.answer": regex },

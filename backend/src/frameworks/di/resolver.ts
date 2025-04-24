@@ -14,6 +14,9 @@ import { ForgotPasswordController } from "../../adapters/controllers/employee/Fo
 import { ResetPasswordController } from "../../adapters/controllers/employee/ResetPasswordController";
 import { AttendanceController } from "../../adapters/controllers/AttendanceController";
 import { MeetingController } from "../../adapters/controllers/MeetingController";
+import { FaqController } from "../../adapters/controllers/FaqController";
+import { SocketManager } from "../../shared/socket/socketManager";
+import { MessageController } from "../../adapters/controllers/MessageController";
 
 DependencyInjection.registerAll();
 
@@ -44,3 +47,9 @@ export const resetPasswordController = container.resolve(ResetPasswordController
 export const attendanceController = container.resolve(AttendanceController);
 
 export const meetingController = container.resolve(MeetingController);
+
+export const faqController = container.resolve(FaqController);
+
+export const socketManager = container.resolve(SocketManager);
+
+export const messageController = container.resolve(MessageController);

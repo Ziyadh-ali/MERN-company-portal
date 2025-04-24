@@ -87,7 +87,7 @@ export class LeaveBalanceRepository implements ILeaveBalanceRepository {
     async getLeaveBalance(employeeId: string, leaveTypeId: string): Promise<{availableDays : number , totalDays : number} | null> {
         const leaveBalance = await LeaveBalanceModel.findOne(
             { employeeId, "leaveBalances.leaveTypeId": leaveTypeId },
-            { "leaveBalances.$": 1 } // Project only the matching leaveTypeId
+            { "leaveBalances.$": 1 }
         );
 
         if (!leaveBalance || leaveBalance.leaveBalances.length === 0) {

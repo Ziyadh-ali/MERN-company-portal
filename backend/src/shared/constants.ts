@@ -55,6 +55,9 @@ export const MESSAGES = {
     MEETING_COMPLETED: "Meeting completed successfully",
     MEETING_DELETED: "Meeting deleted successfully",
     MEETING_UPDATED: "Meeting updated successfully",
+    CREATE_SUCCESS: "FAQ created successfully.",
+    FAQ_UPDATE_SUCCESS: "FAQ updated successfully.",
+    DELETE_SUCCESS: "FAQ deleted successfully.",
   },
 
   ERROR: {
@@ -103,6 +106,16 @@ export const MESSAGES = {
       PARTICIPANTS_HAVE_MEETING: "One or more participants have a conflicting meeting.",
       INVALID_STATUS: "Status is invalid",
       MISSING_FIELDS: "No field to edit",
+    },
+
+    FAQ: {
+      CREATE_ERROR: "Failed to create FAQ.",
+      GET_ERROR: "Failed to retrieve FAQs.",
+      GET_BY_ID_ERROR: "Failed to retrieve FAQ by ID.",
+      NOT_FOUND: "FAQ not found.",
+      INVALID_ID: "Invalid FAQ ID.",
+      UPDATE_ERROR: "Failed to update FAQ.",
+      DELETE_ERROR: "Failed to delete FAQ.",
     },
 
     LEAVE: {

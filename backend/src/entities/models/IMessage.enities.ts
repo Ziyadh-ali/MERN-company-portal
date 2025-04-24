@@ -1,6 +1,7 @@
 import { ObjectId } from "mongoose";
 
 export interface IMessage {
+    _id ?: string | ObjectId;
     content: string;
     sender: ObjectId;
     roomId?: ObjectId;

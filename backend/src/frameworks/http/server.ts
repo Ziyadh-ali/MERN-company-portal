@@ -8,9 +8,9 @@ import cookieParser from "cookie-parser";
 import { config } from "../../shared/config";
 import { UserRoute } from "../routes/employeeRoutes";
 import { Server as IOServer } from "socket.io";
-import { SocketManager } from "../../shared/socket/socketManager";
+import { socketManager } from "../di/resolver";
 
-export class Server {
+export class  Server {
     private app: Application;
     private port: number;
     private server: http.Server;
@@ -26,7 +26,7 @@ export class Server {
                 methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
                 credentials: true,
             },
-        })
+        });
         this.setupMiddlewares();
         this.configureRoutes();
         this.setupSocket();
@@ -55,14 +55,13 @@ export class Server {
         this.app.use("/admin", adminRoute.getRouter());
     }
 
-    private setupSocket() : void {
-        const socketManager = new SocketManager(this.io);
-        socketManager.handleConnections();
+    private setupSocket(): void {
+        socketManager.initialize(this.io);
     }
 
     public start(): void {
-        this.app.listen(this.port, () => {
-            console.log(`Server running on http://localhost:${this.port}`)
+        this.server.listen(this.port, () => {
+            console.log(`Server running on http://localhost:${this.port}`);
         })
     }
 

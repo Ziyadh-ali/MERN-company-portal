@@ -11,7 +11,7 @@ export class EmployeeRepository implements IEmployeeRepository {
 
     async find(filter: any, skip: number, limit: number): Promise<{ employees: Employee[] | []; total: number; active: number; inactive: number }> {
 
-        const query: any = {};
+        const query:  any= {};
 
         if (filter.role) query.role = filter.role;
         if (filter.status) query.status = filter.status;
@@ -35,16 +35,19 @@ export class EmployeeRepository implements IEmployeeRepository {
         return await EmployeeModel.findOne({ email });
     }
 
-    async findByIdAndDelete(id: any): Promise<void> {
+    async findByIdAndDelete(id: string): Promise<void> {
         await EmployeeModel.findByIdAndDelete(id);
     }
 
-    async updateEmployeeById(id: any, data: Partial<Employee>): Promise<Employee | null> {
+    async updateEmployeeById(id: string, data: Partial<Employee>): Promise<Employee | null> {
         return await EmployeeModel.findByIdAndUpdate(id, data);
     }
 
     async findById(id: string): Promise<Employee | null> {
-        return await EmployeeModel.findById(id);
+        return await EmployeeModel.findById(id).populate({
+            path : "manager",
+            select : "fullName"
+        });
     }
 
     async findManagers(): Promise<Employee[] | []> {
@@ -62,4 +65,8 @@ export class EmployeeRepository implements IEmployeeRepository {
             .map((emp) => emp._id?.toString())
             .filter((id): id is string => Boolean(id));
     };
+
+    async getEmployeesForChat(): Promise<Partial<Employee[]>> {
+        return await EmployeeModel.find({status : "active"} , "_id fullName profilePic role");
+    }
 }

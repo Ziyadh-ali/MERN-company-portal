@@ -24,7 +24,10 @@ export interface User {
     phone?: number;
     address?: string;
     joinedAt?: Date;
-    manager?: string;
+    manager?: {
+        _id : string;
+        fullName : string;
+    };
     profilePic?: string;
     createdAt?: Date;
     updatedAt?: Date;
@@ -196,7 +199,7 @@ const EmployeeProfilePage = () => {
                                         Reports to:
                                     </span>
                                     <span className="text-sm text-gray-600">
-                                        {user?.manager || "Not assigned"}
+                                        {user?.manager?.fullName || "Not assigned"}
                                     </span>
                                 </div>
                             </CardContent>

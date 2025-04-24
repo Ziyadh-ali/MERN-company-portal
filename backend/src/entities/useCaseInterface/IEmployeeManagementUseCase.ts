@@ -18,4 +18,6 @@ export interface IEmployeeManagementUseCase {
     deleteEmployee(employeeId : string) : Promise<void>;
 
     getManagers() : Promise<Employee[]>;
+
+    getEmployeesForChat () : Promise<Partial<Employee[]>>;
 }

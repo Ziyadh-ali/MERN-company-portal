@@ -7,9 +7,9 @@ export interface IEmployeeRepository {
         skip : number,
         limit : number,
     ) : Promise<{ employees : Employee[] | []; total : number , active : number; inactive : number}>;
-    findByIdAndDelete(id : any) : Promise<void>;
+    findByIdAndDelete(id : string) : Promise<void>;
     updateEmployeeById(
-        id : any,
+        id : string,
         data : Partial<Employee>,
     ) : Promise<Employee | null>;
     findById(id : string) : Promise<Employee | null>;
@@ -18,4 +18,5 @@ export interface IEmployeeRepository {
         role ?: string , 
         department ?: string,
     }) : Promise <string[]>;
+    getEmployeesForChat() : Promise<Partial<Employee[]>>;
 }

@@ -4,7 +4,7 @@ export interface IFaqs {
     questions: {
         question: string;
         answer: string;
-        createdAt: Date;
+        createdAt?: Date;
     }[];
-    createdAt: Date;
+    createdAt?: Date;
 }
