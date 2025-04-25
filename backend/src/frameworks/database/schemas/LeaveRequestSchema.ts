@@ -10,6 +10,6 @@ export const LeaveRequestSchema = new Schema<ILeaveRequest>(
         reason: { type: String },
         duration : {type : String},
         status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
-        assignedManager: { type: Schema.Types.ObjectId, ref: "User" },
+        assignedManager: { type: Schema.Types.ObjectId, ref: "Employee" },
     }
 );

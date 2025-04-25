@@ -1,114 +1,70 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
+  DialogFooter,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
 
-interface DeleteItem {
-  id: string;
-  name?: string;
+interface ConfirmModalOptions {
+  title: string;
+  message: string;
+  onConfirm: () => void;
+  onCancel?: () => void;
 }
 
-interface ConfirmDeleteModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  item: DeleteItem | null;
-  onConfirm: (id: string) => Promise<void>;
-}
+export const useConfirmModal = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [options, setOptions] = useState<ConfirmModalOptions | null>(null);
 
-// eslint-disable-next-line react-refresh/only-export-components
-const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
-  open,
-  onOpenChange,
-  item,
-  onConfirm,
-}) => {
-  const [isDeleting, setIsDeleting] = useState(false);
+  const confirm = useCallback((options: ConfirmModalOptions) => {
+    setOptions(options);
+    setIsOpen(true);
+  }, []);
 
-  const handleConfirm = async () => {
-    if (!item) return;
-    setIsDeleting(true);
-    try {
-      await onConfirm(item.id);
-      onOpenChange(false);
-    } catch (error) {
-      console.error("Failed to delete item:", error);
-    } finally {
-      setIsDeleting(false);
+  const handleConfirm = () => {
+    if (options?.onConfirm) {
+      options.onConfirm();
     }
+    setIsOpen(false);
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="rounded-xl max-w-md max-h-[80vh] overflow-y-auto
-         scrollbar-hidden hover:scrollbar-thumb-black-400 scrollbar-thumb-rounded-full"
-      >
+  const handleCancel = () => {
+    if (options?.onCancel) {
+      options.onCancel();
+    }
+    setIsOpen(false);
+  };
+
+  const ConfirmModalComponent = () => (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold text-gray-800">
-            Confirm Deletion
-          </DialogTitle>
-          <DialogDescription className="text-sm text-gray-600">
-            Are you sure you want to delete{" "}
-            {item?.name ? `"${item.name}"` : "this item"}? This action cannot be undone.
-          </DialogDescription>
+          <DialogTitle>{options?.title}</DialogTitle>
         </DialogHeader>
-        <div className="flex justify-end space-x-2 mt-4">
+        <div className="py-4">
+          <p className="text-gray-600">{options?.message}</p>
+        </div>
+        <DialogFooter>
           <Button
             variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isDeleting}
+            onClick={handleCancel}
+            className="text-gray-600 border-gray-300 hover:bg-gray-50"
           >
             Cancel
           </Button>
           <Button
-            className="bg-red-600 text-white"
             onClick={handleConfirm}
-            disabled={isDeleting}
+            className="bg-red-600 text-white hover:bg-red-700"
           >
-            {isDeleting ? "Deleting..." : "Delete"}
+            Confirm
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-};
 
-export const useConfirmDeleteModal = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<DeleteItem | null>(null);
-
-  const confirmDelete = (item: DeleteItem) => {
-    setItemToDelete(item);
-    setIsOpen(true);
-  };
-
-  // const handleConfirm = async (id: string) => {
-  //   throw new Error("handleConfirm must be provided by the consumer");
-  // };
-
-  const ConfirmDeleteModalComponent = ({
-    onConfirm,
-  }: {
-    onConfirm: (id: string) => Promise<void>;
-  }) => (
-    <ConfirmDeleteModal
-      open={isOpen}
-      onOpenChange={(open) => {
-        setIsOpen(open);
-        if (!open) setItemToDelete(null);
-      }}
-      item={itemToDelete}
-      onConfirm={onConfirm}
-    />
-  );
-
-  return {
-    confirmDelete,
-    ConfirmDeleteModal: ConfirmDeleteModalComponent,
-  };
+  return { confirm, ConfirmModalComponent };
 };

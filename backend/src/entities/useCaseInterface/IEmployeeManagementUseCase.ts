@@ -20,4 +20,5 @@ export interface IEmployeeManagementUseCase {
     getManagers() : Promise<Employee[]>;
 
     getEmployeesForChat () : Promise<Partial<Employee[]>>;
+    getDevelopers () : Promise<Employee[]>;
 }

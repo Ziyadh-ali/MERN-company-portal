@@ -33,7 +33,8 @@ export class LeaveRequestController {
             const user = await this.employeeProfileUseCase.getEmployeeDetails(data?.employeeId);
             const newData = {
                 ...data,
-                assignedManager: user?.manager || "defaultManager",
+                assignedManager: user?.manager,
+                employeeRole: user?.role,
             }
             const leaveRequest = await this.leaveRequestUseCase.createLeaveRequest(newData);
 
@@ -75,36 +76,34 @@ export class LeaveRequestController {
     async updateLeaveRequestStatus(req: Request, res: Response): Promise<void> {
         try {
             const { leaveRequestId } = req.params;
-            const { status } = req.body;
-            const { userId } = req.body;
-            const { rejectionReason } = req.body;
-
-            if (status === "Rejected" && !rejectionReason) {
-                res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
-                    success: false,
-                    message: MESSAGES.ERROR.LEAVE.NO_REJECTION
-                });
-            }
+            const { status, userId } = req.body;
 
             if (!["Approved", "Rejected"].includes(status)) {
                 res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message: MESSAGES.ERROR.LEAVE.INVALID_STATUS,
                 });
+                return
             }
 
-            const updated = await this.leaveRequestUseCase.updateLeaveRequestStatus(leaveRequestId, status, rejectionReason ? rejectionReason : null);
+            const updated = await this.leaveRequestUseCase.updateLeaveRequestStatus(
+                leaveRequestId,
+                status,
+            );
+
             if (!updated) {
                 res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message: MESSAGES.ERROR.LEAVE.UPDATE_FAILED
                 });
+                return
             }
 
             res.status(HTTP_STATUS_CODES.OK).json({
                 success: true,
                 message: MESSAGES.SUCCESS.OPERATION_SUCCESSFUL
             });
+            return
         } catch (error) {
             console.error(error);
             res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
@@ -113,6 +112,7 @@ export class LeaveRequestController {
             });
         }
     }
+
 
     async editLeaveRequest(req: Request, res: Response): Promise<void> {
         try {

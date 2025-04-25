@@ -156,4 +156,18 @@ export class AdminUserManagement {
             });
         }
     }
+
+    async getDevelopers (req : Request , res : Response) : Promise<void> {
+        try {
+            const developers = await this.employeeManagementUseCase.getDevelopers();
+            res.status(HTTP_STATUS_CODES.OK).json({
+                developers
+            });
+        } catch (error) {
+            console.log(error)
+            res.status(HTTP_STATUS_CODES.NOT_FOUND).json({
+                message: (error instanceof Error) ? error.message : "error getting Develoeprs",
+            });
+        }
+    }
 }

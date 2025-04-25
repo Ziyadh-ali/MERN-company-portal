@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
 import { Input } from "../../../components/ui/input";
 import AdminHeader from "../../../components/adminComponents/AdminHeader";
@@ -11,7 +10,8 @@ import { addUser, deleteUser, getUsers } from "../../../services/admin/adminUser
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useConfirmDeleteModal } from "../../../components/useConfirm";
+import ShadTable from "../../../components/TableComponent";
+import { useConfirmModal } from "../../../components/useConfirm";
 
 interface EmployeeFilter {
   role?: string;
@@ -20,7 +20,7 @@ interface EmployeeFilter {
   [key: string]: string | undefined;
 }
 
-export interface User {
+export interface Employee {
   _id: string;
   fullName: string;
   email: string;
@@ -40,8 +40,8 @@ export interface User {
 function UserManagement() {
   const location = useLocation()
   const navigate = useNavigate();
-  const [users, setUsers] = useState<User[]>([]);
-  const { confirmDelete, ConfirmDeleteModal } = useConfirmDeleteModal();
+  const [users, setUsers] = useState<Employee[]>([]);
+  const {confirm , ConfirmModalComponent} = useConfirmModal()
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(2);
   const [total, setTotal] = useState<number>(0);
@@ -79,8 +79,8 @@ function UserManagement() {
 
   useEffect(() => {
     fetchUsers();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize, filter,location ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, filter, location]);
 
   //TODO  Function for handling adding user- ------------------------------------------------------------------------------------
 
@@ -112,7 +112,20 @@ function UserManagement() {
 
 
   const handleDelete = (userId: string) => {
-    confirmDelete({ id: userId, name: "User" });
+    confirm({
+      title : "Delete Employee?",
+      message : "Are you sure you want to delete this Employee?",
+      onConfirm : async () => {
+        try {
+          const response = await deleteUser(userId);
+          enqueueSnackbar(response.message, { variant: "success" });
+          navigate("/admin/users")
+        } catch (error) {
+          console.log(error)
+          enqueueSnackbar("Failed to delete user.", { variant: "error" });
+        }
+      }
+    });
   };
 
 
@@ -130,6 +143,42 @@ function UserManagement() {
     }));
     setPage(1);
   };
+
+  const employeeColumns = [
+    {
+      header: "Name",
+      accessor: (row: Employee) => row.fullName,
+    },
+    {
+      header: "Role",
+      accessor: (row: Employee) => row.role,
+    },
+    {
+      header: "Status",
+      accessor: (row: Employee) => (
+        <span
+          className={`${row.status === "active"
+            ? "text-green-600 bg-green-100"
+            : "text-red-600 bg-red-100"
+            } px-2 py-1 rounded-full text-xs`}
+        >
+          {row.status}
+        </span>
+      )
+    },
+    {
+      header: "Email",
+      accessor: (row: Employee) => row.email,
+    },
+    {
+      header: "Actions",
+      accessor: (row: Employee) =>
+        <div className="flex space-x-2">
+          <button onClick={() => navigate(`/admin/users/${row._id}`)} className="text-blue-600 hover:underline cursor-pointer">👁️</button>
+          <button onClick={() => handleDelete(row._id)} className="text-red-600 hover:underline cursor-pointer">🗑️</button>  
+        </div>,
+    },
+  ];
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -211,50 +260,12 @@ function UserManagement() {
               <AddUserModal onAddUser={handleAddUser} />
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left text-gray-700">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="px-4 py-2">Name</th>
-                    <th className="px-4 py-2">Role</th>
-                    <th className="px-4 py-2">Status</th>
-                    <th className="px-4 py-2">Email</th>
-                    <th className="px-4 py-2">Last Login</th>
-                    <th className="px-4 py-2">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((user) => (
-                    <tr key={user._id} className="border-b">
-                      <td className="px-4 py-2 flex items-center space-x-2">
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={user.profilePic} alt={user.fullName} />
-                          <AvatarFallback>{user.fullName[0]}</AvatarFallback>
-                        </Avatar>
-                        <span>{user.fullName}</span>
-                      </td>
-                      <td className="px-4 py-2">{user.role}</td>
-                      <td className="px-4 py-2">
-                        <span
-                          className={`${user.status === "active"
-                            ? "text-green-600 bg-green-100"
-                            : "text-red-600 bg-red-100"
-                            } px-2 py-1 rounded-full text-xs`}
-                        >
-                          {user.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2">{user.email}</td>
-                      <td className="px-4 py-2"></td>
-                      <td className="px-4 py-2">
-                        <div className="flex space-x-2">
-                          <button onClick={() => navigate(`/admin/users/${user._id}`)} className="text-blue-600 hover:underline cursor-pointer">👁️</button>
-                          <button onClick={() => handleDelete(user._id)} className="text-red-600 hover:underline cursor-pointer">🗑️</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <ShadTable
+                columns={employeeColumns}
+                data={users}
+                keyExtractor={(row) => row._id}
+                emptyMessage="No employees"
+              />
             </div>
             <div className="flex justify-between items-center mt-4 text-sm text-gray-600">
               <span>
@@ -295,18 +306,7 @@ function UserManagement() {
           </CardContent>
         </Card>
       </div>
-      <ConfirmDeleteModal
-        onConfirm={async (id: string) => {
-          try {
-            const response = await deleteUser(id);
-            enqueueSnackbar(response.message, { variant: "success" });
-            navigate("/admin/users")
-          } catch (error) {
-            console.log(error)
-            enqueueSnackbar("Failed to delete user.", { variant: "error" });
-          }
-        }}
-      />
+      <ConfirmModalComponent />
     </div>
   );
 }

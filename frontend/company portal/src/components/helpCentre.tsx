@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import AdminSideBar from "./adminComponents/AdminSideBar";
 import AdminHeader from "./adminComponents/AdminHeader";
 import { RootState } from "../store/store";
-import { addFaqService, editFaqService, getFaqService } from "../services/user/userService";
+import { addFaqService, deleteFaqService, editFaqService, getFaqService } from "../services/user/userService";
 import EmployeeSidebar from "./employeeComponents/employeeSidebar";
 import { EmployeeHeader } from "./employeeComponents/employeeHeader";
 import { Input } from "./ui/input";
@@ -13,6 +13,10 @@ import { ViewFaqModal } from "../pages/employee/modals/ViewFaqModal";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
 import AddEditFaqModal from "../pages/employee/modals/AddFaqModal";
+import { useLocation, useNavigate } from "react-router-dom";
+import { enqueueSnackbar } from "notistack";
+import { AxiosError } from "axios";
+import { useConfirmModal } from "./useConfirm";
 
 // Interface for FAQ category
 interface FAQCategory {
@@ -30,8 +34,9 @@ interface HelpCenterPageProps {
 }
 
 const HelpCenterPage: React.FC<HelpCenterPageProps> = ({ role }) => {
+    const location = useLocation();
+    const navigate = useNavigate();
     const { employee } = useSelector((state: RootState) => state.employee);
-    // const { admin } = useSelector((state: RootState) => state.admin);
     const [searchQuery, setSearchQuery] = useState("");
     const [openAddModal, setOpenAddModal] = useState(false);
     const [openEditModal, setOpenEditModal] = useState(false);
@@ -39,14 +44,15 @@ const HelpCenterPage: React.FC<HelpCenterPageProps> = ({ role }) => {
     const [selectedFaq, setSelectedFaq] = useState<FAQCategory | null>(null);
     const [editabeFaq, setEditabeFaq] = useState<FAQCategory>();
     const [openFaqModal, setOpenFaqModal] = useState(false);
+    const { confirm, ConfirmModalComponent } = useConfirmModal();
 
     useEffect(() => {
         const fetchFaqs = async () => {
-            const response = await getFaqService();
+            const response = await getFaqService(searchQuery);
             setFaqs(response.faqs);
-        }
+        };
         fetchFaqs();
-    }, []);
+    }, [searchQuery, location]);
 
     const truncateText = (text: string, maxLength: number) => {
         if (text.length <= maxLength) return text;
@@ -60,41 +66,55 @@ const HelpCenterPage: React.FC<HelpCenterPageProps> = ({ role }) => {
         questions: {
             question: string;
             answer: string;
-        }[]
+        }[];
     }) => {
         await addFaqService(data);
-    }
+        const response = await getFaqService(searchQuery);
+        setFaqs(response.faqs);
+        navigate(role === "employee" ? "/help-desk" : "/admin/help");
+    };
 
-    
-    const handleEditFaqModal = async (faqData: FAQCategory) => {
+    const handleEditFaqModal = (faqData: FAQCategory) => {
         setOpenEditModal(true);
         setEditabeFaq(faqData);
     };
+
     const handleEditFaq = async (id: string, faqData: FAQCategory) => {
         if (!id) return;
         await editFaqService(id, faqData);
+        const response = await getFaqService(searchQuery);
+        setFaqs(response.faqs);
+        navigate(role === "employee" ? "/help-desk" : "/admin/help");
     };
 
-    const handleViewFaqs = async (faq: FAQCategory) => {
+    const handleViewFaqs = (faq: FAQCategory) => {
         setSelectedFaq(faq);
         setOpenFaqModal(true);
-    }
+    };
+
+    const handleDeleteFaqs = async (faq: FAQCategory) => {
+        try {
+            const faqId = faq._id;
+            if (!faqId) return;
+            const response = await deleteFaqService(faqId);
+            navigate(role === "employee" ? "/help-desk" : "/admin/help");
+            enqueueSnackbar(response.message, { variant: "success" });
+            const updatedFaqs = await getFaqService(searchQuery);
+            setFaqs(updatedFaqs.faqs);
+        } catch (error) {
+            enqueueSnackbar(
+                error instanceof AxiosError ? error.response?.data.message : "Error in delete",
+                { variant: "error" }
+            );
+        }
+    };
 
     return (
         <div className="flex min-h-screen bg-gray-100">
-            {role === "admin" ?
-                <AdminSideBar /> :
-                <EmployeeSidebar />
-
-            }
+            {role === "admin" ? <AdminSideBar /> : <EmployeeSidebar />}
 
             <div className="flex-1 p-6">
-                {role === "admin" ?
-                    <AdminHeader /> :
-                    <EmployeeHeader heading="FAQ Questions" />
-
-                }
-
+                {role === "admin" ? <AdminHeader /> : <EmployeeHeader heading="FAQ Questions" />}
 
                 <div className="flex justify-between items-center mb-6">
                     <Input
@@ -105,19 +125,18 @@ const HelpCenterPage: React.FC<HelpCenterPageProps> = ({ role }) => {
                         className="w-1/2"
                     />
 
-                    {role === "employee" && employee?.role !== "developer" &&
-                        <div>
-                            <Button className="bg-blue-600 text-white" onClick={() => setOpenAddModal(true)}>Add Faq</Button>
-                            {/* <Button className="bg-blue-600 text-white" onClick={() => setOpenAddModal(true)}>Add Faq</Button> */}
-                        </div>
-                    }
-                    {role === "admin" &&
-                        <div>
-                            <Button className="bg-blue-600 text-white" onClick={() => setOpenAddModal(true)}>Add Faq</Button>
-                        </div>
-                    }
-                    <AddEditFaqModal mode="add" onSubmit={handleAddFaq} onClose={() => setOpenAddModal(false)} open={openAddModal} />
+                    {(role === "admin" || (role === "employee" && employee?.role !== "developer")) && (
+                        <Button className="bg-blue-600 text-white" onClick={() => setOpenAddModal(true)}>
+                            Add Faq
+                        </Button>
+                    )}
 
+                    <AddEditFaqModal
+                        mode="add"
+                        onSubmit={handleAddFaq}
+                        onClose={() => setOpenAddModal(false)}
+                        open={openAddModal}
+                    />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -141,7 +160,13 @@ const HelpCenterPage: React.FC<HelpCenterPageProps> = ({ role }) => {
                                                     ✏️ Edit
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem
-                                                    onClick={() => console.log("Delete clicked")}
+                                                    onClick={() =>
+                                                        confirm({
+                                                            title: "Delete FAQ?",
+                                                            message: "Are you sure you want to delete this FAQ?",
+                                                            onConfirm: () => handleDeleteFaqs(category),
+                                                        })
+                                                    }
                                                     className="text-red-600 focus:text-red-600"
                                                 >
                                                     🗑️ Delete
@@ -154,7 +179,7 @@ const HelpCenterPage: React.FC<HelpCenterPageProps> = ({ role }) => {
                             <CardContent>
                                 <p className="text-gray-600 mb-2">{category.description}</p>
                                 <div className="space-y-2 mb-4 max-h-40 overflow-y-auto">
-                                    {category.questions[0] && category.questions[0].question.length < 80 && (
+                                    {category.questions[0] && (
                                         <div className="mb-4">
                                             <p className="text-sm font-semibold text-gray-700">
                                                 {category.questions[0].question}
@@ -165,15 +190,30 @@ const HelpCenterPage: React.FC<HelpCenterPageProps> = ({ role }) => {
                                         </div>
                                     )}
                                 </div>
-                                <Button onClick={() => handleViewFaqs(category)} className="w-full bg-blue-600 text-white">View FAQs</Button>
+                                <Button onClick={() => handleViewFaqs(category)} className="w-full bg-blue-600 text-white">
+                                    View FAQs
+                                </Button>
                             </CardContent>
                         </Card>
                     ))}
                 </div>
             </div>
-            <ViewFaqModal faq={selectedFaq} onClose={() => setOpenFaqModal(false)} open={openFaqModal} />
-            <AddEditFaqModal mode="edit" initialData={editabeFaq} onSubmit={(data, id) => id ? handleEditFaq(id, data) : Promise.resolve()}
-                onClose={() => setOpenEditModal(false)} open={openEditModal} />
+
+            <ViewFaqModal
+                faq={selectedFaq}
+                onClose={() => setOpenFaqModal(false)}
+                open={openFaqModal}
+            />
+
+            <AddEditFaqModal
+                mode="edit"
+                initialData={editabeFaq}
+                onSubmit={(data, id) => (id ? handleEditFaq(id, data) : Promise.resolve())}
+                onClose={() => setOpenEditModal(false)}
+                open={openEditModal}
+            />
+
+            <ConfirmModalComponent />
         </div>
     );
 };

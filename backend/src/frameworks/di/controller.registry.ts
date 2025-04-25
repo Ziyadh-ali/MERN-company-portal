@@ -12,6 +12,7 @@ import { ResetPasswordController } from "../../adapters/controllers/employee/Res
 import { MeetingController } from "../../adapters/controllers/MeetingController";
 import { FaqController } from "../../adapters/controllers/FaqController";
 import { MessageController } from "../../adapters/controllers/MessageController";
+import { ProjectController } from "../../adapters/controllers/ProjectController";
 
 export class ControllerRegistry {
     static registerControllers() : void {
@@ -65,6 +66,10 @@ export class ControllerRegistry {
 
         container.register("MessageController",{
             useClass : MessageController
+        });
+
+        container.register("ProjectController",{
+            useClass : ProjectController
         });
     }
 }

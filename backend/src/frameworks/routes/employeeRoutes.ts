@@ -12,7 +12,8 @@ import {
     meetingController,
     faqController,
     adminUserManagement,
-    messageController
+    messageController,
+    projectController
 } from "../di/resolver";
 import { verifyAuth } from "../../adapters/middlewares/authMiddleware";
 import upload from "../../adapters/service/multer";
@@ -173,13 +174,51 @@ export class UserRoute {
                 verifyAuth("employee"),
                 (req: Request, res: Response) => faqController.updateFaq(req, res)
             )
-        
-            this.router
-                .get(
-                    "/messages",
-                    verifyAuth("employee"),
-                    (req: Request, res: Response) => messageController.getPrivateMessages(req, res)
-                )
+            .delete(
+                "/faq/:faqId",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => faqController.deleteFaq(req, res)
+            )
+
+        this.router
+            .get(
+                "/projects",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => projectController.findProjects(req, res)
+            )
+            .post(
+                "/projects",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => projectController.createProject(req, res)
+
+            )
+            .patch(
+                "/projects/:projectId",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => projectController.updateProject(req, res)
+            )
+            .delete(
+                "/projects/:projectId",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => projectController.deleteProject(req, res)
+            )
+            .get(
+                "/projects/:projectId",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => projectController.findById(req, res)
+            )
+        this.router
+            .get(
+                "/messages",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => messageController.getPrivateMessages(req, res)
+            )
+        this.router
+            .get(
+                "/developers",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => adminUserManagement.getDevelopers(req, res)
+            )
     }
 
     public getRoute(): express.Router {

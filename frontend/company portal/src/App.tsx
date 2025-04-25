@@ -21,6 +21,7 @@ import MeetingPage from "./pages/employee/employeePages/MeetingPage"
 import ChatPage from "./pages/employee/employeePages/ChatPage"
 import AdminHelpCenterPage from "./pages/admin/adminPages/AdminHelpCenter"
 import EmployeeHelpCenterPage from "./pages/employee/employeePages/HelpCentre"
+import ProjectManagementPage from "./pages/employee/employeePages/ProjectMangement"
 
 function App() {
 
@@ -55,6 +56,8 @@ function App() {
               <Route path="messages" element={<ChatPage/>} />
 
               <Route path="help-desk" element={<EmployeeHelpCenterPage/>} />
+
+              <Route path="project" element={<ProjectManagementPage/>} />
               
             </Route>
 

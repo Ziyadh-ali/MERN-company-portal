@@ -11,4 +11,5 @@ export interface LeaveRequest {
     status?: "Pending" | "Approved" | "Rejected";
     rejectionReason ?: string;
     assignedManager?: ObjectId | string;
+    userRole : string
 }

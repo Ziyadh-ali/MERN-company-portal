@@ -8,7 +8,7 @@ import AdminSideBar from "../../../components/adminComponents/AdminSideBar";
 import { AddLeaveTypeModal, UpdateLeaveTypeModal } from "../modals/LeaveTypeKModal";
 import { createLeaveTypeService, deleteLeaveTypeService, getLeaveTypesService, updateLeaveTypeService } from "../../../services/admin/adminUserM";
 import { useNavigate } from "react-router-dom";
-import { useConfirmDeleteModal } from "../../../components/useConfirm";
+import { useConfirmModal } from "../../../components/useConfirm";
 
 export interface LeaveType {
     _id?: string;
@@ -21,7 +21,7 @@ export interface LeaveType {
 const LeaveTypeManagementPage = () => {
     const navigate = useNavigate()
     const { enqueueSnackbar } = useSnackbar();
-    const {confirmDelete , ConfirmDeleteModal} = useConfirmDeleteModal();
+    const {confirm , ConfirmModalComponent} = useConfirmModal();
     const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -61,7 +61,21 @@ const LeaveTypeManagementPage = () => {
     };
 
     const handleDelete = async (id: string) => {
-        confirmDelete({id : id , name : "admin"});
+        confirm({
+            title: "Delete LeaveType ?",
+            message: "Are you sure you want to delete this LeaveType?",
+            onConfirm: async ()=>{ 
+                try {
+                    await deleteLeaveTypeService(id);
+                    setLeaveTypes(leaveTypes.filter((lt) => lt._id !== id));
+                    enqueueSnackbar("Leave type deleted successfully", { variant: "success" });
+                } catch (error) {
+                    console.error("Failed to delete leave type:", error);
+                    enqueueSnackbar("Failed to delete leave type", { variant: "error" });
+                    setLeaveTypes([]);
+                }
+            },
+        })
     };
 
     const openUpdateModal = (leaveType: LeaveType) => {
@@ -150,19 +164,7 @@ const LeaveTypeManagementPage = () => {
                     leaveType={selectedLeaveType}
                     onUpdate={handleUpdateLeaveType}
                 />
-                <ConfirmDeleteModal
-                    onConfirm={async (id)=>{
-                        try {
-                            await deleteLeaveTypeService(id);
-                            setLeaveTypes(leaveTypes.filter((lt) => lt._id !== id));
-                            enqueueSnackbar("Leave type deleted successfully", { variant: "success" });
-                        } catch (error) {
-                            console.error("Failed to delete leave type:", error);
-                            enqueueSnackbar("Failed to delete leave type", { variant: "error" });
-                            setLeaveTypes([]);
-                        }
-                    }} 
-                 />
+                <ConfirmModalComponent />
             </div>
         </div>
     );

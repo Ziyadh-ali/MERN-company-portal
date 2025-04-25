@@ -60,4 +60,8 @@ export class EmployeeManagementUseCase implements IEmployeeManagementUseCase {
     async getEmployeesForChat(): Promise<Partial<Employee[]>> {
         return await this.employeeRepository.getEmployeesForChat();
     }
+
+    async getDevelopers(): Promise<Employee[]> {
+        return await this.employeeRepository.getDevelopers();
+    }
 } 

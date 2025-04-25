@@ -189,7 +189,43 @@ export const getEmployeesForChatService = async () => {
   return response.data;
 }
 
+export const getDeveloperService = async () => {
+  const response = await employeeAxiosInstance.get("/developers");
+  return response.data;
+}
+
 export const getPrivateMessagesService = async (user1 : string , user2 : string) => {
   const response = await employeeAxiosInstance.get(`/messages?user1=${user1}&user2=${user2}`);
+  return response.data;
+}
+interface ProjectData {
+  name : string;
+  startDate : Date;
+  endDate : Date;
+  members : string[];
+}
+
+export const cretaeProjectService = async (data :ProjectData) => {
+  const response = await employeeAxiosInstance.post("/projects ", {data});
+  return response.data;
+}
+
+export const deleteProjectService = async (projectId :string) => {
+  const response = await employeeAxiosInstance.delete(`/projects/${projectId}`);
+  return response.data;
+}
+
+export const updateProjectService = async (projectId :string , updatedData : Partial<ProjectData>) => {
+  const response = await employeeAxiosInstance.patch(`/projects/${projectId}`,{updatedData});
+  return response.data;
+}
+
+export const getProjectService = async (projectId :string) => {
+  const response = await employeeAxiosInstance.get(`/projects/${projectId}`);
+  return response.data;
+}
+
+export const getProjectsService = async () => {
+  const response = await employeeAxiosInstance.get("/projects");
   return response.data;
 }

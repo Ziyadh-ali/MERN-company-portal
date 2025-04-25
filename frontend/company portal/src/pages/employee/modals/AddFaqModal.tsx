@@ -63,14 +63,15 @@ import {
       onSubmit: async (values, { resetForm }) => {
         try {
           if (mode === "edit" && initialData?._id) {
-            await onSubmit(values, initialData._id); // pass id for edit
+            await onSubmit(values, initialData._id);
           } else {
-            await onSubmit(values); // add mode
+            await onSubmit(values);
           }
   
           enqueueSnackbar(`FAQ ${mode === "edit" ? "updated" : "added"} successfully`, {
             variant: "success",
           });
+
   
           resetForm();
           setQuestionInput("");
@@ -105,7 +106,6 @@ import {
       updated.splice(index, 1);
       formik.setFieldValue("questions", updated);
     };
-  
     return (
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent

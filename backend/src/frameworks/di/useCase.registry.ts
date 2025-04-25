@@ -33,6 +33,8 @@ import { IMeetingUseCase } from "../../entities/useCaseInterface/IMeetingUseCase
 import { IFaqUseCase } from "../../entities/useCaseInterface/IFaqUseCase";
 import { IMessageUseCase } from "../../entities/useCaseInterface/IMessageUseCase";
 import { MessageUseCase } from "../../useCases/MessageUseCase";
+import { IProjectUseCase } from "../../entities/useCaseInterface/IProjectUseCase";
+import { ProjectUseCase } from "../../useCases/ProjectUseCase";
 
 
 export class UseCaseRegistry {
@@ -103,6 +105,10 @@ export class UseCaseRegistry {
 
         container.register<IMessageUseCase>("IMessageUseCase",{
             useClass : MessageUseCase,
+        });
+
+        container.register<IProjectUseCase>("IProjectUseCase",{
+            useClass : ProjectUseCase,
         });
     }
 }

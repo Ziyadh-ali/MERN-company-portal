@@ -8,6 +8,7 @@ import {
   HelpCircle,
   Users,
   ChevronRight,
+  Folder,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
@@ -83,6 +84,16 @@ const EmployeeSidebar = () => {
           >
             <HelpCircle className="w-5 h-5" />
             <span>Help Desk</span>
+          </NavLink>
+          <NavLink
+            to="/project"
+            className={({ isActive }) =>
+              `flex items-center space-x-2 p-2 rounded-md ${isActive ? "bg-blue-100 text-blue-600" : "text-gray-600 hover:bg-gray-100"
+              }`
+            }
+          >
+            <Folder  className="w-5 h-5" />
+            <span>Project </span>
           </NavLink>
           <NavLink
             to="/meeting"

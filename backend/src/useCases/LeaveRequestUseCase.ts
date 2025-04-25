@@ -18,6 +18,10 @@ export class LeaveRequestUseCase implements ILeaveRequestUseCase {
             throw new Error("Employee ID or Leave Type ID is missing");
         }
 
+        if(!leaveRequest.assignedManager && leaveRequest.userRole === "developer"){
+            throw new Error("No manager assigned");
+        }
+
         const leaveBalance = await this.leaveBalanceRepository.getLeaveBalance(leaveRequest?.employeeId.toString(), leaveRequest.leaveTypeId.toString());
         if (!leaveBalance) {
             throw new Error(MESSAGES.ERROR.LEAVE.NO_LEAVE_BALANCE);
@@ -51,7 +55,6 @@ export class LeaveRequestUseCase implements ILeaveRequestUseCase {
         if (requestedDays > leaveBalance.availableDays) {
             throw new Error(MESSAGES.ERROR.LEAVE.INSUFFICIENT_BALANCE)
         }
-
         return await this.leaveRequestRepository.createLeaveRequest(leaveRequest);
     }
 

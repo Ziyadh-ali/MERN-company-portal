@@ -28,8 +28,6 @@ export default function AdminSideBar() {
             { path: "/admin/leave/types", label: "Leave Type Management", icon: "📅" },
             { path: "/admin/payroll", label: "Payroll", icon: "💰" },
             { path: "/admin/attendance", label: "Attendance", icon: "⏰" },
-            { path: "/admin/overview", label: "Overview", icon: "📈" },
-            { path: "/admin/tasks", label: "Project/Task", icon: "📋" },
             { path: "/admin/reports", label: "Reports", icon: "📊" },
             { path: "/admin/help", label: "Help Centre", icon: "❓" },
           ].map(({ path, label, icon }) => (

@@ -82,15 +82,6 @@ export class SocketManager {
         socket.emit("message_deleted", { messageId });
       })
 
-      socket.on("read_message", async ({ messageId, userId }) => {
-        await this.messageRepo.markAsRead(messageId, userId);
-        this.io.emit("message_read", { messageId, userId });
-      });
-
-      socket.on("delivered_message", async ({ messageId, userId }) => {
-        await this.messageRepo.markAsDelivered(messageId, userId);
-      });
-
       socket.on("disconnect", () => {
         for (const [userId, socketId] of this.userSocketMap.entries()) {
           if (socketId === socket.id) {

@@ -61,7 +61,7 @@ const ChatPage = () => {
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const currentUser: CurrentUser = JSON.parse(localStorage.getItem("employeeSession") || "{}");
 
-    const { messages, setMessages, sendMessage, joinRoom , deleteMessage } = useChat();
+    const { messages, setMessages, sendMessage, joinRoom, deleteMessage } = useChat();
 
     useEffect(() => {
         async function fetchEmployees() {
@@ -136,7 +136,7 @@ const ChatPage = () => {
 
     const handleDeleteMessage = (messageId: string) => {
 
-        deleteMessage(messageId , selectedUser?._id ? selectedUser?._id : "")
+        deleteMessage(messageId, selectedUser?._id ? selectedUser?._id : "")
 
         setMessages(messages.filter((msg) => msg._id !== messageId));
     };
@@ -211,17 +211,25 @@ const ChatPage = () => {
                                         <div className="flex-1 overflow-hidden">
                                             <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
                                                 <div className="space-y-4">
-                                                    {messages
-                                                        .filter(
+                                                    {(() => {
+                                                        const filteredMessages = messages.filter(
                                                             (msg) =>
                                                                 (msg.sender === selectedUser._id && msg.recipient === currentUser._id) ||
                                                                 (msg.recipient === selectedUser._id && msg.sender === currentUser._id)
-                                                        )
-                                                        .map((message) => (
+                                                        );
+
+                                                        if (filteredMessages.length === 0) {
+                                                            return (
+                                                                <div className="text-center text-gray-400 text-sm mt-10">
+                                                                    No messages yet.
+                                                                </div>
+                                                            );
+                                                        }
+
+                                                        return filteredMessages.map((message) => (
                                                             <div
                                                                 key={message._id}
-                                                                className={`flex relative ${message.sender === currentUser._id ? "justify-end" : "justify-start"
-                                                                    }`}
+                                                                className={`flex relative ${message.sender === currentUser._id ? "justify-end" : "justify-start"}`}
                                                             >
                                                                 <div
                                                                     className={`p-3 rounded-lg shadow-sm max-w-[80%] flex items-start gap-2 ${message.sender === currentUser._id
@@ -232,9 +240,7 @@ const ChatPage = () => {
                                                                     <div className="flex-1">
                                                                         <p className="break-words text-sm">{message.content}</p>
                                                                         <span
-                                                                            className={`text-xs block mt-1 ${message.sender === currentUser._id
-                                                                                    ? "text-blue-200"
-                                                                                    : "text-gray-500"
+                                                                            className={`text-xs block mt-1 ${message.sender === currentUser._id ? "text-blue-200" : "text-gray-500"
                                                                                 }`}
                                                                         >
                                                                             {new Date(message.createdAt ?? "").toLocaleTimeString([], {
@@ -269,7 +275,8 @@ const ChatPage = () => {
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                        ))}
+                                                        ));
+                                                    })()}
                                                     <div ref={messagesEndRef} />
                                                 </div>
                                             </ScrollArea>
