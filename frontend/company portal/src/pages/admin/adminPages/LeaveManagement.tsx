@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
 import { CheckCircle, XCircle } from "lucide-react";
-import AdminSideBar from "../../../components/adminComponents/AdminSideBar";
 import { useSnackbar } from "notistack";
 import { getAllLeaveRequestsService, updateLeaveRequestStatusService } from "../../../services/admin/adminUserM";
 import ShadTable from "../../../components/TableComponent";
 import { useConfirmModal } from "../../../components/useConfirm";
+import Sidebar from "../../../components/SidebarComponent";
 
 // Define LeaveRequest interface
 export interface LeaveRequest {
@@ -136,12 +136,23 @@ const LeaveManagementPage = () => {
                     <Button variant="outline" size="sm" disabled>{row.status}</Button>
                 ),
         },
+        {
+            header: "Rejection Reason",
+            accessor: (row: LeaveRequest) =>
+                row.status === "Rejected" ? (
+                    <span className="text-sm text-red-600">
+                        {row.reason || "No reason provided"}
+                    </span>
+                ) : (
+                    "-"
+                ),
+        },
     ];
 
     return (
         <div className="flex min-h-screen bg-gray-100">
             {/* Sidebar */}
-            <AdminSideBar />
+            <Sidebar role="admin" />
 
             {/* Main Content */}
             <div className="flex-1 p-6">

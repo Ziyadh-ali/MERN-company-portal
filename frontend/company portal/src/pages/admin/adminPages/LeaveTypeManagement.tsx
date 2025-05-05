@@ -4,11 +4,12 @@ import { Button } from "../../../components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../components/ui/table";
 import { useSnackbar } from "notistack";
 import { Edit, Trash2 } from "lucide-react";
-import AdminSideBar from "../../../components/adminComponents/AdminSideBar";
 import { AddLeaveTypeModal, UpdateLeaveTypeModal } from "../modals/LeaveTypeKModal";
 import { createLeaveTypeService, deleteLeaveTypeService, getLeaveTypesService, updateLeaveTypeService } from "../../../services/admin/adminUserM";
 import { useNavigate } from "react-router-dom";
 import { useConfirmModal } from "../../../components/useConfirm";
+import Sidebar from "../../../components/SidebarComponent";
+import { Header } from "../../../components/HeaderComponent";
 
 export interface LeaveType {
     _id?: string;
@@ -86,22 +87,12 @@ const LeaveTypeManagementPage = () => {
     return (
         <div className="flex min-h-screen bg-gray-100">
             {/* Sidebar */}
-            <AdminSideBar />
+            <Sidebar role="admin" />
 
             {/* Main Content */}
             <div className="flex-1 p-6">
                 {/* Header */}
-                <div className="flex justify-between items-center mb-6">
-                    <div>
-                        <h1 className="text-2xl font-semibold text-gray-800">Leave Type Management</h1>
-                        <p className="text-sm text-gray-600">Manage all leave types</p>
-                    </div>
-                    <AddLeaveTypeModal
-                        open={isAddModalOpen}
-                        onOpenChange={setIsAddModalOpen}
-                        onAdd={handleAddLeaveType}
-                    />
-                </div>
+                <Header heading="Leave Type Management" role="admin"/>
 
                 {/* Leave Types Table */}
                 <Card>

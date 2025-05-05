@@ -6,4 +6,5 @@ export interface IProjectRepository {
     deleteProject(projectId : string) : Promise<void>;
     findById(projectId : string) : Promise<IProject | null>;
     findProjects () : Promise<IProject[] | []>;
+    getProjectsByUser(employeeId: string ): Promise<IProject[]>
 }

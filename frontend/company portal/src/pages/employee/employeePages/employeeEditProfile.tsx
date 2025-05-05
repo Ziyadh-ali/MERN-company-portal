@@ -9,7 +9,7 @@ import { getProfileDetails, updateProfileService } from "../../../services/user/
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import { ErrorBoundary } from 'react-error-boundary';
-import EmployeeSidebar from "../../../components/employeeComponents/employeeSidebar";
+import Sidebar from "../../../components/SidebarComponent";
 
 interface IUserModel {
   fullName: string;
@@ -102,7 +102,7 @@ const EditProfilePage = () => {
       }}
     >
       <div className="flex min-h-screen bg-gray-100">
-        <EmployeeSidebar />
+        <Sidebar role="employee" />
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="w-full max-w-lg bg-white shadow-md rounded-lg p-8">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Edit Profile</h2>

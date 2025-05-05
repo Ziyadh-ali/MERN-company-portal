@@ -10,4 +10,6 @@ export interface IMessageUseCase {
     }): Promise<IMessage>;
 
     getPrivateMessages(user1: string, user2: string): Promise<IMessage[]>;
+
+    getGroupMessages(roomId: string): Promise<IMessage[]>;
 }

@@ -7,9 +7,17 @@ export interface LeaveRequest {
     startDate: Date;
     endDate: Date;
     reason?: string;
-    duration ?: "full" | "morning" | "afternoon";
-    status?: "Pending" | "Approved" | "Rejected";
-    rejectionReason ?: string;
+    duration?: "full" | "morning" | "afternoon";
+    status?: "Pending" | "Approved" | "Rejected" | "Cancelled";
+    rejectionReason?: string;
     assignedManager?: ObjectId | string;
-    userRole : string
+    userRole: string
+}
+
+export interface LeaveRequestFilter {
+    status?: "Pending" | "Approved" | "Rejected";
+    userRole?: string;
+    startDate?: Date;
+    endDate?: Date;
+    search?: string;
 }

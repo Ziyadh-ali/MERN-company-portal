@@ -2,18 +2,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
 // import { Progress } from "@radix-ui/react-progress";
-import AdminSideBar from "../../../components/adminComponents/AdminSideBar";
-import AdminHeader from "../../../components/adminComponents/AdminHeader";
+import { Header } from "../../../components/HeaderComponent";
+import Sidebar from "../../../components/SidebarComponent";
 
 
 export default function AdminProfile() {
     return (
         <div className="flex min-h-screen bg-gray-100">
-      <AdminSideBar/>
+      <Sidebar role = "admin"/>
 
       {/* Main Content */}
       <div className="flex-1 p-6">
-        <AdminHeader/>
+        <Header heading="Profile" role="admin"/>
         <div className="bg-white shadow-md rounded-lg p-6 mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">

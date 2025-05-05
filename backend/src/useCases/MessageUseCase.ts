@@ -23,4 +23,8 @@ export class MessageUseCase implements IMessageUseCase {
   async getPrivateMessages(user1: string, user2: string): Promise<IMessage[]> {
     return await this.messageRepository.getPrivateMessages(user1 , user2);
   }
+
+  async getGroupMessages(roomId: string): Promise<IMessage[]> {
+    return await this.messageRepository.getMessagesByRoomId(roomId);
+  }
 };

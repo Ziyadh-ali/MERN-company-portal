@@ -16,27 +16,28 @@ export class AttendanceUseCase implements IAttendanceUseCase {
     async checkIn(employeeId: string): Promise<void> {
         const now = new Date();
         const { startOfDay, endOfDay } = getDayRange(now);
-
+    
         const day = now.getDay();
         if (day === 0 || day === 6) {
             throw new Error(MESSAGES.ERROR.ATTENDANCE.ON_WEEKEND);
         }
-
+    
         const leave = await this.leaveRequestRepository.getLeaveRequestForDate(employeeId, now);
-        if (leave && leave.duration === "full") {
+        
+        if (leave && leave.duration === "full" && leave.status === "Approved") {
             throw new Error(MESSAGES.ERROR.ATTENDANCE.ON_FULLDAY_LEAVE);
         }
-
-        const isExistingAttendance = await this.attendanceRepository.getAttendanceByDate(employeeId, now);
-        if (isExistingAttendance?.checkInTime) {
+    
+        const existingAttendance = await this.attendanceRepository.getAttendanceByDate(employeeId, now);
+        if (existingAttendance?.checkInTime) {
             throw new Error(MESSAGES.ERROR.ATTENDANCE.ALREADY_CHECKED);
         }
-
+    
         const attendance = await this.attendanceRepository.createAttendance(employeeId, now);
-
+    
         const checkInCutOff = new Date(now);
         checkInCutOff.setHours(10, 0, 0, 0);
-
+    
         if (now > checkInCutOff) {
             const isHalfDay = leave?.duration === "morning";
             if (!isHalfDay) {
@@ -44,10 +45,11 @@ export class AttendanceUseCase implements IAttendanceUseCase {
                 throw new Error(MESSAGES.ERROR.ATTENDANCE.CUT_OFF_TIME);
             }
         }
-
+    
         await this.attendanceRepository.markCheckIn(employeeId, now, startOfDay, endOfDay);
         await this.attendanceRepository.updateStatus(attendance._id?.toString() || "", "Pending");
     }
+    
 
     async checkOut(employeeId: string): Promise<void> {
         const now = new Date();
@@ -98,5 +100,26 @@ export class AttendanceUseCase implements IAttendanceUseCase {
         );
 
         return attendancesOfMonth;
+    }
+
+    async getAllAttendanceByDate(date: Date | null, page: number, pageSize: number): Promise<{ data: Attendance[]|[] , total: number }> {
+        console.log(pageSize)
+        return await this.attendanceRepository.getAllAttendanceByDate(date , page , pageSize);
+    }
+
+    async updateStatus(id: string, status: "Present" | "Absent" | "Weekend" | "Holiday" | "Pending"): Promise<Attendance | null> {
+        return await this.attendanceRepository.updateStatus(id , status);
+    }
+
+    async getAllPendingRegularizationRequests(): Promise<Attendance[]> {
+        return await this.attendanceRepository.getAllPendingRegularizationRequests();
+    }
+
+    async requestRegularization(attendanceId: string, requestedBy: string, reason: string): Promise<Attendance | null> {
+        return await this.attendanceRepository.requestRegularization(attendanceId , requestedBy,reason );
+    }
+
+    async respondToRegularizationRequest(attendanceId: string, action: "Approved" | "Rejected", adminRemarks?: string): Promise<Attendance | null> {
+        return await this.attendanceRepository.respondToRegularizationRequest(attendanceId,action,adminRemarks);
     }
 }

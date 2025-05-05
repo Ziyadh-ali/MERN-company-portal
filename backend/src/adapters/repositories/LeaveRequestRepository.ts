@@ -1,7 +1,8 @@
 import { inject, injectable } from "tsyringe";
-import { LeaveRequest } from "../../entities/models/LeaveRequest.entity";
+import { LeaveRequest, LeaveRequestFilter } from "../../entities/models/LeaveRequest.entity";
 import { ILeaveRequestRepository } from "../../entities/repositoryInterfaces/ILeaveRequest.repository";
 import { LeaveRequestModel } from "../../frameworks/database/models/LeaveRequestModel";
+import { EmployeeModel } from "../../frameworks/database/models/employee/EmployeeModel";
 
 @injectable()
 export class LeaveRequestRepository implements ILeaveRequestRepository {
@@ -38,7 +39,7 @@ export class LeaveRequestRepository implements ILeaveRequestRepository {
     }
 
     async cancelLeaveRequest(leaveRequestId: string): Promise<boolean> {
-        await LeaveRequestModel.deleteOne({ _id: leaveRequestId });
+        await LeaveRequestModel.findByIdAndUpdate(leaveRequestId , {status : "Cancelled"});
         return true;
     }
 
@@ -52,6 +53,51 @@ export class LeaveRequestRepository implements ILeaveRequestRepository {
                 path: "employeeId",
                 select: "fullName role",
             })
+    }
+
+    async getFilteredLeaveRequests(filters: LeaveRequestFilter): Promise<LeaveRequest[]> {
+        const query: any = {};
+
+        if (filters.status) query.status = filters.status;
+        if (filters.userRole) query.userRole = filters.userRole;
+
+        if (filters.startDate && filters.endDate) {
+            query.startDate = { $gte: filters.startDate };
+            query.endDate = { $lte: filters.endDate };
+        }
+
+        let leaveRequestsQuery = LeaveRequestModel.find(query)
+            .populate({
+                path: "leaveTypeId",
+                select: "name",
+            })
+            .populate({
+                path: "employeeId",
+                select: "fullName role",
+            });
+
+        // If searching by employee name
+        if (filters.search) {
+            // First, find matching employees by name
+            const matchingEmployees = await EmployeeModel.find({
+                fullName: { $regex: filters.search, $options: "i" },
+            }).select("_id");
+
+            const employeeIds = matchingEmployees.map((emp) => emp._id);
+            query.employeeId = { $in: employeeIds };
+
+            leaveRequestsQuery = LeaveRequestModel.find(query)
+                .populate({
+                    path: "leaveTypeId",
+                    select: "name",
+                })
+                .populate({
+                    path: "employeeId",
+                    select: "fullName role",
+                });
+        }
+
+        return await leaveRequestsQuery.exec();
     }
 
     async getLeaveRequestById(leaveRequestId: string): Promise<LeaveRequest | null> {

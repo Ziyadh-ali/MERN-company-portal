@@ -6,10 +6,10 @@ import {
 } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
 import { X } from "lucide-react";
-import { EmployeeHeader } from "../../../components/employeeComponents/employeeHeader";
 import { useEffect, useState } from "react";
 import {
   addLeaveRequestService,
+  cancelLeaveRequest,
   deleteLeaveRequest,
   getLeaveBalancesService,
   getLeaveRequestsService,
@@ -21,9 +21,11 @@ import AddLeaveRequestModal, {
 } from "../modals/AddLeaveRequestModal";
 import { enqueueSnackbar } from "notistack";
 import { AxiosError } from "axios";
-import EmployeeSidebar from "../../../components/employeeComponents/employeeSidebar";
 import ShadTable from "../../../components/TableComponent";
 import { useConfirmModal } from "../../../components/useConfirm";
+import Sidebar from "../../../components/SidebarComponent";
+import { Header } from "../../../components/HeaderComponent";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // User interface
 export interface User {
@@ -53,7 +55,8 @@ interface Leave {
   startDate: string;
   endDate: string;
   reason: string;
-  status: "Accepted" | "Rejected" | "Pending";
+  status: "Approved" | "Rejected" | "Pending" | "Cancelled";
+  rejectionReason: string;
 }
 
 interface LeaveTypes {
@@ -70,6 +73,8 @@ interface LeaveTypes {
 }
 
 const LeavePage = () => {
+  const naviagte = useNavigate();
+  const location = useLocation();
   const [leaveTypes, setLeaveTypes] = useState<LeaveTypes>();
   const { confirm, ConfirmModalComponent } = useConfirmModal();
   const [leaveHistory, setLeaveHistory] = useState<Leave[]>([]);
@@ -91,7 +96,7 @@ const LeavePage = () => {
     };
     fethchLeaveBalance();
     fetchLeaveHistory();
-  }, [employee?._id]);
+  }, [employee?._id, location]);
 
   const handleLeaveAdd = async (data: LeaveRequest) => {
     const newData = { ...data, employeeId: employee?._id };
@@ -104,16 +109,13 @@ const LeavePage = () => {
 
   const handleDelete = async (leaveRequestId: string) => {
     confirm({
-      title: "Delete FAQ?",
-      message: "Are you sure you want to delete this FAQ?",
+      title: "Delete Leave Request?",
+      message: "Are you sure you want to delete this Leave Request?",
       onConfirm: async () => {
         try {
           const response = await deleteLeaveRequest(leaveRequestId);
           enqueueSnackbar(response.message, { variant: "success" });
-          const newLeaveHistory = leaveHistory?.filter(
-            (lh) => lh._id !== leaveRequestId
-          );
-          setLeaveHistory(newLeaveHistory);
+          naviagte("/leave")
         } catch (error) {
           console.log(error);
           if (error instanceof AxiosError) {
@@ -125,6 +127,27 @@ const LeavePage = () => {
       }
     });
   };
+
+  const handleCancel = async (leaveRequestId: string) => {
+    confirm({
+      title: "Cancel Leave Request?",
+      message: "Are you sure you want to Cancel this Leave Request?",
+      onConfirm: async () => {
+        try {
+          const response = await cancelLeaveRequest(leaveRequestId);
+          enqueueSnackbar(response.message, { variant: "success" });
+          naviagte("/leave");
+        } catch (error) {
+          console.log(error);
+          if (error instanceof AxiosError) {
+            enqueueSnackbar(error?.response?.data.message, {
+              variant: "error",
+            });
+          }
+        }
+      }
+    });
+  }
 
   const formatDate = (date: string) => {
     const formattedDate = new Date(date);
@@ -157,11 +180,11 @@ const LeavePage = () => {
       header: "Status",
       accessor: (row: Leave) => (
         <span
-          className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${row.status === "Accepted"
-              ? "bg-green-100 text-green-600"
-              : row.status === "Rejected"
-                ? "bg-red-100 text-red-600"
-                : "bg-yellow-100 text-yellow-600"
+          className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${row.status === "Approved"
+            ? "bg-green-100 text-green-600"
+            : row.status === "Rejected"
+              ? "bg-red-100 text-red-600"
+              : "bg-yellow-100 text-yellow-600"
             }`}
         >
           {row.status}
@@ -170,28 +193,50 @@ const LeavePage = () => {
     },
     {
       header: "Actions",
-      accessor: (row: Leave) =>
-        row.status === "Pending" ? (
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-red-600 hover:text-red-800"
-            onClick={() => handleDelete(row._id)}
-          >
-            <X size={16} />
-          </Button>
-        ) : null,
-    },
+      accessor: (row: Leave) => {
+        if (row.status === "Pending") {
+          return (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-red-600 hover:text-red-800"
+              onClick={() => handleDelete(row._id)}
+            >
+              <X size={16} />
+            </Button>
+          );
+        } else if (row.status === "Approved") {
+          return (
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-yellow-600 hover:text-yellow-800"
+              onClick={() => handleCancel(row._id)}
+            >
+              Cancel
+            </Button>
+          );
+        } else if (row.status === "Rejected") {
+          return (
+            <span className="text-sm text-red-600">
+              Reason: {row.rejectionReason || "No reason provided"}
+            </span>
+          );
+        } else {
+          return null;
+        }
+      }
+    }
   ];
 
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
-      <EmployeeSidebar />
+      <Sidebar role="employee" />
 
       {/* Main Content */}
       <div className="flex-1 p-6">
-        <EmployeeHeader heading="Leave Page" />
+        <Header role="employee" heading="Leave Page" />
 
         {/* Leave Types Section */}
         <div className="mb-6">

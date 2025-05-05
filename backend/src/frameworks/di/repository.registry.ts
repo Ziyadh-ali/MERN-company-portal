@@ -19,6 +19,10 @@ import { IFaqRepository } from "../../entities/repositoryInterfaces/IFaq.resposi
 import { IMessageRepository } from "../../entities/repositoryInterfaces/IMessage.respository";
 import { IProjectRepository } from "../../entities/repositoryInterfaces/IProject.repository";
 import { ProjectRepository } from "../../adapters/repositories/ProjectRepository";
+import { IGroupRepository } from "../../entities/repositoryInterfaces/IGroup.repository";
+import { GroupRepository } from "../../adapters/repositories/GroupRepository";
+import { QuestionRepository } from "../../adapters/repositories/QuestionRepository";
+import { IQuestionRepository } from "../../entities/repositoryInterfaces/IQuestion.repository";
 
 
 export class RepositoryRegistry {
@@ -61,6 +65,13 @@ export class RepositoryRegistry {
 
         container.register<IProjectRepository>("IProjectRepository",{
             useClass : ProjectRepository,
+        });
+
+        container.register<IGroupRepository>("IGroupRepository",{
+            useClass : GroupRepository,
+        });
+        container.register<IQuestionRepository>("IQuestionRepository",{
+            useClass : QuestionRepository,
         });
     }
 }

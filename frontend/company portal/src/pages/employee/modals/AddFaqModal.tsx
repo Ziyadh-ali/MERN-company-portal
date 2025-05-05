@@ -14,9 +14,8 @@ import {
   import { AxiosError } from "axios";
   import { useEffect, useState } from "react";
   
-  // FAQ Data Type
   interface FaqData {
-    _id?: string; // used for edit
+    _id?: string;
     topic: string;
     description: string;
     questions: {
@@ -25,7 +24,6 @@ import {
     }[];
   }
   
-  // Props
   interface AddEditFaqModalProps {
     open: boolean;
     onClose: () => void;
@@ -44,7 +42,6 @@ import {
     const [questionInput, setQuestionInput] = useState("");
     const [answerInput, setAnswerInput] = useState("");
   
-    // Reset Q&A inputs when modal opens/closes
     useEffect(() => {
       if (!open) {
         setQuestionInput("");

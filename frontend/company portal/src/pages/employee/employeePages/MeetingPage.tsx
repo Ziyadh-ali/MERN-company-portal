@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
-import { EmployeeHeader } from "../../../components/employeeComponents/employeeHeader";
-import EmployeeSidebar from "../../../components/employeeComponents/employeeSidebar";
 import ScheduleMeetingModal from "../modals/ScheduleMeetingModal";
 import { changeMeetingStatusService, deleteMeetingService, editMeetingService, getMeetingsService, scheduleMeetingService } from "../../../services/user/userService";
 import { ErrorBoundary } from "react-error-boundary";
@@ -20,6 +18,8 @@ import { MoreHorizontal } from "lucide-react";
 import { enqueueSnackbar } from "notistack";
 import { AxiosError } from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import Sidebar from "../../../components/SidebarComponent";
+import { Header } from "../../../components/HeaderComponent";
 
 interface Meeting {
     _id: string;
@@ -191,9 +191,9 @@ const MeetingPage = () => {
             }}
         >
             <div className="flex min-h-screen bg-gray-100">
-                <EmployeeSidebar />
+                <Sidebar role="employee" />
                 <div className="flex-1 p-6">
-                    <EmployeeHeader heading="Meeting Details" />
+                    <Header role="employee" heading="Meeting Details" />
                     <div className="flex justify-between items-center mb-6">
                         <div />
                         <Button onClick={() => setOpenModal(true)} className="bg-blue-600 text-white">
@@ -230,19 +230,19 @@ const MeetingPage = () => {
                     open={openEditModal}
                     onClose={() => setOpenEditModal(false)}
                     meeting={meetingToEdit}
-                    onUpdate={async (updatedMeeting : {
+                    onUpdate={async (updatedMeeting: {
                         _id: string;
                         title: string;
                         description: string;
                         date: string;
                         startTime: string;
                         duration: number;
-                      },
-                      filter: {
-                        role?: string;
-                        department?: string;
-                      }) => {
-                        await editMeetingService(employee?._id ? employee?._id : "" , updatedMeeting,filter)
+                    },
+                        filter: {
+                            role?: string;
+                            department?: string;
+                        }) => {
+                        await editMeetingService(employee?._id ? employee?._id : "", updatedMeeting, filter)
                         setOpenEditModal(false);
                     }}
                 />

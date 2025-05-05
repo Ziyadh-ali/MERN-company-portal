@@ -24,4 +24,25 @@ export class ProjectRepository implements IProjectRepository {
     async findProjects(): Promise<IProject[] | []> {
         return ProjectModel.find().populate("members" , "fullName");
     }
+
+    async getProjectsByUser(employeeId: string ): Promise<IProject[]> {
+    
+          const projects = await ProjectModel.find({
+            $or: [
+              { projectManager: employeeId },
+              { members: employeeId },
+            ],
+          }).exec();
+    
+          return projects.map((project) => ({
+            _id: project._id,
+            projectManager: project.projectManager,
+            name: project.name,
+            startDate: project.startDate,
+            endDate: project.endDate,
+            members: project.members,
+            createdAt: project.createdAt,
+            updatedAt: project.updatedAt,
+          }));
+      }
 }

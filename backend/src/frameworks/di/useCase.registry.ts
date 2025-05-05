@@ -35,6 +35,11 @@ import { IMessageUseCase } from "../../entities/useCaseInterface/IMessageUseCase
 import { MessageUseCase } from "../../useCases/MessageUseCase";
 import { IProjectUseCase } from "../../entities/useCaseInterface/IProjectUseCase";
 import { ProjectUseCase } from "../../useCases/ProjectUseCase";
+import { IGroupUseCase } from "../../entities/useCaseInterface/IGroupUseCase";
+import { GroupUseCase } from "../../useCases/GroupUseCase";
+import { QuestionUseCase } from "../../useCases/QuestionUseCase";
+import { IQuestionUseCase } from "../../entities/useCaseInterface/IQuestionUseCase";
+import { SocketManager } from "../../shared/socket/socketManager";
 
 
 export class UseCaseRegistry {
@@ -109,6 +114,17 @@ export class UseCaseRegistry {
 
         container.register<IProjectUseCase>("IProjectUseCase",{
             useClass : ProjectUseCase,
+        });
+
+        container.register<IGroupUseCase>("IGroupUseCase",{
+            useClass : GroupUseCase,
+        });
+        container.register<IQuestionUseCase>("IQuestionUseCase",{
+            useClass : QuestionUseCase,
+        });
+
+        container.register<SocketManager>("SocketManager",{
+            useClass : SocketManager,
         });
     }
 }

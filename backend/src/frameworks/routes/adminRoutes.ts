@@ -4,6 +4,8 @@ import {
   refreshController,
   adminUserManagement,
   leaveRequestController,
+  attendanceController,
+  questionController,
 } from '../di/resolver';
 import { verifyAuth } from '../../adapters/middlewares/authMiddleware';
 import { leaveTypeController } from '../di/resolver';
@@ -100,13 +102,47 @@ export class AdminRoute {
       .get(
         "/leave/requests",
         verifyAuth("admin"),
-        (req: Request, res: Response) => leaveRequestController.getAllLeaveRequests(req , res)
+        (req: Request, res: Response) => leaveRequestController.getAllLeaveRequests(req, res)
       )
 
       .patch(
         "/leave/requests/:leaveRequestId",
         verifyAuth("admin"),
-        (req: Request, res: Response) => leaveRequestController.updateLeaveRequestStatus(req , res)
+        (req: Request, res: Response) => leaveRequestController.updateLeaveRequestStatus(req, res)
+      )
+
+    this.router
+      .get(
+        "/attendance",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => attendanceController.getAllAttendanceByDate(req, res)
+      )
+      .patch(
+        "/attendance/:attendanceId",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => attendanceController.updateAttendance(req, res)
+      )
+      .patch(
+        "/attendance/:attendanceId/regularize",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => attendanceController.respondToRegularizationRequest(req, res)
+      )
+
+    this.router
+      .get(
+        "/question",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => questionController.getAllQuestions(req, res),
+      )
+      .get(
+        "/question/unanswered",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => questionController.getUnansweredQuestions(req, res),
+      )
+      .patch(
+        "/question/:id",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => questionController.answerQuestion(req, res),
       )
   }
 

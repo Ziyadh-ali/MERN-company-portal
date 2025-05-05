@@ -2,7 +2,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { EmployeeHeader } from "../../../components/employeeComponents/employeeHeader";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
@@ -10,7 +9,8 @@ import { changePasswordService, getProfileDetails } from "../../../services/user
 import  { AxiosError } from "axios";
 import ChangePasswordModal from "../modals/ChangePasswordModal";
 import { enqueueSnackbar } from "notistack";
-import EmployeeSidebar from "../../../components/employeeComponents/employeeSidebar";
+import Sidebar from "../../../components/SidebarComponent";
+import { Header } from "../../../components/HeaderComponent";
 
 // User interface
 export interface User {
@@ -88,11 +88,11 @@ const EmployeeProfilePage = () => {
     return (
         <div className="flex min-h-screen bg-gray-100">
             {/* Sidebar */}
-            <EmployeeSidebar />
+            <Sidebar role="employee" />
 
             {/* Main Content */}
             <div className="flex-1 p-6">
-                <EmployeeHeader heading="Profile Page"/>
+                <Header role="employee" heading="Profile Page"/>
                 <div className="bg-white shadow-md rounded-lg p-6 mb-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">

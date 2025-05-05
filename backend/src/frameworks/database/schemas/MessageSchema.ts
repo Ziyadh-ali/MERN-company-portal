@@ -22,23 +22,23 @@ export const MessageSchema = new Schema<IMessageModel>(
             ref: "Employee",
             default: null,
         },
-        replyTo: {
-            type: Schema.Types.ObjectId,
-            ref: "Message",
-            default: null,
-        },
-        deliveredTo: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: "Employee",
-            },
-        ],
-        readBy: [
-            {
-                type: Schema.Types.ObjectId,
-                ref: "Employee",
-            },
-        ],
+        // replyTo: {
+        //     type: Schema.Types.ObjectId,
+        //     ref: "Message",
+        //     default: null,
+        // },
+        // deliveredTo: [
+        //     {
+        //         type: Schema.Types.ObjectId,
+        //         ref: "Employee",
+        //     },
+        // ],
+        // readBy: [
+        //     {
+        //         type: Schema.Types.ObjectId,
+        //         ref: "Employee",
+        //     },
+        // ],
     },
     {
         timestamps: { createdAt: true, updatedAt: false },

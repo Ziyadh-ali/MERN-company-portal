@@ -76,28 +76,27 @@ export class LeaveRequestController {
     async updateLeaveRequestStatus(req: Request, res: Response): Promise<void> {
         try {
             const { leaveRequestId } = req.params;
-            const { status, userId } = req.body;
+            const { status , reason } = req.body;
+
+            console.log(reason);
+            console.log(status);
 
             if (!["Approved", "Rejected"].includes(status)) {
                 res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
                     success: false,
                     message: MESSAGES.ERROR.LEAVE.INVALID_STATUS,
                 });
-                return
+                return;
+            }
+
+            if(status === "Rejected"){
+                await this.leaveRequestUseCase.setRejectionReason(leaveRequestId , reason);
             }
 
             const updated = await this.leaveRequestUseCase.updateLeaveRequestStatus(
                 leaveRequestId,
                 status,
             );
-
-            if (!updated) {
-                res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
-                    success: false,
-                    message: MESSAGES.ERROR.LEAVE.UPDATE_FAILED
-                });
-                return
-            }
 
             res.status(HTTP_STATUS_CODES.OK).json({
                 success: true,
@@ -114,31 +113,31 @@ export class LeaveRequestController {
     }
 
 
-    async editLeaveRequest(req: Request, res: Response): Promise<void> {
-        try {
-            const { leaveRequestId } = req.params;
-            const updates = req.body;
+    // async editLeaveRequest(req: Request, res: Response): Promise<void> {
+    //     try {
+    //         const { leaveRequestId } = req.params;
+    //         const updates = req.body;
 
-            const updated = await this.leaveRequestUseCase.editLeaveRequest(leaveRequestId, updates);
-            if (!updated) {
-                res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
-                    success: false,
-                    message: MESSAGES.ERROR.LEAVE.EDIT_FAILED
-                });
-            }
+    //         const updated = await this.leaveRequestUseCase.editLeaveRequest(leaveRequestId, updates);
+    //         if (!updated) {
+    //             res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+    //                 success: false,
+    //                 message: MESSAGES.ERROR.LEAVE.EDIT_FAILED
+    //             });
+    //         }
 
-            res.status(HTTP_STATUS_CODES.OK).json({
-                success: true,
-                message: MESSAGES.SUCCESS.OPERATION_SUCCESSFUL
-            });
-        } catch (error) {
-            console.error(error);
-            res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-                success: false,
-                message: MESSAGES.ERROR.GENERIC
-            });
-        }
-    }
+    //         res.status(HTTP_STATUS_CODES.OK).json({
+    //             success: true,
+    //             message: MESSAGES.SUCCESS.OPERATION_SUCCESSFUL
+    //         });
+    //     } catch (error) {
+    //         console.error(error);
+    //         res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+    //             success: false,
+    //             message: MESSAGES.ERROR.GENERIC
+    //         });
+    //     }
+    // }
 
     async cancelLeaveRequest(req: Request, res: Response): Promise<void> {
         try {
@@ -180,4 +179,24 @@ export class LeaveRequestController {
             });
         }
     }
+
+    // async setRegectionStatus(req: Request, res: Response): Promise<void> {
+    //     try {
+    //         const { leaveRequestId } = req.params;
+    //         const { reason } = req.body;
+
+    //         await this.leaveRequestUseCase.setRejectionReason(leaveRequestId, reason);
+
+    //         await this.leaveRequestUseCase.updateLeaveRequestStatus(leaveRequestId , "Rejected");
+
+    //         res.status(HTTP_STATUS_CODES.OK).json({
+    //             message : MESSAGES.SUCCESS.LEAVE_REQUEST_REJECTED,
+    //         })
+    //     } catch (error) {
+    //         res.status(HTTP_STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+    //             success: false,
+    //             message: MESSAGES.ERROR.GENERIC,
+    //         });
+    //     }
+    // }
 }

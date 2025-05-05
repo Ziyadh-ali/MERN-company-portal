@@ -2,6 +2,8 @@ import { inject, injectable } from "tsyringe";
 import { IMeetingRepository } from "../../entities/repositoryInterfaces/IMeeting.repository";
 import { IMeeting } from "../../entities/models/Meeting.entities";
 import { meetingModel } from "../../frameworks/database/models/MeetingModel";
+import { BaseRepository } from "./BaseRepository";
+import { Document } from "mongoose";
 
 @injectable()
 export class MeetingRepository implements IMeetingRepository {
@@ -34,15 +36,15 @@ export class MeetingRepository implements IMeetingRepository {
     }
 
     async getMeetingsByHost(hostId: string): Promise<IMeeting[]> {
-        return await meetingModel.find({createdBy : hostId});
+        return await meetingModel.find({ createdBy: hostId });
     }
 
-    async getMeetingsByEmployeeId(employeeId:  string | string): Promise<IMeeting[]> {
+    async getMeetingsByEmployeeId(employeeId: string | string): Promise<IMeeting[]> {
         return await meetingModel.find({
             $or: [
-              { participants: employeeId },
-              { createdBy: employeeId },
+                { participants: employeeId },
+                { createdBy: employeeId },
             ],
-          }).populate("createdBy");
+        }).populate("createdBy");
     }
 }

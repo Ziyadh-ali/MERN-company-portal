@@ -29,6 +29,11 @@ export const config = {
     email : {
         EMAIL_USER : process.env.EMAIL_USER,
         EMAIL_PASS : process.env.EMAIL_PASS,
+    },
+
+    calander : {
+        CALENDARIFIC_URL : process.env.CALENDARIFIC_URL,
+        CALENDARIFIC_API_KEY : process.env.CALENDARIFIC_API_KEY,
     }
 
 }

@@ -26,4 +26,20 @@ export class MessageController {
             });
         }
     }
+    async getGroupMessages(Req: Request, res: Response): Promise<void> {
+        try {
+            const { roomId } = Req.params;
+            if (roomId) {
+                const messages = await this.messageUseCase.getGroupMessages(roomId.toString());
+                res.status(HTTP_STATUS_CODES.OK).json({
+                    messages
+                })
+            }
+        } catch (error) {
+            console.log(error);
+            res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+                message: (error instanceof Error) ? error.message : "",
+            });
+        }
+    }
 }

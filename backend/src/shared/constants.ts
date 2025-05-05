@@ -61,6 +61,7 @@ export const MESSAGES = {
     PROJECT_CREATED: "Project created successfully.",
     PROJECT_DELETED: "Project deleted successfully.",
     PROJECT_UPDATED: "Project updated successfully.",
+    ATTENDANCDE_UPDATED: "Attendance updated successfully.",
 
   },
 

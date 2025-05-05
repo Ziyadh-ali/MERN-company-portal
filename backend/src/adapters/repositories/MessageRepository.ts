@@ -29,6 +29,7 @@ export class MessageRepository implements IMessageRepository {
                 { sender: user2, recipient: user1 },
             ],
         })
+            .populate("sender", "fullName email")
             .sort({ createdAt: 1 });
     }
 

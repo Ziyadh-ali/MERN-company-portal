@@ -6,8 +6,8 @@ export interface IMessage {
     sender: ObjectId;
     roomId?: ObjectId;
     recipient?: ObjectId;
-    replyTo?: ObjectId;
-    deliveredTo: ObjectId[];
-    readBy: ObjectId[];
+    // replyTo?: ObjectId;
+    // deliveredTo: ObjectId[];
+    // readBy: ObjectId[];
     createdAt: Date;
 }

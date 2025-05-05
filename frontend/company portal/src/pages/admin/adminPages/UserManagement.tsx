@@ -2,8 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui
 import { Button } from "../../../components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../components/ui/select";
 import { Input } from "../../../components/ui/input";
-import AdminHeader from "../../../components/adminComponents/AdminHeader";
-import AdminSideBar from "../../../components/adminComponents/AdminSideBar";
 import AddUserModal from "../modals/AddUserModal";
 import { enqueueSnackbar } from "notistack";
 import { addUser, deleteUser, getUsers } from "../../../services/admin/adminUserM";
@@ -12,6 +10,8 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ShadTable from "../../../components/TableComponent";
 import { useConfirmModal } from "../../../components/useConfirm";
+import Sidebar from "../../../components/SidebarComponent";
+import { Header } from "../../../components/HeaderComponent";
 
 interface EmployeeFilter {
   role?: string;
@@ -182,9 +182,9 @@ function UserManagement() {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <AdminSideBar />
+      <Sidebar role="admin" />
       <div className="flex-1 p-6">
-        <AdminHeader />
+        <Header heading="User management" role="admin" />
         <Card className="mb-6">
           <CardHeader className="flex justify-between items-center">
             <CardTitle className="text-lg font-semibold text-gray-800">

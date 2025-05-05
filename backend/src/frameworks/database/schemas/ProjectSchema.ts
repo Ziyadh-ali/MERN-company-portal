@@ -1,5 +1,4 @@
 import { Schema, Types } from "mongoose";
-import { IMessageModel } from "../models/MessageModel";
 import { IProjectModel } from "../models/ProjectModal";
 
 export const ProjectSchema = new Schema<IProjectModel>(

@@ -5,12 +5,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useFormik } from "formik";
 import { useSnackbar } from "notistack";
 import { useEffect, useState } from "react";
-import AdminSideBar from "../../../components/adminComponents/AdminSideBar";
 import { ErrorBoundary } from "react-error-boundary";
 
 // Assume these are the services for fetching and updating user data
 import { validationSchema } from "../../../utils/editValidation";
 import { getManagers, getUserDetails, updateUserService } from "../../../services/admin/adminUserM";
+import Sidebar from "../../../components/SidebarComponent";
 
 // User interface
 export interface User {
@@ -131,7 +131,7 @@ const AdminEditUserPage = () => {
             }}
         >
             <div className="flex min-h-screen bg-gray-100">
-                <AdminSideBar />
+                <Sidebar role="admin" />
                 <div className="flex-1 flex items-center justify-center p-6">
                     <div className="w-full max-w-lg bg-white shadow-md rounded-lg p-8">
                         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Edit User Profile</h2>

@@ -13,7 +13,9 @@ import {
     faqController,
     adminUserManagement,
     messageController,
-    projectController
+    projectController,
+    groupController,
+    questionController
 } from "../di/resolver";
 import { verifyAuth } from "../../adapters/middlewares/authMiddleware";
 import upload from "../../adapters/service/multer";
@@ -96,6 +98,11 @@ export class UserRoute {
                 verifyAuth("employee"),
                 (req: Request, res: Response) => leaveRequestController.cancelLeaveRequest(req, res)
             )
+            .patch(
+                "/leave/request/cancel/:leaveRequestId",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => leaveRequestController.cancelLeaveRequest(req, res)
+            )
 
         this.router
             .get(
@@ -109,6 +116,11 @@ export class UserRoute {
                 "/attendance/:employeeId",
                 verifyAuth("employee"),
                 (req: Request, res: Response) => attendanceController.checkIn(req, res)
+            )
+            .post(
+                "/attendance/:attendanceId/regularized",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => attendanceController.requestRegularization(req, res)
             )
             .patch(
                 "/attendance/:employeeId",
@@ -215,9 +227,64 @@ export class UserRoute {
             )
         this.router
             .get(
+                "/messages/:roomId",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => messageController.getGroupMessages(req, res)
+            )
+        this.router
+            .get(
                 "/developers",
                 verifyAuth("employee"),
                 (req: Request, res: Response) => adminUserManagement.getDevelopers(req, res)
+            )
+
+        this.router
+            .post(
+                "/groups",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => groupController.createGroup(req, res),
+            )
+            .get(
+                "/groups",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => groupController.getGroupsByUser(req, res),
+            )
+            .patch(
+                "/groups/:groupId/members",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => groupController.addMembers(req, res),
+            )
+
+        this.router
+            .post(
+                "/question",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => questionController.submitQuestion(req, res),
+            )
+            .get(
+                "/question",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => questionController.getAllQuestions(req, res),
+            )
+            .get(
+                "/question/unanswered",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => questionController.getUnansweredQuestions(req, res),
+            )
+            .get(
+                "/question/:employeeId",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => questionController.getQuestionsByEmployeeId(req, res),
+            )
+            .delete(
+                "/question/:id",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => questionController.deleteQuestion(req, res),
+            )
+            .patch(
+                "/question/:id",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => questionController.answerQuestion(req, res),
             )
     }
 

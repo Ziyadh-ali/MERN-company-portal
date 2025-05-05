@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import EmployeeSidebar from "../../../components/employeeComponents/employeeSidebar";
-import { EmployeeHeader } from "../../../components/employeeComponents/employeeHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
 import ProjectFormModal, { ProjectFormValues } from "../modals/ProjectModal";
@@ -11,6 +9,8 @@ import ViewMembersModal from "../modals/ViewModal";
 import { useLocation, useNavigate } from "react-router-dom";
 import ShadTable from "../../../components/TableComponent";
 import { useConfirmModal } from "../../../components/useConfirm";
+import Sidebar from "../../../components/SidebarComponent";
+import { Header } from "../../../components/HeaderComponent";
 
 interface Member {
     _id: string;
@@ -137,10 +137,10 @@ const ProjectManagementPage = () => {
 
     return (
         <div className="flex h-screen">
-            <EmployeeSidebar />
+            <Sidebar role="employee" />
             <div className="flex-1 flex flex-col">
                 <div className="p-6 pb-2">
-                    <EmployeeHeader heading="Project Management" />
+                    <Header role="employee" heading="Project Management" />
                 </div>
                 <div className="px-6 pb-6">
                     <Card>
@@ -191,7 +191,7 @@ const ProjectManagementPage = () => {
                                                 onClick={() => confirm({
                                                     title: "Delete Project?",
                                                     message: "Are you sure you want to delete this Project?",
-                                                    onConfirm: () => handleDelete,
+                                                    onConfirm: () => handleDelete(row._id),
                                                 })}
                                               >
                                                 Delete

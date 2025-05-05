@@ -3,6 +3,7 @@ import { HTTP_STATUS_CODES } from "../../shared/constants";
 import { inject, injectable } from "tsyringe";
 import { MESSAGES } from "../../shared/constants";
 import { IProjectUseCase } from "../../entities/useCaseInterface/IProjectUseCase";
+import { CustomRequest } from "../middlewares/authMiddleware";
 
 @injectable()
 export class ProjectController {
@@ -12,8 +13,10 @@ export class ProjectController {
 
     async createProject(req: Request, res: Response): Promise<void> {
         try {
+            const projectManager = (req as CustomRequest).user.id;
             const { data } = req.body;
-            const newProject = await this.projectUseCase.createProject(data);
+            console.log(projectManager)
+            const newProject = await this.projectUseCase.createProject({...data , projectManager});
 
             res.status(HTTP_STATUS_CODES.OK).json({
                 newProject,

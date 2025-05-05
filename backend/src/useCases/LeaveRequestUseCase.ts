@@ -1,9 +1,10 @@
 import { inject, injectable } from "tsyringe";
 import { ILeaveRequestRepository } from "../entities/repositoryInterfaces/ILeaveRequest.repository";
 import { ILeaveRequestUseCase } from "../entities/useCaseInterface/ILeaveRequestUseCase";
-import { LeaveRequest } from "../entities/models/LeaveRequest.entity";
+import { LeaveRequest, LeaveRequestFilter } from "../entities/models/LeaveRequest.entity";
 import { ILeaveBalanceRepository } from "../entities/repositoryInterfaces/ILeaveBalance.repository";
 import { MESSAGES } from "../shared/constants";
+import { calculateWorkingDaysExcludingHolidays } from "../shared/utils/calculateWorkingDaysExcludingHolidays";
 
 
 @injectable()
@@ -18,7 +19,7 @@ export class LeaveRequestUseCase implements ILeaveRequestUseCase {
             throw new Error("Employee ID or Leave Type ID is missing");
         }
 
-        if(!leaveRequest.assignedManager && leaveRequest.userRole === "developer"){
+        if (!leaveRequest.assignedManager && leaveRequest.userRole === "developer") {
             throw new Error("No manager assigned");
         }
 
@@ -30,6 +31,10 @@ export class LeaveRequestUseCase implements ILeaveRequestUseCase {
         const existingLeaves = await this.leaveRequestRepository.getLeaveRequestByEmployee(leaveRequest?.employeeId.toString());
 
         for (const leave of existingLeaves) {
+
+            if (leave.status === "Cancelled") continue;
+            if (leave.status === "Rejected") continue;
+
             const existingStart = new Date(leave.startDate);
             const existingEnd = new Date(leave.endDate);
 
@@ -62,13 +67,36 @@ export class LeaveRequestUseCase implements ILeaveRequestUseCase {
         return await this.leaveRequestRepository.getLeaveRequestByEmployee(userId);
     }
 
-    async getLeaveRequestForApproval(managerId: string): Promise<LeaveRequest[]> {
-        return await this.leaveRequestRepository.getLeaveRequestForApproval(managerId);
-    }
+    // async getLeaveRequestForApproval(managerId: string): Promise<LeaveRequest[]> {
+    //     return await this.leaveRequestRepository.getLeaveRequestForApproval(managerId);
+    // }
 
     async cancelLeaveRequest(leaveRequestId: string): Promise<boolean> {
-        return await this.leaveRequestRepository.cancelLeaveRequest(leaveRequestId);
-    }
+        const leaveRequest = await this.leaveRequestRepository.getLeaveRequestById(leaveRequestId);
+      
+        if (!leaveRequest || leaveRequest.status !== "Approved") {
+          throw new Error("Only approved leave requests can be cancelled.");
+        }
+      
+        const updated = await this.leaveRequestRepository.cancelLeaveRequest(leaveRequestId);
+        if (!updated) return false;
+      
+        const workingDays = await calculateWorkingDaysExcludingHolidays(
+          leaveRequest.startDate,
+          leaveRequest.endDate,
+          leaveRequest.duration? leaveRequest.duration : ""
+        );
+      
+        if (workingDays > 0) {
+          await this.leaveBalanceRepository.restoreLeave(
+            leaveRequest.employeeId.toString(),
+            leaveRequest.leaveTypeId.toString(),
+            workingDays
+          );
+        }
+      
+        return true;
+      }
 
     async updateLeaveRequestStatus(leaveRequestId: string, status: "Approved" | "Rejected",): Promise<boolean> {
         const leaveRequest = await this.leaveRequestRepository.getLeaveRequestById(leaveRequestId);
@@ -76,30 +104,40 @@ export class LeaveRequestUseCase implements ILeaveRequestUseCase {
         if (!leaveRequest) {
             throw new Error("Leave request not found");
         }
+
         if (status === "Approved") {
             const { employeeId, leaveTypeId, startDate, endDate, duration } = leaveRequest;
 
-            let requestedDays = Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
+            const workingDays = await calculateWorkingDaysExcludingHolidays(startDate, endDate, duration ? duration : "");
 
-            if (requestedDays === 1 && (duration === "morning" || duration === "afternoon")) {
-                requestedDays = 0.5;
-            }
+            if (workingDays > 0) {
+                const success = await this.leaveBalanceRepository.deductLeave(
+                    employeeId.toString(),
+                    leaveTypeId.toString(),
+                    workingDays
+                );
 
-            const success = await this.leaveBalanceRepository.deductLeave(employeeId.toString(), leaveTypeId.toString(), requestedDays);
-
-            if (!success) {
-                throw new Error("Failed to deduct leave balance. Possible insufficient balance.");
+                if (!success) {
+                    throw new Error("Failed to deduct leave balance. Possible insufficient balance.");
+                }
             }
         }
 
         return await this.leaveRequestRepository.updateLeaveRequestStatus(leaveRequestId, status);
     }
 
-    async editLeaveRequest(leaveRequestId: string, updates: Partial<LeaveRequest>): Promise<boolean> {
-        return await this.leaveRequestRepository.editLeaveRequest(leaveRequestId, updates);
-    }
+    // async editLeaveRequest(leaveRequestId: string, updates: Partial<LeaveRequest>): Promise<boolean> {
+    //     return await this.leaveRequestRepository.editLeaveRequest(leaveRequestId, updates);
+    // }
 
     async getAllLeaveRequests(): Promise<LeaveRequest[]> {
         return await this.leaveRequestRepository.getAllLeaveRequests();
     }
-}
+
+    async setRejectionReason(leaveRequestId: string, reason: string): Promise<void> {
+        return await this.leaveRequestRepository.setRejectionReason(leaveRequestId, reason);
+    }
+    async getFilteredLeaveRequests(filters: LeaveRequestFilter): Promise<LeaveRequest[]> {
+        return await this.leaveRequestRepository.getFilteredLeaveRequests(filters);
+    }
+}                                                                                 
