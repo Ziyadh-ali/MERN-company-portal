@@ -19,6 +19,7 @@ import {
 } from "../di/resolver";
 import { verifyAuth } from "../../adapters/middlewares/authMiddleware";
 import upload from "../../adapters/service/multer";
+import { chatMediaUpload } from "../../adapters/service/chatUploadMulter";
 
 
 export class UserRoute {
@@ -285,6 +286,14 @@ export class UserRoute {
                 "/question/:id",
                 verifyAuth("employee"),
                 (req: Request, res: Response) => questionController.answerQuestion(req, res),
+            )
+
+        this.router
+            .post(
+                "/chat/upload",
+                verifyAuth("employee"),
+                chatMediaUpload.single("file"),
+                (req: Request, res: Response) => messageController.uploadMedia(req, res),
             )
     }
 

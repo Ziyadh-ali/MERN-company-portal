@@ -4,6 +4,7 @@ import { IMessageRepository } from "../../entities/repositoryInterfaces/IMessage
 import cookie from "cookie";
 import { IJwtService } from "../../entities/services/jwt.interface";
 import { IGroupRepository } from "../../entities/repositoryInterfaces/IGroup.repository";
+import { INotificationRepository } from "../../entities/repositoryInterfaces/INotification.repository";
 
 @injectable()
 export class SocketManager {
@@ -14,6 +15,7 @@ export class SocketManager {
     @inject("IMessageRepository") private messageRepo: IMessageRepository,
     @inject("IGroupRepository") private groupRepo: IGroupRepository,
     @inject("IJwtService") private jwtService: IJwtService,
+    @inject("INotificationRepository") private notificationRepo: INotificationRepository,
   ) { }
 
   public initialize(io: IOServer): void {
@@ -119,6 +121,8 @@ export class SocketManager {
         }
       });
 
+      this.handleNotificationEvents(socket)
+
       socket.on("leave_group", async ({ roomId }) => {
         try {
           const userId = (socket as any).user?.id;
@@ -147,20 +151,37 @@ export class SocketManager {
       });
 
       socket.on("send_message", async (data) => {
-        const { content, sender, recipient, roomId, replyTo } = data;
-
+        const { content, sender, recipient, roomId, media } = data;
         try {
           const savedMessage = await this.messageRepo.createMessage({
             content,
             sender: sender._id,
             recipient,
             roomId,
-            replyTo,
+            media,
           });
 
           if (recipient) {
+
+            await this.notificationRepo.createNotification({
+              recipient,
+              sender: sender._id,
+              type: "message",
+              content: `New Message from ${sender.fullName}`,
+              read: false,
+            })
+
+
             const recipientSocketId = this.userSocketMap.get(recipient);
             if (recipientSocketId) {
+              this.io.to(recipientSocketId).emit("new_notification", {
+                content: `New message from ${sender.fullName}`,
+                _id: Date.now().toString(),
+                read: false,
+                createdAt: new Date()
+              })
+
+
               this.io.to(recipientSocketId).emit("receive_message", savedMessage);
               socket.to(recipientSocketId).emit("delivered", {
                 messageId: savedMessage._id,
@@ -170,7 +191,10 @@ export class SocketManager {
           }
 
           if (roomId) {
-            this.io.to(roomId).emit("receive_message", savedMessage);
+            this.io.to(roomId).emit("receive_message", {
+              ...savedMessage,
+              media: media ? { url: media.url, type: media.type } : null
+            });
           }
 
           socket.emit("message_sent", savedMessage);
@@ -204,12 +228,29 @@ export class SocketManager {
       });
 
       socket.on('members_added', ({ groupId, newMembers }) => {
-        // Update UI for existing members
+
         console.log('New members added:', newMembers);
       });
 
       socket.on('added_to_group', ({ groupId, groupName }) => {
+        const userId = (socket as any).user?.id;
+
         console.log(`You've been added to group: ${groupName}`);
+
+        this.notificationRepo.createNotification({
+          recipient: userId,
+          type: 'group_invite',
+          content: `You were added to group "${groupName}"`,
+          read: false
+        });
+
+        socket.emit('new_notification', {
+          content: `You were added to group "${groupName}"`,
+          _id: Date.now().toString(),
+          read: false,
+          createdAt: new Date()
+        });
+
         socket.emit('join', groupId);
       });
 
@@ -238,6 +279,17 @@ export class SocketManager {
       members: group.members,
       createdBy: group.createdBy
     });
+
+    group.members.forEach(async (memberId: string) => {
+      if (memberId !== group.createdBy) {
+        await this.notificationRepo.createNotification({
+          recipient: memberId,
+          sender: group.createdBy,
+          type: 'group_invite',
+          content: `You were added to group "${group.name}"`,
+        });
+      }
+    });
   }
 
   public emitMembersAdded(groupId: string, newMembers: string[], allMembers: string[]) {
@@ -258,5 +310,70 @@ export class SocketManager {
         });
       }
     });
+
+    newMembers.forEach(userId => {
+      this.notificationRepo.createNotification({
+        recipient: userId,
+        type: 'group_update',
+        content: `You were added to a group`,
+      });
+    });
   }
+
+  private handleNotificationEvents(socket: Socket) {
+    socket.on("get_notifications", async (employeeId: string) => {
+      const notification = await this.notificationRepo.getUnreadNotifications(employeeId);
+      socket.emit("notification_list", notification);
+    });
+
+    socket.on("mark_as_read", async (notificationIds: string[]) => {
+      await this.notificationRepo.markAsRead(notificationIds);
+      socket.emit("notification_marked_read", notificationIds);
+    })
+  }
+
+  public async sendRealTimeNotification(userId: string, content: string) {
+    const socketId = this.userSocketMap.get(userId);
+    if (socketId) {
+      this.io.to(socketId).emit("new_notification", {
+        _id: `temp-${Date.now()}`,
+        content,
+        read: false,
+        createdAt: new Date()
+      });
+    }
+  }
+  public async sendPersistentNotification(notificationData: {
+    recipient: string;
+    sender?: string;
+    type: "message" | "group_invite" | "mention" | "reaction" | "group_update";
+    content: string;
+  }) {
+    const notification = await this.notificationRepo.createNotification(notificationData);
+    this.sendRealTimeNotification(notification.recipient.toString(), notification.content);
+  }
+
+  // public sendDirectMessage(data: {
+  //   recipient: string;
+  //   message: any;
+  // }) {
+  //   const socketId = this.userSocketMap.get(data.recipient);
+  //   if (socketId) {
+  //     this.io.to(socketId).emit('receive_message', {
+  //       ...data.message,
+  //       isMedia: true
+  //     });
+  //   }
+  // }
+
+  // public sendGroupMessage(data: {
+  //   roomId: string;
+  //   message: any;
+  // }) {
+  //   this.io.to(data.roomId).emit('receive_message', {
+  //     ...data.message,
+  //     isMedia: true
+  //   });
+  // }
 }
+

@@ -2,19 +2,9 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import socket from "../socket";
 import { enqueueSnackbar } from "notistack";
+import { Message, Notification } from "../utils/Interfaces/interfaces";
 
-interface Message {
-    _id: string;
-    content: string;
-    sender: {
-        _id: string;
-        fullName: string;
-        email: string;
-    };
-    recipient?: string;
-    roomId?: string;
-    createdAt?: string;
-}
+
 
 type ProjectRoom = {
     projectId: string;
@@ -31,11 +21,17 @@ interface ChatContextType {
     deleteMessage: (messageId: string, chatType: "individual" | "group", chatId?: string, roomId?: string) => void;
     setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
     setProjectRooms: React.Dispatch<React.SetStateAction<ProjectRoom[]>>;
+    setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
     onlineUsers: string[];
     setOnlineUsers: React.Dispatch<React.SetStateAction<string[]>>;
     deleteGroup: (roomId: string) => void;
     leaveGroup: (roomId: string) => void;
     isGroupAdmin: (roomId: string) => boolean;
+    notifications: Notification[];
+    unreadCount: number;
+    fetchNotifications: () => void;
+    markAsRead: (notificationIds: string[]) => void;
+    clearNotifications: () => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -44,14 +40,17 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [messages, setMessages] = useState<Message[]>([]);
     const [projectRooms, setProjectRooms] = useState<ProjectRoom[]>([]);
     const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     const sendMessage = (message: Omit<Message, "_id"> & { chatType: "individual" | "group" }) => {
-        const { content, sender, recipient, roomId, chatType } = message;
+        const { content, sender, recipient, roomId, chatType , media } = message;
         const payload = {
             content,
             sender,
             recipient: chatType === "individual" ? recipient : undefined,
             roomId: chatType === "group" ? roomId : undefined,
+            media,
         };
         socket.emit("send_message", payload);
     };
@@ -81,6 +80,22 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const user = JSON.parse(localStorage.getItem("employeeSession") || "{}");
         const room = projectRooms.find(r => r.roomId === roomId);
         return room?.createdBy === user._id;
+    };
+
+    const fetchNotifications = () => {
+        const user = JSON.parse(localStorage.getItem("employeeSession") || "{}");
+        if (user?._id) {
+            socket.emit("get_notifications", user._id);
+        }
+    };
+
+    const markAsRead = (notificationIds: string[]) => {
+        socket.emit("mark_as_read", notificationIds);
+    };
+
+    const clearNotifications = () => {
+        setNotifications([]);
+        setUnreadCount(0);
     };
 
     useEffect(() => {
@@ -175,7 +190,37 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 socket.emit("register_user", user._id);
             }
         };
-    
+
+        socket.on("notification_list", (notifications: Notification[]) => {
+            setNotifications(notifications);
+            setUnreadCount(notifications.filter(n => !n.read).length);
+        });
+
+        socket.on('new_notification', (notification) => {
+            if (notification._id.startsWith('temp-')) {
+                setNotifications(prev => [{
+                    ...notification,
+                    isTemp: true
+                }, ...prev]);
+
+                setUnreadCount(prev => prev + 1);
+            } else {
+                setNotifications(prev => [notification, ...prev]);
+                setUnreadCount(prev => prev + 1);
+
+                fetchNotifications();
+            }
+        });
+
+        socket.on("notification_marked_read", (notificationIds: string[]) => {
+            setNotifications(prev =>
+                prev.map(n =>
+                    notificationIds.includes(n._id) ? { ...n, read: true } : n
+                )
+            );
+            setUnreadCount(prev => prev - notificationIds.length);
+        });
+
         socket.on("connect", handleReconnect);
 
         return () => {
@@ -191,6 +236,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             socket.off("member_left");
             socket.off("added_to_group");
             socket.off("members_added");
+            socket.off("notification_list");
+            socket.off("new_notification");
+            socket.off("notification_marked_read");
             socket.off("connect", handleReconnect);
         };
     }, []);
@@ -210,6 +258,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 deleteGroup,
                 leaveGroup,
                 isGroupAdmin,
+                notifications,
+                unreadCount,
+                fetchNotifications,
+                markAsRead,
+                clearNotifications,
+                setNotifications
             }}
         >
             {children}

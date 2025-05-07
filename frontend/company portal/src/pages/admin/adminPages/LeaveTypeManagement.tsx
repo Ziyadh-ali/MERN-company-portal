@@ -22,7 +22,7 @@ export interface LeaveType {
 const LeaveTypeManagementPage = () => {
     const navigate = useNavigate()
     const { enqueueSnackbar } = useSnackbar();
-    const {confirm , ConfirmModalComponent} = useConfirmModal();
+    const { confirm, ConfirmModalComponent } = useConfirmModal();
     const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -54,18 +54,18 @@ const LeaveTypeManagementPage = () => {
     };
 
     const handleUpdateLeaveType = async (id: string, leaveType: Omit<LeaveType, "_id">) => {
-            const response = await updateLeaveTypeService(id, leaveType);
-            setLeaveTypes(
-                leaveTypes.map((lt) => (lt._id === id ? response.data : lt))
-            );
-            setSelectedLeaveType(null);
+        const response = await updateLeaveTypeService(id, leaveType);
+        setLeaveTypes(
+            leaveTypes.map((lt) => (lt._id === id ? response.data : lt))
+        );
+        setSelectedLeaveType(null);
     };
 
     const handleDelete = async (id: string) => {
         confirm({
             title: "Delete LeaveType ?",
             message: "Are you sure you want to delete this LeaveType?",
-            onConfirm: async ()=>{ 
+            onConfirm: async () => {
                 try {
                     await deleteLeaveTypeService(id);
                     setLeaveTypes(leaveTypes.filter((lt) => lt._id !== id));
@@ -92,57 +92,69 @@ const LeaveTypeManagementPage = () => {
             {/* Main Content */}
             <div className="flex-1 p-6">
                 {/* Header */}
-                <Header heading="Leave Type Management" role="admin"/>
+                <Header heading="Leave Type Management" role="admin" />
 
                 {/* Leave Types Table */}
                 <Card>
-                    <CardHeader>
+                    <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="text-lg font-semibold text-gray-800">
                             Leave Types
                         </CardTitle>
+                        <AddLeaveTypeModal
+                            open={isAddModalOpen}
+                            onOpenChange={(open) => {
+                                setIsAddModalOpen(open);
+                            }}
+                            onAdd={handleAddLeaveType}
+                        />
                     </CardHeader>
+
                     <CardContent>
-                        {leaveTypes.length > 0 ? <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Name</TableHead>
-                                    <TableHead>Description</TableHead>
-                                    <TableHead>Max Days Allowed</TableHead>
-                                    <TableHead>Is Paid</TableHead>
-                                    <TableHead>Requires Approval</TableHead>
-                                    <TableHead>Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {leaveTypes.map((leaveType) => (
-                                    <TableRow key={leaveType._id as string}>
-                                        <TableCell>{leaveType.name}</TableCell>
-                                        <TableCell>{leaveType.description || "N/A"}</TableCell>
-                                        <TableCell>{leaveType.maxDaysAllowed}</TableCell>
-                                        <TableCell>{leaveType.isPaid ? "Yes" : "No"}</TableCell>
-                                        <TableCell>{leaveType.requiresApproval ? "Yes" : "No"}</TableCell>
-                                        <TableCell>
-                                            <div className="flex space-x-2">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => openUpdateModal(leaveType)}
-                                                >
-                                                    <Edit size={16} />
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleDelete(leaveType._id as string)}
-                                                >
-                                                    <Trash2 size={16} />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
+                        {leaveTypes.length > 0 ? (
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Name</TableHead>
+                                        <TableHead>Description</TableHead>
+                                        <TableHead>Max Days Allowed</TableHead>
+                                        <TableHead>Is Paid</TableHead>
+                                        <TableHead>Requires Approval</TableHead>
+                                        <TableHead>Actions</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table> : <h1>No Leave Types</h1>}
+                                </TableHeader>
+                                <TableBody>
+                                    {leaveTypes.map((leaveType) => (
+                                        <TableRow key={leaveType._id as string}>
+                                            <TableCell>{leaveType.name}</TableCell>
+                                            <TableCell>{leaveType.description || "N/A"}</TableCell>
+                                            <TableCell>{leaveType.maxDaysAllowed}</TableCell>
+                                            <TableCell>{leaveType.isPaid ? "Yes" : "No"}</TableCell>
+                                            <TableCell>{leaveType.requiresApproval ? "Yes" : "No"}</TableCell>
+                                            <TableCell>
+                                                <div className="flex space-x-2">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => openUpdateModal(leaveType)}
+                                                    >
+                                                        <Edit size={16} />
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleDelete(leaveType._id as string)}
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        ) : (
+                            <h1>No Leave Types</h1>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -155,6 +167,7 @@ const LeaveTypeManagementPage = () => {
                     leaveType={selectedLeaveType}
                     onUpdate={handleUpdateLeaveType}
                 />
+
                 <ConfirmModalComponent />
             </div>
         </div>

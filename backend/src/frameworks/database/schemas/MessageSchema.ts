@@ -5,7 +5,6 @@ export const MessageSchema = new Schema<IMessageModel>(
     {
         content: {
             type: String,
-            required: true,
         },
         sender: {
             type: Schema.Types.ObjectId,
@@ -22,23 +21,21 @@ export const MessageSchema = new Schema<IMessageModel>(
             ref: "Employee",
             default: null,
         },
-        // replyTo: {
-        //     type: Schema.Types.ObjectId,
-        //     ref: "Message",
-        //     default: null,
-        // },
-        // deliveredTo: [
-        //     {
-        //         type: Schema.Types.ObjectId,
-        //         ref: "Employee",
-        //     },
-        // ],
-        // readBy: [
-        //     {
-        //         type: Schema.Types.ObjectId,
-        //         ref: "Employee",
-        //     },
-        // ],
+        media: {
+            url: {
+                type: String,
+                required: false,
+            },
+            type: {
+                type: String,
+                enum: ['image', 'video', 'document'],
+                required: false,
+            },
+            public_id: {
+                type: String,
+                required: false,
+            },
+        },
     },
     {
         timestamps: { createdAt: true, updatedAt: false },

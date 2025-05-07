@@ -5,7 +5,8 @@ import { Input } from "../../../components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "../../../components/ui/tabs";
 import { ScrollArea } from "../../../components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
-import { Send, MoreVertical } from "lucide-react";
+import { Progress } from "../../../components/ui/progress";
+import { Send, MoreVertical, Paperclip, X, Loader2, FileText } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -18,11 +19,12 @@ import { addGroupMembersService, addGroupService, getEmployeesForChatService, ge
 import Sidebar from "../../../components/SidebarComponent";
 import { Header } from "../../../components/HeaderComponent";
 import GroupFormModal from "../modals/GroupModal";
-import { ChatUser, IGroup } from "../../../utils/Interfaces/interfaces";
+import { ChatUser, IGroup, Message } from "../../../utils/Interfaces/interfaces";
 import { enqueueSnackbar } from "notistack";
 import { AxiosError } from "axios";
 import { useConfirmModal } from "../../../components/useConfirm";
 import { AddMembersModal } from "../modals/AddMembersModal";
+import { employeeAxiosInstance } from "../../../api/employee.axios";
 
 
 
@@ -44,10 +46,7 @@ interface ChatMessage {
     _id: string;
     content: string;
     createdAt: string | undefined;
-    deliveredTo: string[];
-    readBy: string[];
     recipient?: string;
-    replyTo?: string;
     roomId?: string;
     sender: string | Sender;
     __v: number;
@@ -62,7 +61,7 @@ const ChatPage = () => {
     const [users, setUsers] = useState<ChatUser[]>([]);
     const [newMessage, setNewMessage] = useState("");
     const [groupChatModal, setGroupChatModal] = useState(false);
-    const [scroll, setScroll] = useState(true);
+    // const [scroll, setScroll] = useState(true);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [, setJustSentMessage] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -71,6 +70,11 @@ const ChatPage = () => {
     const currentUser: CurrentUser = JSON.parse(localStorage.getItem("employeeSession") || "{}");
     const { messages, projectRooms, sendMessage, joinRoom, deleteMessage, setMessages, onlineUsers, deleteGroup, leaveGroup } = useChat();
     const { ConfirmModalComponent, confirm } = useConfirmModal();
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [filePreview, setFilePreview] = useState<string | null>(null);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [addMembersModalOpen, setAddMembersModalOpen] = useState(false);
     const [selectedGroupForAddMembers, setSelectedGroupForAddMembers] = useState<{
@@ -143,23 +147,24 @@ const ChatPage = () => {
     };
 
     const handleSendMessage = () => {
-        if (newMessage.trim()) {
-            const message = {
-                content: newMessage,
-                sender: {
-                    _id: currentUser._id,
-                    fullName: currentUser.fullName,
-                    email: currentUser.email,
-                },
-                recipient: activeTab === "individual" ? selectedUser?._id : undefined,
-                roomId: activeTab === "group" && selectedRoom ? selectedRoom.roomId : undefined,
-                replyTo: undefined,
-                chatType: activeTab,
-            };
-            setScroll(!scroll);
+
+        const message = {
+            content: newMessage,
+            sender: {
+                _id: currentUser._id,
+                fullName: currentUser.fullName,
+                email: currentUser.email,
+            },
+            recipient: activeTab === "individual" ? selectedUser?._id : undefined,
+            roomId: activeTab === "group" && selectedRoom ? selectedRoom.roomId : undefined,
+            replyTo: undefined,
+            chatType: activeTab,
+        };
+        if (selectedFile) {
+            uploadFile(message);
+        } else if (newMessage.trim()) {
             sendMessage(message);
             setNewMessage("");
-            setJustSentMessage(true);
         }
     };
 
@@ -207,6 +212,63 @@ const ChatPage = () => {
             enqueueSnackbar((error instanceof AxiosError) ? error.response?.data.message : "error in adding chat", { variant: "error" })
         }
     }
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files?.[0]) {
+            const file = e.target.files[0];
+            setSelectedFile(file);
+            if (file.type.startsWith('image/')) {
+                setFilePreview(URL.createObjectURL(file));
+            } else if (file.type.startsWith('video/')) {
+                setFilePreview(URL.createObjectURL(file));
+            }
+        }
+    };
+
+    const removeFile = () => {
+        setSelectedFile(null);
+        setFilePreview(null);
+        setUploadProgress(0);
+    };
+
+    const uploadFile = async (message: Message) => {
+        if (!selectedFile) return;
+
+        console.log(selectedFile.type);
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        try {
+            const res = await employeeAxiosInstance.post('/chat/upload', formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round(
+                        (progressEvent.loaded * 100) / (progressEvent.total || 1)
+                    );
+                    setUploadProgress(percentCompleted);
+                }
+            });
+
+            // Attach the media URL from Cloudinary to the message
+            const messageWithMedia = {
+                ...message,
+                chatType: activeTab,
+                media: res.data.media, // Assuming res.data contains the uploaded media URL
+            };
+
+            // Send the message with media
+            sendMessage(messageWithMedia);
+
+            setNewMessage(""); // Clear the message input
+            removeFile(); // Remove the selected file after sending
+        } catch (error) {
+            console.log(error);
+            enqueueSnackbar("File upload failed", { variant: "error" });
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
 
 
@@ -408,17 +470,16 @@ const ChatPage = () => {
                                                                     ((senderId === selectedUser?._id && msg.recipient === currentUser._id) ||
                                                                         (msg.recipient === selectedUser?._id && senderId === currentUser._id))) ||
                                                                 (activeTab === "group" && msg.roomId === selectedRoom?.roomId);
-                                                            console.log("Message:", msg, "isMatch:", isMatch);
                                                             return isMatch;
                                                         });
 
                                                         // Deduplicate messages by their _id
                                                         const seenMessageIds = new Set<string>();
                                                         const uniqueMessages = filteredMessages.filter((msg) => {
-                                                            if (seenMessageIds.has(msg._id)) {
+                                                            if (seenMessageIds.has(msg._id ? msg._id : "")) {
                                                                 return false;
                                                             }
-                                                            seenMessageIds.add(msg._id);
+                                                            seenMessageIds.add(msg._id ? msg._id : "");
                                                             return true;
                                                         });
 
@@ -448,7 +509,40 @@ const ChatPage = () => {
                                                                         <p className="text-xs font-medium mb-1">
                                                                             {message.sender.fullName}
                                                                         </p>
-                                                                        <p className="break-words text-sm">{message.content}</p>
+                                                                        
+                                                                        {/* Add this section for media display */}
+                                                                        {message.media && (
+                                                                            <div className="mb-2">
+                                                                                {message.media.type === 'image' ? (
+                                                                                    <img 
+                                                                                        src={message.media.url} 
+                                                                                        alt="Media" 
+                                                                                        className="max-h-60 rounded-md"
+                                                                                    />
+                                                                                ) : message.media.type === 'video' ? (
+                                                                                    <video 
+                                                                                        src={message.media.url} 
+                                                                                        controls 
+                                                                                        className="max-h-60 rounded-md"
+                                                                                    />
+                                                                                ) : (
+                                                                                    <a 
+                                                                                        href={message.media.url} 
+                                                                                        target="_blank" 
+                                                                                        rel="noopener noreferrer"
+                                                                                        className="flex items-center gap-2 p-2 border rounded-md"
+                                                                                    >
+                                                                                        <FileText className="w-5 h-5" />
+                                                                                        <span>View Document</span>
+                                                                                    </a>
+                                                                                )}
+                                                                            </div>
+                                                                        )}
+                                                                        
+                                                                        {message.content && (
+                                                                            <p className="break-words text-sm">{message.content}</p>
+                                                                        )}
+                                                                        
                                                                         <span
                                                                             className={`text-xs block mt-1 ${(typeof message.sender === "string" ? message.sender : message.sender._id) ===
                                                                                 currentUser._id
@@ -478,7 +572,7 @@ const ChatPage = () => {
                                                                                 className="bg-white border border-gray-200 shadow-md"
                                                                             >
                                                                                 <DropdownMenuItem
-                                                                                    onClick={() => handleDeleteMessage(message._id)}
+                                                                                    onClick={() => handleDeleteMessage(message._id ? message._id : "")}
                                                                                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
                                                                                 >
                                                                                     Delete
@@ -495,7 +589,69 @@ const ChatPage = () => {
                                             </ScrollArea>
                                         </div>
                                         <div className="p-4 border-t relative">
+                                            {/* File preview */}
+                                            {filePreview && (
+                                                <div className="mb-2 relative">
+                                                    {selectedFile?.type.startsWith('image/') ? (
+                                                        <img
+                                                            src={filePreview}
+                                                            alt="Preview"
+                                                            className="max-h-40 rounded-md"
+                                                        />
+                                                    ) : selectedFile?.type.startsWith('video/') ? (
+                                                        <video
+                                                            src={filePreview}
+                                                            controls
+                                                            className="max-h-40 rounded-md"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex items-center gap-2 p-2 border rounded-md">
+                                                            <FileText className="w-5 h-5" />
+                                                            <span>{selectedFile?.name}</span>
+                                                        </div>
+                                                    )}
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="absolute top-1 right-1 h-6 w-6"
+                                                        onClick={removeFile}
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            )}
+
+                                            {/* Upload progress */}
+                                            {isUploading && (
+                                                <div className="mb-2">
+                                                    <Progress value={uploadProgress} className="h-2" />
+                                                    <p className="text-xs text-muted-foreground mt-1">
+                                                        Uploading... {uploadProgress}%
+                                                    </p>
+                                                </div>
+                                            )}
+
                                             <div className="flex items-center gap-2">
+                                                {/* File input */}
+                                                <input
+                                                    type="file"
+                                                    id="file-upload"
+                                                    className="hidden"
+                                                    ref={fileInputRef}
+                                                    onChange={handleFileChange}
+                                                    accept="image/*,video/*,.pdf,.doc,.docx"
+                                                />
+
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    type="button"
+                                                    onClick={() => fileInputRef.current?.click()}
+                                                >
+                                                    <Paperclip className="h-5 w-5" />
+                                                </Button>
+
+                                                {/* Emoji picker and message input */}
                                                 <Button
                                                     type="button"
                                                     variant="ghost"
@@ -514,12 +670,17 @@ const ChatPage = () => {
                                                 />
                                                 <Button
                                                     onClick={handleSendMessage}
-                                                    disabled={!newMessage.trim()}
+                                                    disabled={(!newMessage.trim() && !selectedFile) || isUploading}
                                                     size="icon"
                                                 >
-                                                    <Send className="h-5 w-5" />
+                                                    {isUploading ? (
+                                                        <Loader2 className="h-5 w-5 animate-spin" />
+                                                    ) : (
+                                                        <Send className="h-5 w-5" />
+                                                    )}
                                                 </Button>
                                             </div>
+
                                             {showEmojiPicker && (
                                                 <div className="absolute bottom-[60px] left-4 z-10">
                                                     <EmojiPicker onEmojiClick={handleEmojiClick} />

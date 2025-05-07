@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, } from "lucide-react";
 import { useSnackbar } from "notistack";
 import { getAllLeaveRequestsService, updateLeaveRequestStatusService } from "../../../services/admin/adminUserM";
 import ShadTable from "../../../components/TableComponent";
-import { useConfirmModal } from "../../../components/useConfirm";
 import Sidebar from "../../../components/SidebarComponent";
+import RejectLeaveRequestModal from "../../employee/modals/RejectLeaveRequest";
+import { useLocation } from "react-router-dom";
 
 // Define LeaveRequest interface
 export interface LeaveRequest {
@@ -29,9 +30,9 @@ export interface LeaveRequest {
 
 
 const LeaveManagementPage = () => {
+    const location = useLocation()
     const { enqueueSnackbar } = useSnackbar();
     const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
-    const { confirm, ConfirmModalComponent } = useConfirmModal();
 
     // Fetch leave requests on mount
     useEffect(() => {
@@ -55,7 +56,7 @@ const LeaveManagementPage = () => {
             }
         };
         fetchLeaveRequests();
-    }, [enqueueSnackbar]);
+    }, [enqueueSnackbar,location]);
 
     // Handle approve/reject actions
     const handleApprove = async (id: string, userId: string) => {
@@ -66,17 +67,6 @@ const LeaveManagementPage = () => {
         } catch (error) {
             console.error("Error approving leave request:", error);
             enqueueSnackbar("Failed to approve leave request", { variant: "error" });
-        }
-    };
-
-    const handleReject = async (id: string, userId: string) => {
-        try {
-            await updateLeaveRequestStatusService(id, "Rejected", userId);
-            setLeaveRequests(leaveRequests.map(req => req._id === id ? { ...req, status: "Rejected" } : req));
-            enqueueSnackbar("Leave request rejected successfully", { variant: "success" });
-        } catch (error) {
-            console.error("Error rejecting leave request:", error);
-            enqueueSnackbar("Failed to reject leave request", { variant: "error" });
         }
     };
 
@@ -124,13 +114,10 @@ const LeaveManagementPage = () => {
                         <Button size="sm" onClick={() => handleApprove(row._id as string, row.employeeId._id as string)}>
                             <CheckCircle size={16} className="mr-1" /> Approve
                         </Button>
-                        <Button variant="destructive" size="sm" onClick={() => confirm({
-                            title: "Reject Leave Request ?",
-                            message: "Are you sure you want to reject this Leave Request?",
-                            onConfirm: async () => {handleReject(row._id as string , row.employeeId._id as string)},
-                        })}>
-                            <XCircle size={16} className="mr-1" /> Reject
-                        </Button>
+                        <RejectLeaveRequestModal
+                                leaveRequestId={row._id}
+                                role="admin"
+                            />
                     </div>
                 ) : (
                     <Button variant="outline" size="sm" disabled>{row.status}</Button>
@@ -174,7 +161,6 @@ const LeaveManagementPage = () => {
                     </CardContent>
                 </Card>
             </div>
-            <ConfirmModalComponent />
         </div>
     );
 };

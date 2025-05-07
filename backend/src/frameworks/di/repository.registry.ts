@@ -23,6 +23,8 @@ import { IGroupRepository } from "../../entities/repositoryInterfaces/IGroup.rep
 import { GroupRepository } from "../../adapters/repositories/GroupRepository";
 import { QuestionRepository } from "../../adapters/repositories/QuestionRepository";
 import { IQuestionRepository } from "../../entities/repositoryInterfaces/IQuestion.repository";
+import { INotificationRepository } from "../../entities/repositoryInterfaces/INotification.repository";
+import { NotificationRepository } from "../../adapters/repositories/NotificationRepository";
 
 
 export class RepositoryRegistry {
@@ -70,8 +72,13 @@ export class RepositoryRegistry {
         container.register<IGroupRepository>("IGroupRepository",{
             useClass : GroupRepository,
         });
+
         container.register<IQuestionRepository>("IQuestionRepository",{
             useClass : QuestionRepository,
+        });
+
+        container.register<INotificationRepository>("INotificationRepository",{
+            useClass : NotificationRepository,
         });
     }
 }

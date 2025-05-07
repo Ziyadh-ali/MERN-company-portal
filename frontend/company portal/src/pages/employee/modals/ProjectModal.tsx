@@ -46,8 +46,15 @@ const ProjectFormModal: FC<ProjectFormModalProps> = ({
 }) => {
     const [employees, setEmployees] = useState<Employee[]>([]);
 
+    const today = new Date();
+
+    const updatedInitialValues: ProjectFormValues = {
+        ...initialValues,
+        startDate: isEdit ? initialValues.startDate : initialValues.startDate || today,
+    };
+
     const formik = useFormik<ProjectFormValues>({
-        initialValues,
+        initialValues: updatedInitialValues,
         validationSchema: projectSchema,
         enableReinitialize: true,
         onSubmit: (values) => {
