@@ -21,6 +21,10 @@ import MeetingPage from "./pages/employee/employeePages/MeetingPage"
 import ChatPage from "./pages/employee/employeePages/ChatPage"
 import AdminHelpCenterPage from "./pages/admin/adminPages/AdminHelpCenter"
 import EmployeeHelpCenterPage from "./pages/employee/employeePages/HelpCentre"
+import ProjectManagementPage from "./pages/employee/employeePages/ProjectMangement"
+import ManagerDeveloperManagement from "./pages/employee/employeePages/ManagerUserManagement"
+import ManagerLeaveManagementPage from "./pages/employee/employeePages/ManagerLeaveRequest"
+import AdminAttendancePage from "./pages/admin/adminPages/AdminAttendncePage"
 
 function App() {
 
@@ -55,6 +59,12 @@ function App() {
               <Route path="messages" element={<ChatPage/>} />
 
               <Route path="help-desk" element={<EmployeeHelpCenterPage/>} />
+
+              <Route path="project" element={<ProjectManagementPage/>} />
+
+              <Route path="developers/developers-list" element={<ManagerDeveloperManagement/>} />
+
+              <Route path="developers/leave" element={<ManagerLeaveManagementPage/>} />
               
             </Route>
 
@@ -85,6 +95,8 @@ function App() {
               <Route path="leave/requests" element={<LeaveManagementPage />} />
 
               <Route path="help" element={<AdminHelpCenterPage />} />
+
+              <Route path="attendance" element={<AdminAttendancePage />} />
 
             </Route>
 

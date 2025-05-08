@@ -5,13 +5,13 @@ import { MessageModel } from "../../frameworks/database/models/MessageModel";
 
 @injectable()
 export class MessageRepository implements IMessageRepository {
-    async createMessage(data: { content: string; sender: string; recipient?: string; roomId?: string; replyTo?: string; }): Promise<IMessage> {
+    async createMessage(data: IMessage): Promise<IMessage> {
         const message = await MessageModel.create({
             content: data.content,
             sender: data.sender,
             recipient: data.recipient || null,
             roomId: data.roomId || null,
-            replyTo: data.replyTo || null,
+            media : data.media,
         });
         return message
     }
@@ -29,6 +29,7 @@ export class MessageRepository implements IMessageRepository {
                 { sender: user2, recipient: user1 },
             ],
         })
+            .populate("sender", "fullName email")
             .sort({ createdAt: 1 });
     }
 

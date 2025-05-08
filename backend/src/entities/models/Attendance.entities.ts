@@ -6,5 +6,14 @@ export interface Attendance {
     date : Date,
     checkInTime : Date | null,
     checkOutTime : Date | null,
-    status : "Present" | "Absent" | "Late" | "Leave"| "Pending",
+    status : "Present" | "Absent" | "Weekend" | "Holiday"| "Pending" | "Late",
+    isRegularized?: boolean;
+    isRegularizable?: boolean;
+    regularizationRequest?: {
+      requestedBy: ObjectId | string;
+      reason: string;
+      requestedStatus: "Present" | "Absent" | "Late" | "Leave";
+      status: "Pending" | "Approved" | "Rejected";
+      adminRemarks?: string;
+    };
 }

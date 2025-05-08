@@ -69,4 +69,8 @@ export class EmployeeRepository implements IEmployeeRepository {
     async getEmployeesForChat(): Promise<Partial<Employee[]>> {
         return await EmployeeModel.find({status : "active"} , "_id fullName profilePic role");
     }
+
+    async getDevelopers(): Promise<Employee[]> {
+        return await EmployeeModel.find({role : "developer"})
+    }
 }

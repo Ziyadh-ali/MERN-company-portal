@@ -1,5 +1,7 @@
+import axios from "axios";
 import { employeeAxiosInstance } from "../../api/employee.axios";
 import { EditMeeting } from "../../pages/employee/modals/editMeetingModal";
+import { IGroup } from "../../utils/Interfaces/interfaces";
 
 
 
@@ -189,7 +191,127 @@ export const getEmployeesForChatService = async () => {
   return response.data;
 }
 
-export const getPrivateMessagesService = async (user1 : string , user2 : string) => {
+export const getDeveloperService = async () => {
+  const response = await employeeAxiosInstance.get("/developers");
+  return response.data;
+}
+
+export const getPrivateMessagesService = async (user1: string, user2: string) => {
   const response = await employeeAxiosInstance.get(`/messages?user1=${user1}&user2=${user2}`);
   return response.data;
 }
+export const getGroupMessagesService = async (roomId: string) => {
+  const response = await employeeAxiosInstance.get(`/messages/${roomId}`);
+  return response.data;
+}
+interface ProjectData {
+  name: string;
+  startDate: Date;
+  endDate: Date;
+  members: string[];
+}
+
+export const cretaeProjectService = async (data: ProjectData) => {
+  const response = await employeeAxiosInstance.post("/projects ", { data });
+  return response.data;
+}
+
+export const deleteProjectService = async (projectId: string) => {
+  const response = await employeeAxiosInstance.delete(`/projects/${projectId}`);
+  return response.data;
+}
+
+export const updateProjectService = async (projectId: string, updatedData: Partial<ProjectData>) => {
+  const response = await employeeAxiosInstance.patch(`/projects/${projectId}`, { updatedData });
+  return response.data;
+}
+
+export const getProjectService = async (projectId: string) => {
+  const response = await employeeAxiosInstance.get(`/projects/${projectId}`);
+  return response.data;
+}
+
+export const getProjectsService = async () => {
+  const response = await employeeAxiosInstance.get("/projects");
+  return response.data;
+}
+
+export const cancelLeaveRequest = async (leaveRequestId: string) => {
+  const response = await employeeAxiosInstance.patch(`/leave/request/cancel/${leaveRequestId}`);
+  return response.data;
+}
+
+export const fetchHolidays = async (year: number, countryCode = "IN") => {
+  const apiKey = import.meta.env.VITE_CALENDARIFIC_API_KEY;
+  try {
+    const res = await axios.get(import.meta.env.VITE_CALENDARIFIC_URL, {
+      params: {
+        api_key: apiKey,
+        country: countryCode,
+        year: year,
+      },
+    });
+    const data = res.data.response.holidays;
+    console.log("Fetched holiday data:", data);
+
+    if (Array.isArray(data)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return data.map((holiday: any) => ({
+        date: holiday.date.iso,
+        name: holiday.name,
+      }));
+    } else {
+      console.error("Holiday data is not an array:", data);
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching holidays:", error);
+    return [];
+  }
+};
+
+export const addGroupService = async (data: IGroup) => {
+  const response = await employeeAxiosInstance.post("/groups", { data: data });
+  return response.data;
+}
+
+export const addRegularizeRequest = async (attendanceId: string, reason: string) => {
+  const response = await employeeAxiosInstance.post(`/attendance/${attendanceId}/regularized`, { reason })
+  return response.data;
+}
+
+export const getMyQuestionsService = async (employeeId: string) => {
+  const response = await employeeAxiosInstance.get(`/question/${employeeId}`);
+  return response.data;
+}
+
+export const submitQuestionService = async (question: string) => {
+  const response = await employeeAxiosInstance.post("/question", { question });
+  return response.data;
+}
+export const getHrQuestionService = async () => {
+  const response = await employeeAxiosInstance.get("/question");
+  return response.data;
+}
+
+export const answerQuestionService = async (questionId: string, answer: string) => {
+  const response = await employeeAxiosInstance.patch(`/question/${questionId}`, { answer });
+  return response.data;
+}
+
+export const getGroupByMemberService = async () => {
+  const response = await employeeAxiosInstance.get("/groups");
+  return response.data;
+}
+
+export const addGroupMembersService = async (
+  groupId: string,
+  userIds: string[]
+) => {
+  const response = await employeeAxiosInstance.patch(`/groups/${groupId}/members`, { userIds });
+  return response.data;
+};
+
+
+
+

@@ -1,16 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
 import { Progress } from "../../../components/ui/progress";
-import AdminSideBar from "../../../components/adminComponents/AdminSideBar";
-import AdminHeader from "../../../components/adminComponents/AdminHeader";
+import { Header } from "../../../components/HeaderComponent";
+import Sidebar from "../../../components/SidebarComponent";
 
 
 function AdminDashBoard() {
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <AdminSideBar/>
+      <Sidebar role="admin"/>
       <div className="flex-1 p-6">
-        <AdminHeader/>
+        <Header heading="Dashboard" role="admin"/>
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
           <Card>
             <CardHeader>

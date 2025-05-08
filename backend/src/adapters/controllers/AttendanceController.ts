@@ -3,6 +3,7 @@ import { IAttendanceUseCase } from "../../entities/useCaseInterface/IAttendanceU
 import { injectable, inject } from "tsyringe";
 import { HTTP_STATUS_CODES } from "../../shared/constants";
 import { MESSAGES } from "../../shared/constants";
+import { CustomRequest } from "../middlewares/authMiddleware";
 
 @injectable()
 export class AttendanceController {
@@ -71,6 +72,95 @@ export class AttendanceController {
             res.status(HTTP_STATUS_CODES.OK).json({
                 attendancesOfMonth,
             });
+
+        } catch (error) {
+            console.log(error);
+            res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+                message: (error instanceof Error) ? error.message : MESSAGES.ERROR.ATTENDANCE.ERROR_IN_FETCHING,
+            });
+        }
+    }
+
+    async getAllAttendanceByDate(req: Request, res: Response): Promise<void> {
+        try {
+            const { page = 1, pageSize = 10 } = req.query;
+
+            const rawDate = req.query.date as string | undefined;
+            const date = rawDate ? new Date(rawDate) : null;
+
+            const attendances = await this.attendanceUseCase.getAllAttendanceByDate(date, Number(page), Number(pageSize));
+            res.status(HTTP_STATUS_CODES.OK).json({
+                attendances,
+            });
+        } catch (error) {
+            console.log(error);
+            res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+                message: (error instanceof Error) ? error.message : MESSAGES.ERROR.ATTENDANCE.ERROR_IN_FETCHING,
+            });
+        }
+    }
+
+    async updateAttendance(req: Request, res: Response): Promise<void> {
+        try {
+            const { attendanceId } = req.params;
+            const status = req.query.status as unknown as "Present" | "Absent" | "Weekend" | "Holiday" | "Pending" | "Late";
+
+            const updatedAttendance = await this.attendanceUseCase.updateStatus(attendanceId, status);
+
+            res.status(HTTP_STATUS_CODES.OK).json({
+                message: MESSAGES.SUCCESS.ATTENDANCDE_UPDATED,
+                updatedAttendance,
+            })
+        } catch (error) {
+            console.log(error);
+            res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+                message: (error instanceof Error) ? error.message : MESSAGES.ERROR.ATTENDANCE.ERROR_IN_FETCHING,
+            });
+        }
+    }
+
+    async getAllPendingRegularizationRequests(req: Request, res: Response): Promise<void> {
+        try {
+            const pendingAttendance = await this.attendanceUseCase.getAllPendingRegularizationRequests();
+            res.status(HTTP_STATUS_CODES.OK).json({
+                pendingAttendance,
+            })
+        } catch (error) {
+            console.log(error);
+            res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+                message: (error instanceof Error) ? error.message : MESSAGES.ERROR.ATTENDANCE.ERROR_IN_FETCHING,
+            });
+        }
+    }
+    async requestRegularization(req: Request, res: Response): Promise<void> {
+        try {
+            const { attendanceId } = req.params;
+            const requestedBy = (req as CustomRequest).user.id;
+            const { reason } = req.body;
+
+            const pendingAttendnace = await this.attendanceUseCase.requestRegularization(attendanceId, requestedBy.toString(), reason);
+            res.status(HTTP_STATUS_CODES.OK).json({
+                pendingAttendnace,
+            })
+        } catch (error) {
+            console.log(error);
+            res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
+                message: (error instanceof Error) ? error.message : MESSAGES.ERROR.ATTENDANCE.ERROR_IN_FETCHING,
+            });
+        }
+    }
+
+    async respondToRegularizationRequest(req: Request, res: Response): Promise<void> {
+        try {
+
+            const { attendanceId } = req.params;
+            const { remarks } = req.body;
+            const action = req.query.action as unknown as "Approved" | "Rejected"
+
+            await this.attendanceUseCase.respondToRegularizationRequest(attendanceId, action, remarks);
+            res.status(HTTP_STATUS_CODES.OK).json({
+                message : `Regularization ${action}`,
+            })
 
         } catch (error) {
             console.log(error);

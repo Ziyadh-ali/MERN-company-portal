@@ -11,7 +11,7 @@ export const FaqSchema = new Schema<IFaqModel>(
                 answer: { type: String, required: true },
                 createdAt: Date,
             }
-        ],
+        ],  
         createdAt: Date,
     }
 );

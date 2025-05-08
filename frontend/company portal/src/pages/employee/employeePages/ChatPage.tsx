@@ -5,25 +5,28 @@ import { Input } from "../../../components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "../../../components/ui/tabs";
 import { ScrollArea } from "../../../components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
-import { Send, MoreVertical } from "lucide-react";
+import { Progress } from "../../../components/ui/progress";
+import { Send, MoreVertical, Paperclip, X, Loader2, FileText } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "../../../components/ui/dropdown-menu";
-import EmployeeSidebar from "../../../components/employeeComponents/employeeSidebar";
-import { EmployeeHeader } from "../../../components/employeeComponents/employeeHeader";
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 import { useChat } from "../../../context/chatContext";
-import { getEmployeesForChatService, getPrivateMessagesService } from "../../../services/user/userService";
+import { addGroupMembersService, addGroupService, getEmployeesForChatService, getGroupMessagesService, getPrivateMessagesService } from "../../../services/user/userService";
+import Sidebar from "../../../components/SidebarComponent";
+import { Header } from "../../../components/HeaderComponent";
+import GroupFormModal from "../modals/GroupModal";
+import { ChatUser, IGroup, Message } from "../../../utils/Interfaces/interfaces";
+import { enqueueSnackbar } from "notistack";
+import { AxiosError } from "axios";
+import { useConfirmModal } from "../../../components/useConfirm";
+import { AddMembersModal } from "../modals/AddMembersModal";
+import { employeeAxiosInstance } from "../../../api/employee.axios";
 
-interface ChatUser {
-    _id: string;
-    fullName: string;
-    role: string;
-    profilePic: string;
-}
+
 
 interface CurrentUser {
     _id: string;
@@ -33,35 +36,51 @@ interface CurrentUser {
     fullName: string;
 }
 
-export interface ChatMessage {
+interface Sender {
+    _id: string;
+    fullName: string;
+    email: string;
+}
+
+interface ChatMessage {
     _id: string;
     content: string;
-    createdAt: string;
-    deliveredTo: string[];
-    readBy: string[];
-    recipient: string | null;
-    replyTo: string | null;
-    roomId: string | null;
-    sender: {
-        _id: string;
-        fullName: string;
-        email: string;
-    };
+    createdAt: string | undefined;
+    recipient?: string;
+    roomId?: string;
+    sender: string | Sender;
     __v: number;
 }
 
 const ChatPage = () => {
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-    const [activeTab, setActiveTab] = useState("individual");
+    const [activeTab, setActiveTab] = useState<"individual" | "group">("individual");
     const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
+    const [selectedRoom, setSelectedRoom] = useState<{ roomId: string; projectName: string } | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [users, setUsers] = useState<ChatUser[]>([]);
     const [newMessage, setNewMessage] = useState("");
+    const [groupChatModal, setGroupChatModal] = useState(false);
+    // const [scroll, setScroll] = useState(true);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [, setJustSentMessage] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const scrollContentRef = useRef<HTMLDivElement>(null);
     const currentUser: CurrentUser = JSON.parse(localStorage.getItem("employeeSession") || "{}");
+    const { messages, projectRooms, sendMessage, joinRoom, deleteMessage, setMessages, onlineUsers, deleteGroup, leaveGroup } = useChat();
+    const { ConfirmModalComponent, confirm } = useConfirmModal();
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [filePreview, setFilePreview] = useState<string | null>(null);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const { messages, setMessages, sendMessage, joinRoom , deleteMessage } = useChat();
+    const [addMembersModalOpen, setAddMembersModalOpen] = useState(false);
+    const [selectedGroupForAddMembers, setSelectedGroupForAddMembers] = useState<{
+        roomId: string;
+        projectName: string;
+    } | null>(null);
 
     useEffect(() => {
         async function fetchEmployees() {
@@ -74,33 +93,40 @@ const ChatPage = () => {
         fetchEmployees();
     }, [currentUser._id]);
 
-    const handleEmojiClick = (emojiData: EmojiClickData) => {
-        setNewMessage((prev) => prev + emojiData.emoji);
-    };
+    useEffect(() => {
+        projectRooms.forEach((room) => joinRoom(room.roomId, "group"));
+    }, [projectRooms, joinRoom]);
 
     useEffect(() => {
-        setSelectedUser(users[0]);
-    }, [users]);
-
-    useEffect(() => {
-        if (selectedUser) {
+        if (activeTab === "individual" && selectedUser) {
             const fetchMessages = async () => {
-                if (selectedUser) {
-                    const res = await getPrivateMessagesService(currentUser._id, selectedUser._id);
-                    console.log(res.messages);
-                    setMessages(res.messages);
-                }
+                const res = await getPrivateMessagesService(currentUser._id, selectedUser._id);
+                const transformedMessages = res.messages.map((msg: ChatMessage) => ({
+                    ...msg,
+                    sender: typeof msg.sender === "string" ? { _id: msg.sender, fullName: "", email: "" } : msg.sender,
+                }));
+                setMessages(transformedMessages);
             };
-
             fetchMessages();
-            joinRoom(selectedUser._id);
+            joinRoom(selectedUser._id, "individual");
+        } else if (activeTab === "group" && selectedRoom) {
+            const fetchMessages = async () => {
+                const res = await getGroupMessagesService(selectedRoom.roomId);
+                const transformedMessages = res.messages.map((msg: ChatMessage) => ({
+                    ...msg,
+                    sender: typeof msg.sender === "string" ? { _id: msg.sender, fullName: "", email: "" } : msg.sender,
+                }));
+                setMessages(transformedMessages);
+            };
+            fetchMessages();
+            joinRoom(selectedRoom.roomId, "group");
         }
-    }, [selectedUser]);
-
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [activeTab, selectedRoom, selectedUser]);
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+        console.log("Online users updated in ChatPage:", onlineUsers);
+    }, [onlineUsers]);
 
     const filteredUsers = searchQuery
         ? users.filter((user) =>
@@ -109,19 +135,34 @@ const ChatPage = () => {
         : users;
 
     const scrollToBottom = () => {
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-        }
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    const handleEmojiClick = (emojiData: EmojiClickData) => {
+        setNewMessage((prev) => prev + emojiData.emoji);
     };
 
     const handleSendMessage = () => {
-        if (newMessage.trim() && selectedUser) {
-            const message = {
-                content: newMessage,
-                sender: currentUser._id,
-                recipient: selectedUser._id,
-                timestamp: new Date().toISOString(),
-            };
+
+        const message = {
+            content: newMessage,
+            sender: {
+                _id: currentUser._id,
+                fullName: currentUser.fullName,
+                email: currentUser.email,
+            },
+            recipient: activeTab === "individual" ? selectedUser?._id : undefined,
+            roomId: activeTab === "group" && selectedRoom ? selectedRoom.roomId : undefined,
+            replyTo: undefined,
+            chatType: activeTab,
+        };
+        if (selectedFile) {
+            uploadFile(message);
+        } else if (newMessage.trim()) {
             sendMessage(message);
             setNewMessage("");
         }
@@ -134,25 +175,123 @@ const ChatPage = () => {
         }
     };
 
+    const handleAddMembers = async (userIds: string[]) => {
+        try {
+            const response = await addGroupMembersService(
+                selectedGroupForAddMembers?.roomId || "",
+                userIds
+            );
+            enqueueSnackbar(response.message, { variant: "success" });
+        } catch (error) {
+            enqueueSnackbar(
+                error instanceof AxiosError
+                    ? error.response?.data.message
+                    : "Failed to add members",
+                { variant: "error" }
+            );
+        }
+    };
+
     const handleDeleteMessage = (messageId: string) => {
-
-        deleteMessage(messageId , selectedUser?._id ? selectedUser?._id : "")
-
+        deleteMessage(
+            messageId,
+            activeTab,
+            activeTab === "individual" ? selectedUser?._id : undefined,
+            activeTab === "group" ? (selectedRoom?.roomId ?? undefined) : undefined
+        );
         setMessages(messages.filter((msg) => msg._id !== messageId));
     };
 
+    const handleGroupAdd = async (data: IGroup) => {
+        try {
+            const response = await addGroupService(data);
+            enqueueSnackbar(response.message, { variant: "success" })
+
+        } catch (error) {
+            console.log(error);
+            enqueueSnackbar((error instanceof AxiosError) ? error.response?.data.message : "error in adding chat", { variant: "error" })
+        }
+    }
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files?.[0]) {
+            const file = e.target.files[0];
+            setSelectedFile(file);
+            if (file.type.startsWith('image/')) {
+                setFilePreview(URL.createObjectURL(file));
+            } else if (file.type.startsWith('video/')) {
+                setFilePreview(URL.createObjectURL(file));
+            }
+        }
+    };
+
+    const removeFile = () => {
+        setSelectedFile(null);
+        setFilePreview(null);
+        setUploadProgress(0);
+    };
+
+    const uploadFile = async (message: Message) => {
+        if (!selectedFile) return;
+
+        console.log(selectedFile.type);
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+
+        try {
+            const res = await employeeAxiosInstance.post('/chat/upload', formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round(
+                        (progressEvent.loaded * 100) / (progressEvent.total || 1)
+                    );
+                    setUploadProgress(percentCompleted);
+                }
+            });
+
+            // Attach the media URL from Cloudinary to the message
+            const messageWithMedia = {
+                ...message,
+                chatType: activeTab,
+                media: res.data.media, // Assuming res.data contains the uploaded media URL
+            };
+
+            // Send the message with media
+            sendMessage(messageWithMedia);
+
+            setNewMessage(""); // Clear the message input
+            removeFile(); // Remove the selected file after sending
+        } catch (error) {
+            console.log(error);
+            enqueueSnackbar("File upload failed", { variant: "error" });
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+
+
     return (
         <div className="flex h-screen bg-gray-100 overflow-hidden">
-            <EmployeeSidebar />
+            <Sidebar role="employee" />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <div className="p-6 pb-2">
-                    <EmployeeHeader heading="Chat Dashboard" />
+                    <Header heading="Chat Dashboard" role="employee" />
                 </div>
                 <div className="px-6 pb-6 flex-1 overflow-hidden">
                     <Card className="h-full flex flex-col overflow-hidden">
                         <CardHeader className="p-4 border-b">
                             <div className="flex justify-between items-center w-full">
-                                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
+                                <Tabs
+                                    value={activeTab}
+                                    onValueChange={(value: string) => {
+                                        if (value === "individual" || value === "group") {
+                                            setActiveTab(value);
+                                        }
+                                    }}
+                                    className="w-auto"
+                                >
                                     <TabsList>
                                         <TabsTrigger value="individual">Individual</TabsTrigger>
                                         <TabsTrigger value="group">Group</TabsTrigger>
@@ -166,84 +305,258 @@ const ChatPage = () => {
                                     className="max-w-xs"
                                 />
                             </div>
+                            {activeTab === "group" && (
+                                <div className="mt-4">
+                                    <Button onClick={() => setGroupChatModal(true)} variant="default">
+                                        Create Group
+                                    </Button>
+                                </div>
+                            )}
                         </CardHeader>
                         <div className="flex flex-1 overflow-hidden">
                             <div className="w-1/3 border-r overflow-hidden flex flex-col">
                                 <ScrollArea className="flex-1">
                                     <div className="p-4 space-y-2">
-                                        {filteredUsers.map((user) => (
-                                            <div
-                                                key={user._id}
-                                                className={`flex items-center p-3 hover:bg-gray-100 cursor-pointer rounded-md ${selectedUser?._id === user._id ? "bg-gray-100" : ""
-                                                    }`}
-                                                onClick={() => setSelectedUser(user)}
-                                            >
-                                                <Avatar className="h-10 w-10 mr-3 flex-shrink-0">
-                                                    <AvatarImage src={user.profilePic} alt={user.fullName} />
-                                                    <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
-                                                </Avatar>
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex justify-between items-center">
-                                                        <span className="font-medium text-gray-800 truncate">{user.fullName}</span>
-                                                        {user.role !== "developer" ? (
-                                                            <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{user.role}</span>
-                                                        ) : ""}
+                                        {activeTab === "individual" &&
+                                            filteredUsers.map((user) => {
+                                                return (
+                                                    <div
+                                                        key={user._id}
+                                                        className={`flex items-center p-3 hover:bg-gray-100 cursor-pointer rounded-md ${selectedUser?._id === user._id ? "bg-gray-100" : ""
+                                                            }`}
+                                                        onClick={() => {
+                                                            setSelectedUser(user);
+                                                            setSelectedRoom(null);
+                                                        }}
+                                                    >
+                                                        <div className="relative mr-3">
+                                                            <Avatar className="h-10 w-10">
+                                                                <AvatarImage src={user.profilePic} alt={user.fullName} />
+                                                                <AvatarFallback>{user.fullName.charAt(0)}</AvatarFallback>
+                                                            </Avatar>
+                                                            {onlineUsers.includes(user._id) ? (
+                                                                <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
+                                                            ) : (
+                                                                <span className="absolute bottom-0 right-0 w-3 h-3 bg-gray-400 border-2 border-white rounded-full" />
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="font-medium text-gray-800 truncate">{user.fullName}</span>
+                                                                {user.role !== "developer" && (
+                                                                    <span className="text-xs text-gray-500 flex-shrink-0 ml-2">{user.role}</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
                                                     </div>
+                                                );
+                                            })}
+                                        {activeTab === "group" &&
+                                            projectRooms.map((room) => (
+                                                <div
+                                                    key={room.roomId}
+                                                    className={`flex items-center p-3 hover:bg-gray-100 cursor-pointer rounded-md ${selectedRoom?.roomId === room.roomId ? "bg-gray-100" : ""
+                                                        }`}
+                                                >
+                                                    <div
+                                                        className="flex-1 min-w-0"
+                                                        onClick={() => {
+                                                            setSelectedRoom({
+                                                                projectName: room.projectName,
+                                                                roomId: room.roomId,
+                                                            });
+                                                            setSelectedUser(null);
+                                                        }}
+                                                    >
+                                                        <span className="font-medium text-gray-800 truncate">
+                                                            {room.projectName} Group Chat
+                                                        </span>
+                                                    </div>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="p-1 text-gray-500 hover:bg-transparent hover:text-gray-700 focus:outline-none"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                <MoreVertical className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent
+                                                            align="end"
+                                                            className="bg-white border border-gray-200 shadow-md"
+                                                        >
+                                                            {room.createdBy === currentUser._id ? (
+                                                                <>
+                                                                    <DropdownMenuItem
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            confirm({
+                                                                                title: "Delete Group",
+                                                                                message: "Are you sure you want to delete this Group?",
+                                                                                onConfirm: () => {
+                                                                                    deleteGroup(room.roomId);
+                                                                                }
+                                                                            });
+                                                                        }}
+                                                                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                                    >
+                                                                        Delete Group
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem
+                                                                        onClick={(e) => {
+                                                                            e.stopPropagation();
+                                                                            setSelectedGroupForAddMembers(room);
+                                                                            setAddMembersModalOpen(true);
+                                                                        }}
+                                                                        className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                                    >
+                                                                        Add Members
+                                                                    </DropdownMenuItem>
+                                                                </>
+                                                            )
+                                                                :
+                                                                <DropdownMenuItem
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        confirm({
+                                                                            title: "Leave Group",
+                                                                            message: "Are you sure you want to leave this Group?",
+                                                                            onConfirm: () => {
+                                                                                leaveGroup(room.roomId);
+                                                                            }
+                                                                        });
+                                                                    }}
+                                                                    className="text-yellow-600 hover:text-red-700 hover:bg-red-50"
+                                                                >
+                                                                    Leave Group
+                                                                </DropdownMenuItem>
+                                                            }
+
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            ))}
                                     </div>
                                 </ScrollArea>
                             </div>
-
                             <div className="w-2/3 flex flex-col overflow-hidden">
-                                {selectedUser ? (
+                                {(selectedUser || selectedRoom) ? (
                                     <>
                                         <div className="flex items-center p-4 border-b">
-                                            <Avatar className="h-10 w-10 mr-3">
-                                                <AvatarImage src={selectedUser.profilePic} alt={selectedUser.fullName} />
-                                                <AvatarFallback>{selectedUser.fullName.charAt(0)}</AvatarFallback>
-                                            </Avatar>
-                                            <div>
-                                                <h2 className="font-semibold text-gray-800">{selectedUser.fullName}</h2>
-                                            </div>
+                                            {selectedUser ? (
+                                                <>
+                                                    <Avatar className="h-10 w-10 mr-3">
+                                                        <AvatarImage src={selectedUser.profilePic} alt={selectedUser.fullName} />
+                                                        <AvatarFallback>{selectedUser.fullName.charAt(0)}</AvatarFallback>
+                                                    </Avatar>
+                                                    <div>
+                                                        <h2 className="font-semibold text-gray-800">{selectedUser.fullName}</h2>
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <h2 className="font-semibold text-gray-800">{selectedRoom?.projectName} Project Chat</h2>
+                                            )}
                                         </div>
                                         <div className="flex-1 overflow-hidden">
                                             <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
-                                                <div className="space-y-4">
-                                                    {messages
-                                                        .filter(
-                                                            (msg) =>
-                                                                (msg.sender === selectedUser._id && msg.recipient === currentUser._id) ||
-                                                                (msg.recipient === selectedUser._id && msg.sender === currentUser._id)
-                                                        )
-                                                        .map((message) => (
+                                                <div ref={scrollContentRef}>
+                                                    {(() => {
+                                                        const filteredMessages = messages.filter((msg) => {
+                                                            const senderId = typeof msg.sender === "string" ? msg.sender : msg.sender._id;
+                                                            const isMatch =
+                                                                (activeTab === "individual" &&
+                                                                    ((senderId === selectedUser?._id && msg.recipient === currentUser._id) ||
+                                                                        (msg.recipient === selectedUser?._id && senderId === currentUser._id))) ||
+                                                                (activeTab === "group" && msg.roomId === selectedRoom?.roomId);
+                                                            return isMatch;
+                                                        });
+
+                                                        // Deduplicate messages by their _id
+                                                        const seenMessageIds = new Set<string>();
+                                                        const uniqueMessages = filteredMessages.filter((msg) => {
+                                                            if (seenMessageIds.has(msg._id ? msg._id : "")) {
+                                                                return false;
+                                                            }
+                                                            seenMessageIds.add(msg._id ? msg._id : "");
+                                                            return true;
+                                                        });
+
+                                                        if (uniqueMessages.length === 0) {
+                                                            return (
+                                                                <div className="text-center text-gray-400 text-sm mt-10">
+                                                                    No messages yet.
+                                                                </div>
+                                                            );
+                                                        }
+
+                                                        return uniqueMessages.map((message) => (
                                                             <div
                                                                 key={message._id}
-                                                                className={`flex relative ${message.sender === currentUser._id ? "justify-end" : "justify-start"
+                                                                className={`flex relative ${(typeof message.sender === "string" ? message.sender : message.sender._id) === currentUser._id
+                                                                    ? "justify-end"
+                                                                    : "justify-start"
                                                                     }`}
                                                             >
                                                                 <div
-                                                                    className={`p-3 rounded-lg shadow-sm max-w-[80%] flex items-start gap-2 ${message.sender === currentUser._id
-                                                                            ? "bg-blue-600 text-white rounded-tr-none"
-                                                                            : "bg-gray-200 text-gray-800 rounded-tl-none"
+                                                                    className={`p-3 rounded-lg shadow-sm max-w-[80%] flex items-start gap-2 ${(typeof message.sender === "string" ? message.sender : message.sender._id) === currentUser._id
+                                                                        ? "bg-blue-600 text-white rounded-tr-none"
+                                                                        : "bg-gray-200 text-gray-800 rounded-tl-none"
                                                                         }`}
                                                                 >
                                                                     <div className="flex-1">
-                                                                        <p className="break-words text-sm">{message.content}</p>
+                                                                        <p className="text-xs font-medium mb-1">
+                                                                            {message.sender.fullName}
+                                                                        </p>
+                                                                        
+                                                                        {/* Add this section for media display */}
+                                                                        {message.media && (
+                                                                            <div className="mb-2">
+                                                                                {message.media.type === 'image' ? (
+                                                                                    <img 
+                                                                                        src={message.media.url} 
+                                                                                        alt="Media" 
+                                                                                        className="max-h-60 rounded-md"
+                                                                                    />
+                                                                                ) : message.media.type === 'video' ? (
+                                                                                    <video 
+                                                                                        src={message.media.url} 
+                                                                                        controls 
+                                                                                        className="max-h-60 rounded-md"
+                                                                                    />
+                                                                                ) : (
+                                                                                    <a 
+                                                                                        href={message.media.url} 
+                                                                                        target="_blank" 
+                                                                                        rel="noopener noreferrer"
+                                                                                        className="flex items-center gap-2 p-2 border rounded-md"
+                                                                                    >
+                                                                                        <FileText className="w-5 h-5" />
+                                                                                        <span>View Document</span>
+                                                                                    </a>
+                                                                                )}
+                                                                            </div>
+                                                                        )}
+                                                                        
+                                                                        {message.content && (
+                                                                            <p className="break-words text-sm">{message.content}</p>
+                                                                        )}
+                                                                        
                                                                         <span
-                                                                            className={`text-xs block mt-1 ${message.sender === currentUser._id
-                                                                                    ? "text-blue-200"
-                                                                                    : "text-gray-500"
+                                                                            className={`text-xs block mt-1 ${(typeof message.sender === "string" ? message.sender : message.sender._id) ===
+                                                                                currentUser._id
+                                                                                ? "text-blue-200"
+                                                                                : "text-gray-500"
                                                                                 }`}
                                                                         >
-                                                                            {new Date(message.createdAt ?? "").toLocaleTimeString([], {
+                                                                            {new Date(message.createdAt || "").toLocaleTimeString([], {
                                                                                 hour: "2-digit",
                                                                                 minute: "2-digit",
                                                                             })}
                                                                         </span>
                                                                     </div>
-                                                                    {message.sender === currentUser._id && (
+                                                                    {(typeof message.sender === "string" ? message.sender : message.sender._id) === currentUser._id && (
                                                                         <DropdownMenu>
                                                                             <DropdownMenuTrigger asChild>
                                                                                 <Button
@@ -259,7 +572,7 @@ const ChatPage = () => {
                                                                                 className="bg-white border border-gray-200 shadow-md"
                                                                             >
                                                                                 <DropdownMenuItem
-                                                                                    onClick={() => handleDeleteMessage(message._id)}
+                                                                                    onClick={() => handleDeleteMessage(message._id ? message._id : "")}
                                                                                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
                                                                                 >
                                                                                     Delete
@@ -269,14 +582,76 @@ const ChatPage = () => {
                                                                     )}
                                                                 </div>
                                                             </div>
-                                                        ))}
+                                                        ));
+                                                    })()}
                                                     <div ref={messagesEndRef} />
                                                 </div>
                                             </ScrollArea>
                                         </div>
-
                                         <div className="p-4 border-t relative">
+                                            {/* File preview */}
+                                            {filePreview && (
+                                                <div className="mb-2 relative">
+                                                    {selectedFile?.type.startsWith('image/') ? (
+                                                        <img
+                                                            src={filePreview}
+                                                            alt="Preview"
+                                                            className="max-h-40 rounded-md"
+                                                        />
+                                                    ) : selectedFile?.type.startsWith('video/') ? (
+                                                        <video
+                                                            src={filePreview}
+                                                            controls
+                                                            className="max-h-40 rounded-md"
+                                                        />
+                                                    ) : (
+                                                        <div className="flex items-center gap-2 p-2 border rounded-md">
+                                                            <FileText className="w-5 h-5" />
+                                                            <span>{selectedFile?.name}</span>
+                                                        </div>
+                                                    )}
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="absolute top-1 right-1 h-6 w-6"
+                                                        onClick={removeFile}
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            )}
+
+                                            {/* Upload progress */}
+                                            {isUploading && (
+                                                <div className="mb-2">
+                                                    <Progress value={uploadProgress} className="h-2" />
+                                                    <p className="text-xs text-muted-foreground mt-1">
+                                                        Uploading... {uploadProgress}%
+                                                    </p>
+                                                </div>
+                                            )}
+
                                             <div className="flex items-center gap-2">
+                                                {/* File input */}
+                                                <input
+                                                    type="file"
+                                                    id="file-upload"
+                                                    className="hidden"
+                                                    ref={fileInputRef}
+                                                    onChange={handleFileChange}
+                                                    accept="image/*,video/*,.pdf,.doc,.docx"
+                                                />
+
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    type="button"
+                                                    onClick={() => fileInputRef.current?.click()}
+                                                >
+                                                    <Paperclip className="h-5 w-5" />
+                                                </Button>
+
+                                                {/* Emoji picker and message input */}
                                                 <Button
                                                     type="button"
                                                     variant="ghost"
@@ -285,7 +660,6 @@ const ChatPage = () => {
                                                 >
                                                     😊
                                                 </Button>
-
                                                 <Input
                                                     type="text"
                                                     placeholder="Type a message..."
@@ -296,10 +670,14 @@ const ChatPage = () => {
                                                 />
                                                 <Button
                                                     onClick={handleSendMessage}
-                                                    disabled={!newMessage.trim()}
+                                                    disabled={(!newMessage.trim() && !selectedFile) || isUploading}
                                                     size="icon"
                                                 >
-                                                    <Send className="h-5 w-5" />
+                                                    {isUploading ? (
+                                                        <Loader2 className="h-5 w-5 animate-spin" />
+                                                    ) : (
+                                                        <Send className="h-5 w-5" />
+                                                    )}
                                                 </Button>
                                             </div>
 
@@ -320,6 +698,15 @@ const ChatPage = () => {
                     </Card>
                 </div>
             </div>
+            <GroupFormModal isOpen={groupChatModal} onClose={() => setGroupChatModal(false)} onSubmit={handleGroupAdd} />
+            <ConfirmModalComponent />
+            <AddMembersModal
+                isOpen={addMembersModalOpen}
+                onClose={() => setAddMembersModalOpen(false)}
+                groupId={selectedGroupForAddMembers?.roomId || ""}
+                allUsers={users ?? []}
+                onAddMembers={handleAddMembers}
+            />
         </div>
     );
 };

@@ -12,10 +12,14 @@ import {
     meetingController,
     faqController,
     adminUserManagement,
-    messageController
+    messageController,
+    projectController,
+    groupController,
+    questionController
 } from "../di/resolver";
 import { verifyAuth } from "../../adapters/middlewares/authMiddleware";
 import upload from "../../adapters/service/multer";
+import { chatMediaUpload } from "../../adapters/service/chatUploadMulter";
 
 
 export class UserRoute {
@@ -95,6 +99,11 @@ export class UserRoute {
                 verifyAuth("employee"),
                 (req: Request, res: Response) => leaveRequestController.cancelLeaveRequest(req, res)
             )
+            .patch(
+                "/leave/request/cancel/:leaveRequestId",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => leaveRequestController.cancelLeaveRequest(req, res)
+            )
 
         this.router
             .get(
@@ -108,6 +117,11 @@ export class UserRoute {
                 "/attendance/:employeeId",
                 verifyAuth("employee"),
                 (req: Request, res: Response) => attendanceController.checkIn(req, res)
+            )
+            .post(
+                "/attendance/:attendanceId/regularized",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => attendanceController.requestRegularization(req, res)
             )
             .patch(
                 "/attendance/:employeeId",
@@ -173,13 +187,114 @@ export class UserRoute {
                 verifyAuth("employee"),
                 (req: Request, res: Response) => faqController.updateFaq(req, res)
             )
-        
-            this.router
-                .get(
-                    "/messages",
-                    verifyAuth("employee"),
-                    (req: Request, res: Response) => messageController.getPrivateMessages(req, res)
-                )
+            .delete(
+                "/faq/:faqId",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => faqController.deleteFaq(req, res)
+            )
+
+        this.router
+            .get(
+                "/projects",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => projectController.findProjects(req, res)
+            )
+            .post(
+                "/projects",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => projectController.createProject(req, res)
+
+            )
+            .patch(
+                "/projects/:projectId",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => projectController.updateProject(req, res)
+            )
+            .delete(
+                "/projects/:projectId",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => projectController.deleteProject(req, res)
+            )
+            .get(
+                "/projects/:projectId",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => projectController.findById(req, res)
+            )
+        this.router
+            .get(
+                "/messages",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => messageController.getPrivateMessages(req, res)
+            )
+        this.router
+            .get(
+                "/messages/:roomId",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => messageController.getGroupMessages(req, res)
+            )
+        this.router
+            .get(
+                "/developers",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => adminUserManagement.getDevelopers(req, res)
+            )
+
+        this.router
+            .post(
+                "/groups",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => groupController.createGroup(req, res),
+            )
+            .get(
+                "/groups",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => groupController.getGroupsByUser(req, res),
+            )
+            .patch(
+                "/groups/:groupId/members",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => groupController.addMembers(req, res),
+            )
+
+        this.router
+            .post(
+                "/question",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => questionController.submitQuestion(req, res),
+            )
+            .get(
+                "/question",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => questionController.getAllQuestions(req, res),
+            )
+            .get(
+                "/question/unanswered",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => questionController.getUnansweredQuestions(req, res),
+            )
+            .get(
+                "/question/:employeeId",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => questionController.getQuestionsByEmployeeId(req, res),
+            )
+            .delete(
+                "/question/:id",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => questionController.deleteQuestion(req, res),
+            )
+            .patch(
+                "/question/:id",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => questionController.answerQuestion(req, res),
+            )
+
+        this.router
+            .post(
+                "/chat/upload",
+                verifyAuth("employee"),
+                chatMediaUpload.single("file"),
+                (req: Request, res: Response) => messageController.uploadMedia(req, res),
+            )
     }
 
     public getRoute(): express.Router {

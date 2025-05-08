@@ -12,11 +12,11 @@ export class AdminController {
     }
 
 
-    async login(req: Request, res: Response) {
+    async login(req: Request, res: Response): Promise<void> {
         const { email, password } = req.body;
         try {
             const response = await this.adminAuthUseCase.login(email, password);
-            
+
             if (response) {
                 setAuthCookies(
                     res,
@@ -43,7 +43,7 @@ export class AdminController {
 
     async logout(req: Request, res: Response) {
         try {
-            clearAuthCookies(res , "admin_access_token" , "admin_refresh_token");
+            clearAuthCookies(res, "admin_access_token", "admin_refresh_token");
             res.status(200).json({
                 success: true,
                 message: MESSAGES.SUCCESS.LOGOUT_SUCCESS,

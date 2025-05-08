@@ -12,6 +12,9 @@ import { ResetPasswordController } from "../../adapters/controllers/employee/Res
 import { MeetingController } from "../../adapters/controllers/MeetingController";
 import { FaqController } from "../../adapters/controllers/FaqController";
 import { MessageController } from "../../adapters/controllers/MessageController";
+import { ProjectController } from "../../adapters/controllers/ProjectController";
+import { GroupController } from "../../adapters/controllers/GroupController";
+import { QuestionController } from "../../adapters/controllers/QuestionController";
 
 export class ControllerRegistry {
     static registerControllers() : void {
@@ -65,6 +68,17 @@ export class ControllerRegistry {
 
         container.register("MessageController",{
             useClass : MessageController
+        });
+
+        container.register("ProjectController",{
+            useClass : ProjectController
+        });
+
+        container.register("GroupController",{
+            useClass : GroupController,
+        });
+        container.register("QuestionController",{
+            useClass : QuestionController,
         });
     }
 }

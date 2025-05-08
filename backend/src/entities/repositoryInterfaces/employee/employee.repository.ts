@@ -19,4 +19,5 @@ export interface IEmployeeRepository {
         department ?: string,
     }) : Promise <string[]>;
     getEmployeesForChat() : Promise<Partial<Employee[]>>;
+    getDevelopers() : Promise<Employee[]>;
 }

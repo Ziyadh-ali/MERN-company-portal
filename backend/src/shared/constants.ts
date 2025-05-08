@@ -58,6 +58,11 @@ export const MESSAGES = {
     CREATE_SUCCESS: "FAQ created successfully.",
     FAQ_UPDATE_SUCCESS: "FAQ updated successfully.",
     DELETE_SUCCESS: "FAQ deleted successfully.",
+    PROJECT_CREATED: "Project created successfully.",
+    PROJECT_DELETED: "Project deleted successfully.",
+    PROJECT_UPDATED: "Project updated successfully.",
+    ATTENDANCDE_UPDATED: "Attendance updated successfully.",
+
   },
 
   ERROR: {
@@ -83,6 +88,11 @@ export const MESSAGES = {
       INVALID_CURRENT_PASSWORD: "The current password you entered is incorrect.",
       INVALID_PASSWORD: "The password you entered is incorrect.",
       PASSWORD_UPDATE_FAILED: "An error occurred while updating the password. Please try again.",
+    },
+    PROJECT: {
+      PROJECT_CREATED: "Project not created.",
+      PROJECT_DELETED: "Project not deleted.",
+      PROJECT_UPDATED: "Project not updated.",
     },
 
     LEAVE_TYPE: {

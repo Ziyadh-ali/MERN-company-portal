@@ -2,7 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui
 import { Button } from "../../../components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
 import { Progress } from "../../../components/ui/progress";
-import { EmployeeHeader } from "../../../components/employeeComponents/employeeHeader";
 import { useEffect, useState } from "react";
 import { checkInService, checkOutService, getTodayAttendance } from "../../../services/user/userService";
 import { useSelector } from "react-redux";
@@ -10,7 +9,8 @@ import { RootState } from "../../../store/store";
 import { enqueueSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
 import { AxiosError } from "axios";
-import EmployeeSidebar from "../../../components/employeeComponents/employeeSidebar";
+import Sidebar from "../../../components/SidebarComponent";
+import { Header } from "../../../components/HeaderComponent";
 
 export interface Attendance {
     _id?: string,
@@ -63,12 +63,12 @@ const EmployeeDashboard = () => {
     return (
         <div className="flex min-h-screen bg-gray-100">
             {/* Sidebar */}
-            <EmployeeSidebar />
+            <Sidebar role="employee" />
 
             {/* Main Content */}
             <div className="flex-1 p-6">
                 {/* Header */}
-                <EmployeeHeader heading="Dashboard" />
+                <Header role="employee" heading="Dashboard" />
                 {/* Dashboard Sections */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <Card>

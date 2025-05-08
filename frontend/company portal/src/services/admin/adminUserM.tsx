@@ -96,10 +96,10 @@ export const getAllLeaveRequestsService = async () => {
     return response.data;
 }
 
-export const updateLeaveRequestStatusService = async (leaveRequestId: string, status: "Approved" | "Rejected", userId: string) => {
+export const updateLeaveRequestStatusService = async (leaveRequestId: string, status: "Approved" | "Rejected", reason?: string) => {
     const response = await adminAxiosInstance.patch(`/leave/requests/${leaveRequestId}`, {
         status,
-        userId
+        reason
     }, {
         headers: {
             "Content-Type": "application/json"
@@ -107,4 +107,36 @@ export const updateLeaveRequestStatusService = async (leaveRequestId: string, st
     }
     );
     return response.data;
+}
+
+export const getAllAttendanceService = async (
+    date: string | number,
+    page: number,
+    pageSize: number
+) => {
+    const queryDate = typeof date === "number" ? new Date(date).toISOString().split("T")[0] : date;
+    const response = await adminAxiosInstance.get(
+        `/attendance?date=${queryDate}&page=${page}&pageSize=${pageSize}`
+    );
+    return response.data;
+};
+
+export const updateAttendanceService = async (attendanceId: string, status: "Present" | "Absent" | "Weekend" | "Holiday" | "Pending") => {
+    const response = await adminAxiosInstance.patch(`/attendance/${attendanceId}?status=${status}`);
+    return response.data;
+}
+
+export const regularizeStatusService = async (attendanceId: string, action: "Approved" | "Rejected", remarks: string) => {
+    const response = await adminAxiosInstance.patch(`/attendance/${attendanceId}/regularize?action=${action}`, { remarks });
+    return response.data;
+}
+
+export const getQuestionsForAdminService = async () => {
+    const response = await adminAxiosInstance.get("/question");
+    return response.data;
+}
+
+export const answerAdminQuestionService = async (questionId: string, answer: string) => {
+  const response = await adminAxiosInstance.patch(`/question/${questionId}`, { answer });
+  return response.data;
 }

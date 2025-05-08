@@ -1,4 +1,5 @@
 import { createSlice , PayloadAction } from "@reduxjs/toolkit";
+import socket from "../../utils/socket";
 
 interface Employee {
     _id : string,
@@ -22,10 +23,12 @@ const employeeSlice = createSlice({
     reducers : {
         employeeLogin : (state , action : PayloadAction<Employee>) => {
             state.employee = action.payload;
+            socket.connect();
             localStorage.setItem("employeeSession" , JSON.stringify(action.payload));
         },
         employeeLogout : (state) => {
             state.employee = null;
+            socket.disconnect();
             localStorage.removeItem("employeeSession");
         }
     }

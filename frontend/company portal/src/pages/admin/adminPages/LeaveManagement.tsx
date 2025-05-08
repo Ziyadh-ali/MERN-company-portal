@@ -1,25 +1,27 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../components/ui/table";
-import { CheckCircle, XCircle } from "lucide-react";
-import AdminSideBar from "../../../components/adminComponents/AdminSideBar";
+import { CheckCircle, } from "lucide-react";
 import { useSnackbar } from "notistack";
 import { getAllLeaveRequestsService, updateLeaveRequestStatusService } from "../../../services/admin/adminUserM";
+import ShadTable from "../../../components/TableComponent";
+import Sidebar from "../../../components/SidebarComponent";
+import RejectLeaveRequestModal from "../../employee/modals/RejectLeaveRequest";
+import { useLocation } from "react-router-dom";
 
 // Define LeaveRequest interface
 export interface LeaveRequest {
-    _id?: string;
+    _id: string;
     employeeId: {
         fullName: string,
-        role : string , 
+        role: string,
         _id: string,
     }
     leaveTypeId: {
         name: string,
         _id: string,
     }
-    days : number;
+    days: number;
     startDate: string;
     endDate: string;
     reason?: string;
@@ -28,6 +30,7 @@ export interface LeaveRequest {
 
 
 const LeaveManagementPage = () => {
+    const location = useLocation()
     const { enqueueSnackbar } = useSnackbar();
     const [leaveRequests, setLeaveRequests] = useState<LeaveRequest[]>([]);
 
@@ -38,12 +41,12 @@ const LeaveManagementPage = () => {
                 const data = await getAllLeaveRequestsService();
                 const updatedLeaveRequests = (data.leaveRequests || []).map((request: LeaveRequest) => {
                     const startDate = new Date(request.startDate);
-                    const endDate = new Date(request.endDate); 
-                    
+                    const endDate = new Date(request.endDate);
+
                     const timeDifference = endDate.getTime() - startDate.getTime();
-                    
+
                     const days = Math.ceil(timeDifference / (1000 * 3600 * 24)) + 1;
-                    
+
                     return { ...request, days: days };
                 });
                 setLeaveRequests(updatedLeaveRequests || []);
@@ -53,12 +56,12 @@ const LeaveManagementPage = () => {
             }
         };
         fetchLeaveRequests();
-    }, [enqueueSnackbar]);
+    }, [enqueueSnackbar,location]);
 
     // Handle approve/reject actions
-    const handleApprove = async (id: string , userId : string) => {
+    const handleApprove = async (id: string, userId: string) => {
         try {
-            await updateLeaveRequestStatusService(id , "Approved",userId);
+            await updateLeaveRequestStatusService(id, "Approved", userId);
             setLeaveRequests(leaveRequests.map(req => req._id === id ? { ...req, status: "Approved" } : req));
             enqueueSnackbar("Leave request approved successfully", { variant: "success" });
         } catch (error) {
@@ -67,21 +70,76 @@ const LeaveManagementPage = () => {
         }
     };
 
-    const handleReject = async (id: string , userId : string) => {
-        try {
-            await updateLeaveRequestStatusService(id , "Rejected",userId);
-            setLeaveRequests(leaveRequests.map(req => req._id === id ? { ...req, status: "Rejected" } : req));
-            enqueueSnackbar("Leave request rejected successfully", { variant: "success" });
-        } catch (error) {
-            console.error("Error rejecting leave request:", error);
-            enqueueSnackbar("Failed to reject leave request", { variant: "error" });
-        }
-    };
+    const leaveColumns = [
+        {
+            header: "User Name",
+            accessor: (row: LeaveRequest) => row.employeeId.fullName,
+        },
+        {
+            header: "Role",
+            accessor: (row: LeaveRequest) => row.employeeId.role,
+        },
+        {
+            header: "Leave Type",
+            accessor: (row: LeaveRequest) => row.leaveTypeId.name,
+        },
+        {
+            header: "Start Date",
+            accessor: (row: LeaveRequest) => new Date(row.startDate).toDateString(),
+        },
+        {
+            header: "End Date",
+            accessor: (row: LeaveRequest) => new Date(row.endDate).toDateString(),
+        },
+        {
+            header: "Days",
+            accessor: (row: LeaveRequest) => row.days,
+        },
+        {
+            header: "Status",
+            accessor: (row: LeaveRequest) => (
+                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${row.status === "Pending" ? "bg-yellow-100 text-yellow-800" :
+                    row.status === "Approved" ? "bg-green-100 text-green-800" :
+                        "bg-red-100 text-red-800"
+                    }`}>
+                    {row.status}
+                </span>
+            )
+        },
+        {
+            header: "Actions",
+            accessor: (row: LeaveRequest) =>
+                row.status === "Pending" ? (
+                    <div className="flex space-x-2">
+                        <Button size="sm" onClick={() => handleApprove(row._id as string, row.employeeId._id as string)}>
+                            <CheckCircle size={16} className="mr-1" /> Approve
+                        </Button>
+                        <RejectLeaveRequestModal
+                                leaveRequestId={row._id}
+                                role="admin"
+                            />
+                    </div>
+                ) : (
+                    <Button variant="outline" size="sm" disabled>{row.status}</Button>
+                ),
+        },
+        {
+            header: "Rejection Reason",
+            accessor: (row: LeaveRequest) =>
+                row.status === "Rejected" ? (
+                    <span className="text-sm text-red-600">
+                        {row.reason || "No reason provided"}
+                    </span>
+                ) : (
+                    "-"
+                ),
+        },
+    ];
 
     return (
         <div className="flex min-h-screen bg-gray-100">
             {/* Sidebar */}
-            <AdminSideBar />
+            <Sidebar role="admin" />
 
             {/* Main Content */}
             <div className="flex-1 p-6">
@@ -94,58 +152,12 @@ const LeaveManagementPage = () => {
                         <CardTitle className="text-lg font-semibold">Leave Requests</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {leaveRequests.length > 0 ? (
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>User Name</TableHead>
-                                        <TableHead>Role</TableHead>
-                                        <TableHead>Leave Type</TableHead>
-                                        <TableHead>Start Date</TableHead>
-                                        <TableHead>End Date</TableHead>
-                                        <TableHead>Days</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {leaveRequests.length >0 ? leaveRequests.map((request) => (
-                                        <TableRow key={request._id}>
-                                            <TableCell>{request.employeeId.fullName}</TableCell>
-                                            <TableCell>{request.employeeId.role}</TableCell>
-                                            <TableCell>{request.leaveTypeId.name}</TableCell>
-                                            <TableCell>{request.startDate}</TableCell>
-                                            <TableCell>{request.endDate}</TableCell>
-                                            <TableCell>{request.days}</TableCell>
-                                            <TableCell>
-                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${request.status === "Pending" ? "bg-yellow-100 text-yellow-800" :
-                                                        request.status === "Approved" ? "bg-green-100 text-green-800" :
-                                                            "bg-red-100 text-red-800"
-                                                    }`}>
-                                                    {request.status}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell>
-                                                {request.status === "Pending" ? (
-                                                    <div className="flex space-x-2">
-                                                        <Button size="sm" onClick={() => handleApprove(request._id as string , request.employeeId._id as string)}>
-                                                            <CheckCircle size={16} className="mr-1" /> Approve
-                                                        </Button>
-                                                        <Button variant="destructive" size="sm" onClick={() => handleReject(request._id as string , request.employeeId._id as string)}>
-                                                            <XCircle size={16} className="mr-1" /> Reject
-                                                        </Button>
-                                                    </div>
-                                                ) : (
-                                                    <Button variant="outline" size="sm" disabled>{request.status}</Button>
-                                                )}
-                                            </TableCell>
-                                        </TableRow>
-                                    )) : ""}
-                                </TableBody>
-                            </Table>
-                        ) : (
-                            <h1 className="text-center text-gray-600">No Leave Requests</h1>
-                        )}
+                        <ShadTable
+                            columns={leaveColumns}
+                            data={leaveRequests}
+                            keyExtractor={(row) => row._id}
+                            emptyMessage="No Leave Requests"
+                        />
                     </CardContent>
                 </Card>
             </div>

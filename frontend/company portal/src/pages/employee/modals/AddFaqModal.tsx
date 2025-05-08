@@ -14,9 +14,8 @@ import {
   import { AxiosError } from "axios";
   import { useEffect, useState } from "react";
   
-  // FAQ Data Type
   interface FaqData {
-    _id?: string; // used for edit
+    _id?: string;
     topic: string;
     description: string;
     questions: {
@@ -25,7 +24,6 @@ import {
     }[];
   }
   
-  // Props
   interface AddEditFaqModalProps {
     open: boolean;
     onClose: () => void;
@@ -44,7 +42,6 @@ import {
     const [questionInput, setQuestionInput] = useState("");
     const [answerInput, setAnswerInput] = useState("");
   
-    // Reset Q&A inputs when modal opens/closes
     useEffect(() => {
       if (!open) {
         setQuestionInput("");
@@ -63,14 +60,15 @@ import {
       onSubmit: async (values, { resetForm }) => {
         try {
           if (mode === "edit" && initialData?._id) {
-            await onSubmit(values, initialData._id); // pass id for edit
+            await onSubmit(values, initialData._id);
           } else {
-            await onSubmit(values); // add mode
+            await onSubmit(values);
           }
   
           enqueueSnackbar(`FAQ ${mode === "edit" ? "updated" : "added"} successfully`, {
             variant: "success",
           });
+
   
           resetForm();
           setQuestionInput("");
@@ -105,7 +103,6 @@ import {
       updated.splice(index, 1);
       formik.setFieldValue("questions", updated);
     };
-  
     return (
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent

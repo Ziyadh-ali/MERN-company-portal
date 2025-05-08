@@ -1,11 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
-import AdminHeader from "../../../components/adminComponents/AdminHeader";
-import AdminSideBar from "../../../components/adminComponents/AdminSideBar";
 import { useEffect, useState } from "react";
 import { getUserDetails } from "../../../services/admin/adminUserM";
 import { useNavigate, useParams } from "react-router-dom";
+import Sidebar from "../../../components/SidebarComponent";
+import { Header } from "../../../components/HeaderComponent";
 
 // Define the IUserModel interface based on the schema
 interface IUserModel {
@@ -72,10 +72,10 @@ const UserDetailsPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      <AdminSideBar />
+      <Sidebar role="admin" />
 
       <div className="flex-1 p-6">
-        <AdminHeader />
+        <Header heading="User details" role="admin" />
 
         <div className="bg-white shadow-md rounded-lg p-6 mb-6">
           <div className="flex items-center justify-between">

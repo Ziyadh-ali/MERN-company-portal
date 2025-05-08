@@ -17,6 +17,9 @@ import { MeetingController } from "../../adapters/controllers/MeetingController"
 import { FaqController } from "../../adapters/controllers/FaqController";
 import { SocketManager } from "../../shared/socket/socketManager";
 import { MessageController } from "../../adapters/controllers/MessageController";
+import { ProjectController } from "../../adapters/controllers/ProjectController";
+import { GroupController } from "../../adapters/controllers/GroupController";
+import { QuestionController } from "../../adapters/controllers/QuestionController";
 
 DependencyInjection.registerAll();
 
@@ -53,3 +56,9 @@ export const faqController = container.resolve(FaqController);
 export const socketManager = container.resolve(SocketManager);
 
 export const messageController = container.resolve(MessageController);
+
+export const projectController = container.resolve(ProjectController);
+
+export const groupController = container.resolve(GroupController);
+
+export const questionController = container.resolve(QuestionController);

@@ -2,13 +2,7 @@ import { IMessage } from "../models/IMessage.enities";
 
 
 export interface IMessageRepository {
-  createMessage(data: {
-    content: string;
-    sender: string;
-    recipient?: string;
-    roomId?: string;
-    replyTo?: string;
-  }): Promise<IMessage>;
+  createMessage(data: IMessage): Promise<IMessage>;
 
   getMessagesByRoomId(roomId: string): Promise<IMessage[]>;
 
