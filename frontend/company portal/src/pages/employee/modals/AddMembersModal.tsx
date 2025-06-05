@@ -1,12 +1,12 @@
-// src/components/modals/AddMembersModal.tsx
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../../components/ui/dialog";
 import { ScrollArea } from "../../../components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
 import { Button } from "../../../components/ui/button";
 import { Check } from "lucide-react";
-import { useEffect, useState } from "react";
 import { getGroupByMemberService } from "../../../services/user/userService";
 import { ChatUser } from "../../../utils/Interfaces/interfaces";
+import { useSocket } from "../../../context/SocketContext";
 
 interface AddMembersModalProps {
   isOpen: boolean;
@@ -26,17 +26,38 @@ export const AddMembersModal = ({
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [currentMembers, setCurrentMembers] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { socket } = useSocket();
 
-
-  useEffect(()=>{
-    if (!isOpen) return;
-    const fetchGroup = async ()=> {
-        const response = await getGroupByMemberService();
-        const filteredGroup = response.find((group: { _id: string; }) => group._id == groupId)
-        setCurrentMembers(filteredGroup.members);
+  const fetchCurrentMembers = async () => {
+    const response = await getGroupByMemberService();
+    const filteredGroup = response.find((group: { _id: string }) => group._id === groupId);
+    if (filteredGroup) {
+      setCurrentMembers(filteredGroup.members);
     }
-    fetchGroup();
-  },[groupId]);
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    fetchCurrentMembers();
+
+    // Listen for group member updates
+    const handleGroupMembersUpdated = (data: { groupId: string; newMembers: string[] }) => {
+      if (data.groupId === groupId) {
+        fetchCurrentMembers(); // Refresh members list
+      }
+    };
+
+    if (socket) {
+      socket.on('groupMembersUpdated', handleGroupMembersUpdated);
+    }
+
+    return () => {
+      if (socket) {
+        socket.off('groupMembersUpdated', handleGroupMembersUpdated);
+      }
+    };
+  }, [isOpen, groupId, socket]);
 
   const availableUsers = allUsers.filter(
     (user) => !currentMembers.includes(user._id)
@@ -56,6 +77,8 @@ export const AddMembersModal = ({
       await onAddMembers(selectedUsers);
       onClose();
       setSelectedUsers([]);
+    } catch (error) {
+      console.error("Error adding members:", error);
     } finally {
       setIsLoading(false);
     }

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui/card";
 import { Button } from "../../../components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
-import { Progress } from "../../../components/ui/progress";
+// import { Progress } from "../../../components/ui/progress";
 import { useEffect, useState } from "react";
 import { checkInService, checkOutService, getTodayAttendance } from "../../../services/user/userService";
 import { useSelector } from "react-redux";
@@ -149,7 +149,7 @@ const EmployeeDashboard = () => {
                     </Card> */}
 
                     {/* Current Project */} 
-                    <Card>
+                    {/* <Card>
                         <CardHeader>
                             <CardTitle className="text-sm text-gray-600">Current Project</CardTitle>
                         </CardHeader>
@@ -163,7 +163,7 @@ const EmployeeDashboard = () => {
                             </div>
                             <Progress value={75} className="w-full" />
                         </CardContent>
-                    </Card>
+                    </Card> */}
 
                     {/* Today's Meetings */}
                     <Card>

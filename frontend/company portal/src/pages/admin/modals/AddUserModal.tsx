@@ -16,10 +16,11 @@ interface AddUserModalProps {
     role: string
     department: string
     password: string
+    salary: number
   }) => void
 }
 
-const AddUserModal = ({onAddUser }: AddUserModalProps) => {
+const AddUserModal = ({ onAddUser }: AddUserModalProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showCPassword, setShowCPassword] = useState(false);
   const formik = useFormik({
@@ -30,6 +31,7 @@ const AddUserModal = ({onAddUser }: AddUserModalProps) => {
       department: "",
       password: "",
       confirmPassword: "",
+      salary: 0,
     },
     validationSchema: addUserSchema,
     onSubmit: (values) => {
@@ -130,6 +132,28 @@ const AddUserModal = ({onAddUser }: AddUserModalProps) => {
             </Select>
             {formik.touched.department && formik.errors.department ? (
               <div className="text-red-500 text-sm">{formik.errors.department}</div>
+            ) : null}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="salary" className="text-sm font-medium text-gray-700">
+              Salary *
+            </Label>
+            <Input
+              id="salary"
+              name="salary"
+              type="number"
+              min="0"
+              placeholder="Enter salary amount"
+              className="w-full"
+              onChange={(e) => {
+                const value = e.target.value === '' ? 0 : Number(e.target.value);
+                formik.setFieldValue("salary", value >= 0 ? value : 0);
+              }}
+              onBlur={formik.handleBlur}
+              value={formik.values.salary}
+            />
+            {formik.touched.salary && formik.errors.salary ? (
+              <div className="text-red-500 text-sm">{formik.errors.salary}</div>
             ) : null}
           </div>
           <div className="space-y-2">

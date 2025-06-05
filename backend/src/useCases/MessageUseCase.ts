@@ -2,7 +2,7 @@ import { inject, injectable } from "tsyringe";
 import { IMessageRepository } from "../entities/repositoryInterfaces/IMessage.respository";
 import { IMessage } from "../entities/models/IMessage.enities";
 import { IMessageUseCase } from "../entities/useCaseInterface/IMessageUseCase";
-import { socketManager } from "../frameworks/di/resolver";
+// import { socketManager } from "../frameworks/di/resolver";
 
 @injectable()
 export class MessageUseCase implements IMessageUseCase {
@@ -30,14 +30,6 @@ export class MessageUseCase implements IMessageUseCase {
       recipient: data.recipient,
       roomId: data.roomId,
       media: data.media
-    });
-
-    // Emit via SocketManager
-    await socketManager.sendPersistentNotification({
-      recipient: data.recipient?.toString() || data.roomId!?.toString(),
-      sender: data.sender.toString(),
-      type: 'message',
-      content: data.content || 'Sent a media file',
     });
 
     return savedMessage;

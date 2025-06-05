@@ -26,6 +26,7 @@ import { useConfirmModal } from "../../../components/useConfirm";
 import Sidebar from "../../../components/SidebarComponent";
 import { Header } from "../../../components/HeaderComponent";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSocket } from "../../../context/SocketContext";
 
 // User interface
 export interface User {
@@ -80,6 +81,7 @@ const LeavePage = () => {
   const [leaveHistory, setLeaveHistory] = useState<Leave[]>([]);
   const [openModal, setOpenModal] = useState(false);
   const { employee } = useSelector((state: RootState) => state.employee);
+  const {sendLeaveRequestApplied} = useSocket() 
 
   useEffect(() => {
     const fethchLeaveBalance = async () => {
@@ -100,7 +102,14 @@ const LeavePage = () => {
 
   const handleLeaveAdd = async (data: LeaveRequest) => {
     const newData = { ...data, employeeId: employee?._id };
-    await addLeaveRequestService(newData);
+    const response = await addLeaveRequestService(newData);
+    console.log(response)
+    sendLeaveRequestApplied({
+      employeeId : response.leaveRequest.employeeId._id,
+      employeeName : employee?.fullName ? employee?.fullName : "",
+      leaveId : response.leaveRequest._id,
+      managerId : response.leaveRequest.assignedManager || "67d3fb40609f7c890f6eb579",
+    })
     setOpenModal(false);
 
     const updated = await getLeaveRequestsService(employee!._id);

@@ -39,7 +39,11 @@ import { IGroupUseCase } from "../../entities/useCaseInterface/IGroupUseCase";
 import { GroupUseCase } from "../../useCases/GroupUseCase";
 import { QuestionUseCase } from "../../useCases/QuestionUseCase";
 import { IQuestionUseCase } from "../../entities/useCaseInterface/IQuestionUseCase";
-import { SocketManager } from "../../shared/socket/socketManager";
+// import { SocketManager } from "../../shared/socket/socketManager";
+import { IMonthlySummaryUseCase } from "../../entities/useCaseInterface/IMonthlySummaryUseCase";
+import { MonthlySummaryUseCase } from "../../useCases/MonthlySummaryUseCase";
+import { IPayrollUseCase } from "../../entities/useCaseInterface/IPayrollUseCase";
+import { PayrollUseCase } from "../../useCases/PayrollUseCase";
 
 
 export class UseCaseRegistry {
@@ -123,8 +127,16 @@ export class UseCaseRegistry {
             useClass : QuestionUseCase,
         });
 
-        container.register<SocketManager>("SocketManager",{
-            useClass : SocketManager,
+        // container.register<SocketManager>("SocketManager",{
+        //     useClass : SocketManager,
+        // });
+
+        container.register<IMonthlySummaryUseCase>("IMonthlySummaryUseCase",{
+            useClass : MonthlySummaryUseCase,
+        });
+
+        container.register<IPayrollUseCase>("IPayrollUseCase",{
+            useClass : PayrollUseCase,
         });
     }
 }

@@ -25,6 +25,11 @@ import { QuestionRepository } from "../../adapters/repositories/QuestionReposito
 import { IQuestionRepository } from "../../entities/repositoryInterfaces/IQuestion.repository";
 import { INotificationRepository } from "../../entities/repositoryInterfaces/INotification.repository";
 import { NotificationRepository } from "../../adapters/repositories/NotificationRepository";
+import { IMonthlySummaryRepository } from "../../entities/repositoryInterfaces/IMonthlySummaryRepository";
+import { MonthlySummaryRepository } from "../../adapters/repositories/MonthlySummaryRepository";
+import { IPayrollRepository } from "../../entities/repositoryInterfaces/IPayrollRepository";
+import { PayrollRepository } from "../../adapters/repositories/PayrollRepository";
+import { SocketManager } from "../../adapters/service/SocketService";
 
 
 export class RepositoryRegistry {
@@ -79,6 +84,18 @@ export class RepositoryRegistry {
 
         container.register<INotificationRepository>("INotificationRepository",{
             useClass : NotificationRepository,
+        });
+
+        container.register<IMonthlySummaryRepository>("IMonthlySummaryRepository",{
+            useClass : MonthlySummaryRepository,
+        });
+
+        container.register<IPayrollRepository>("IPayrollRepository",{
+            useClass : PayrollRepository,
+        });
+
+        container.register<SocketManager>("SocketManager", {
+            useClass: SocketManager,
         });
     }
 }

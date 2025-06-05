@@ -10,21 +10,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import { ErrorBoundary } from 'react-error-boundary';
 import Sidebar from "../../../components/SidebarComponent";
-
-interface IUserModel {
-  fullName: string;
-  email: string;
-  role: string;
-  department: string;
-  status: string;
-  profilePic?: string;
-  phone?: number;
-  address?: string;
-  manager?: string;
-  joinedAt: Date;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+import { Employee } from "../../../utils/Interfaces/interfaces";
 
 
 const EditProfilePage = () => {
@@ -32,7 +18,7 @@ const EditProfilePage = () => {
   const { enqueueSnackbar } = useSnackbar();
   const { employee } = useSelector((state: RootState) => state.employee);
   const [loading, setLoading] = useState(true);
-  const [profile, setProfile] = useState<IUserModel | null>(null);
+  const [profile, setProfile] = useState<Employee | null>(null);
 
   const formik = useFormik({
     initialValues: {
@@ -40,7 +26,7 @@ const EditProfilePage = () => {
       email: "",
       phone: "",
       address: "",
-      profilePic: null,
+      profilePic: "",
     },
     validationSchema: profileValidationSchema,
     enableReinitialize: true,
@@ -78,9 +64,9 @@ const EditProfilePage = () => {
         formik.setValues({
           fullName: response.details.fullName || "",
           email: response.details.email || "",
-          phone: response.details.phone || "",
+          phone: response.details.phone.toString() || "",
           address: response.details.address || "",
-          profilePic: response.details.profilePic || null,
+          profilePic: response.details.profilePic || "",
         });
       } catch (error) {
         console.error(error);
@@ -89,6 +75,7 @@ const EditProfilePage = () => {
       }
     };
     fetchUserProfile();
+  // eslint-disable-next-line
   }, [employee?._id]);
 
 

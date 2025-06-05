@@ -33,4 +33,10 @@ export const addUserSchema = Yup.object({
         .trim()
         .required("Confirm Password is required")
         .oneOf([Yup.ref("password"), "null"], "Passwords must match"),
+    salary: Yup.number()
+        .typeError("Salary must be a number")
+        .required("Salary is required")
+        .positive("Salary must be positive")
+        .min(1000, "Salary should be min 1000")
+        .max(1000000, "Salary seems too high")
 });

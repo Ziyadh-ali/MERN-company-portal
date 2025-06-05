@@ -20,7 +20,7 @@ export const AttendanceSchema = new Schema<IAttendanceModel>({
         default: false,
     },
     regularizationRequest: {
-        requestedBy: { type: Schema.Types.ObjectId, ref: "Employee" },
+        requestedBy: {type : String},
         reason: { type: String },
         status: {
             type: String,

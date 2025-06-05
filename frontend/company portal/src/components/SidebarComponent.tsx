@@ -1,4 +1,4 @@
-import { useState } from "react";
+// import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   Home,
@@ -6,9 +6,9 @@ import {
   Calendar,
   DollarSign,
   HelpCircle,
-  Users,
-  ChevronRight,
-  Folder,
+  // Users,
+  // ChevronRight,
+  // Folder,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
@@ -16,12 +16,12 @@ import { RootState } from "../store/store";
 const Sidebar = ({ role }: { role: "admin" | "employee" }) => {
   const { employee } = useSelector((state: RootState) => state.employee || { employee: null });
   // State to manage the visibility of the Employees submenu
-  const [isEmployeesOpen, setIsEmployeesOpen] = useState(false);
+  // const [isEmployeesOpen, setIsEmployeesOpen] = useState(false);
 
   // Toggle the Employees submenu
-  const toggleEmployeesMenu = () => {
-    setIsEmployeesOpen(!isEmployeesOpen);
-  };
+  // const toggleEmployeesMenu = () => {
+  //   setIsEmployeesOpen(!isEmployeesOpen);
+  // };
 
   return (
     <div className="w-64 bg-white shadow-md">
@@ -67,14 +67,14 @@ const Sidebar = ({ role }: { role: "admin" | "employee" }) => {
               <span>Leave</span>
             </NavLink>
             <NavLink
-              to="/payroll"
+              to="/payslip"
               className={({ isActive }) =>
                 `flex items-center space-x-2 p-2 rounded-md ${isActive ? "bg-blue-100 text-blue-600" : "text-gray-600 hover:bg-gray-100"
                 }`
               }
             >
               <DollarSign className="w-5 h-5" />
-              <span>Payroll</span>
+              <span>payslip</span>
             </NavLink>
             <NavLink
               to="/help-desk"
@@ -86,7 +86,7 @@ const Sidebar = ({ role }: { role: "admin" | "employee" }) => {
               <HelpCircle className="w-5 h-5" />
               <span>Help Desk</span>
             </NavLink>
-            <NavLink
+            {/* <NavLink
               to="/project"
               className={({ isActive }) =>
                 `flex items-center space-x-2 p-2 rounded-md ${isActive ? "bg-blue-100 text-blue-600" : "text-gray-600 hover:bg-gray-100"
@@ -95,7 +95,7 @@ const Sidebar = ({ role }: { role: "admin" | "employee" }) => {
             >
               <Folder className="w-5 h-5" />
               <span>Project </span>
-            </NavLink>
+            </NavLink> */}
             <NavLink
               to="/meeting"
               className={({ isActive }) =>
@@ -108,7 +108,7 @@ const Sidebar = ({ role }: { role: "admin" | "employee" }) => {
             </NavLink>
             {employee?.role && (employee.role === "hr") && (
               <div>
-                <button
+                {/* <button
                   onClick={toggleEmployeesMenu}
                   className={`flex items-center justify-between w-full p-2 rounded-md ${isEmployeesOpen
                     ? "bg-blue-100 text-blue-600"
@@ -123,8 +123,8 @@ const Sidebar = ({ role }: { role: "admin" | "employee" }) => {
                     className={`transform transition-transform duration-200 ${isEmployeesOpen ? "rotate-90" : "rotate-0"
                       } w-5 h-5`}
                   />
-                </button>
-                {isEmployeesOpen && (
+                </button> */}
+                {/* {isEmployeesOpen && (
                   <div className="ml-6 mt-2 space-y-1">
                     <NavLink
                       to="/developers/developers-list"
@@ -163,7 +163,7 @@ const Sidebar = ({ role }: { role: "admin" | "employee" }) => {
                       <span>Salary</span>
                     </NavLink>
                   </div>
-                )}
+                )} */}
               </div>
             )}
 
@@ -177,6 +177,7 @@ const Sidebar = ({ role }: { role: "admin" | "employee" }) => {
               { path: "/admin/leave/types", label: "Leave Type Management", icon: "📅" },
               { path: "/admin/payroll", label: "Payroll", icon: "💰" },
               { path: "/admin/attendance", label: "Attendance", icon: "⏰" },
+              { path: "/admin/attendance/summary", label: "Monthly Summary", icon: "⏰" },
               { path: "/admin/reports", label: "Reports", icon: "📊" },
               { path: "/admin/help", label: "Help Centre", icon: "❓" },
             ].map(({ path, label, icon }) => (

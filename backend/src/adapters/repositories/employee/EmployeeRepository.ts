@@ -11,7 +11,7 @@ export class EmployeeRepository implements IEmployeeRepository {
 
     async find(filter: any, skip: number, limit: number): Promise<{ employees: Employee[] | []; total: number; active: number; inactive: number }> {
 
-        const query:  any= {};
+        const query: any = {};
 
         if (filter.role) query.role = filter.role;
         if (filter.status) query.status = filter.status;
@@ -44,10 +44,7 @@ export class EmployeeRepository implements IEmployeeRepository {
     }
 
     async findById(id: string): Promise<Employee | null> {
-        return await EmployeeModel.findById(id).populate({
-            path : "manager",
-            select : "fullName"
-        });
+        return await EmployeeModel.findById(id).populate('manager', '_id fullName');
     }
 
     async findManagers(): Promise<Employee[] | []> {
@@ -67,10 +64,11 @@ export class EmployeeRepository implements IEmployeeRepository {
     };
 
     async getEmployeesForChat(): Promise<Partial<Employee[]>> {
-        return await EmployeeModel.find({status : "active"} , "_id fullName profilePic role");
+        return await EmployeeModel.find({ status: "active" }, "_id fullName profilePic role");
     }
 
     async getDevelopers(): Promise<Employee[]> {
-        return await EmployeeModel.find({role : "developer"})
+        return await EmployeeModel.find({ role: "developer" })
     }
+
 }

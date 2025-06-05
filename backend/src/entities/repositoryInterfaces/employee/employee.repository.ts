@@ -1,7 +1,7 @@
 import { Employee } from "../../models/employeeEntities/employee.enitity";
 export interface IEmployeeRepository {
     save(data : Partial<Employee>) : Promise<Employee>
-    findByEmail(email : string): Promise<Employee | null>
+    findByEmail(email : string): Promise<Employee | null>;
     find(
         filter : any,
         skip : number,
@@ -15,7 +15,7 @@ export interface IEmployeeRepository {
     findById(id : string) : Promise<Employee | null>;
     findManagers() : Promise<Employee[] | []>;
     getParticipantsByFilter(filter : {
-        role ?: string , 
+        role ?: string,
         department ?: string,
     }) : Promise <string[]>;
     getEmployeesForChat() : Promise<Partial<Employee[]>>;

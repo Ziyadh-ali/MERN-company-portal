@@ -10,7 +10,7 @@ export interface Attendance {
     isRegularized?: boolean;
     isRegularizable?: boolean;
     regularizationRequest?: {
-      requestedBy: ObjectId | string;
+      requestedBy: string;
       reason: string;
       requestedStatus: "Present" | "Absent" | "Late" | "Leave";
       status: "Pending" | "Approved" | "Rejected";

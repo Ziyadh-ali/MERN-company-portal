@@ -39,6 +39,8 @@ export const validationSchema = Yup.object({
   status: Yup.string()
   .trim()
   .required("Status is required"),
+  salary : Yup.number()
+  .required("Salary is required"),
   phone: Yup.string()
     .matches(/^[0-9]{10}$/, "Phone number must be 10 digits")
     .required("Phone is required"),

@@ -6,6 +6,8 @@ import {
   leaveRequestController,
   attendanceController,
   questionController,
+  monthlySummaryController,
+  payrollController,
 } from '../di/resolver';
 import { verifyAuth } from '../../adapters/middlewares/authMiddleware';
 import { leaveTypeController } from '../di/resolver';
@@ -143,6 +145,67 @@ export class AdminRoute {
         "/question/:id",
         verifyAuth("admin"),
         (req: Request, res: Response) => questionController.answerQuestion(req, res),
+      )
+
+    this.router
+      .post(
+        "/summary",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => monthlySummaryController.generateSummary(req, res),
+      )
+      .post(
+        "/summary/regenerate",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => monthlySummaryController.regenerateSummary(req, res),
+      )
+      .patch(
+        "/summary/approve/:summaryId",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => monthlySummaryController.approveSummary(req, res),
+      )
+      .patch(
+        "/summary/reject/:summaryId",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => monthlySummaryController.rejectSummary(req, res),
+      )
+      .patch(
+        "/summary/bulk-approve",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => monthlySummaryController.bulkApproveSummaries(req, res),
+      )
+      .get(
+        "/summary",
+        verifyAuth("admin"),
+        (req: Request, res: Response) => monthlySummaryController.getSummaries(req, res),
+      )
+
+    this.router
+      .post(
+        "/payroll/generate",
+        verifyAuth("admin"),
+        (req, res) => payrollController.generatePayroll(req, res)
+      )
+      .post(
+        "/payroll/generate/bulk",
+        verifyAuth("admin"),
+        (req, res) => payrollController.generateBulkPayroll(req, res)
+      )
+
+      .get(
+        "/payroll",
+        verifyAuth("admin"),
+        (req, res) => payrollController.getPayrollRecords(req, res)
+      )
+      .get(
+        "/payrolls",
+        verifyAuth("admin"),
+        (req, res) => payrollController.getAllPayroll(req, res)
+      )
+
+      .patch(
+        "/payroll/:payrollId/status",
+        verifyAuth("admin"),
+        (req, res) => payrollController.updatePayrollStatus(req, res)
       )
   }
 

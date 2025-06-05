@@ -15,7 +15,14 @@ export const NotificationSchema = new Schema<INotificationModel>(
         type: {
             type: String,
             required: true,
-            enum: ['message', 'group_invite', 'mention', 'reaction', 'group_update']
+            enum: [
+                'message',
+                'leave_approval',
+                'leave_rejection',
+                'meeting_scheduled',
+                'meeting_updated',
+                'leave_apply',
+            ]
         },
         content: {
             type: String,
@@ -24,6 +31,11 @@ export const NotificationSchema = new Schema<INotificationModel>(
         read: {
             type: Boolean,
             default: false
+        },
+        metadata: {
+            leaveId: String,
+            meetingId: String,
+            messageId: String,
         },
         createdAt: {
             type: Date,

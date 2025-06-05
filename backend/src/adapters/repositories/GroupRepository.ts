@@ -46,7 +46,7 @@ export class GroupRepository implements IGroupRepository {
         }
     }
 
-    async getGroupDetails(groupId: string): Promise<{ members: string[], createdBy: string } | null> {
+    async getGroupDetails(groupId: string): Promise<{  name : string , members: string[], createdBy: string } | null> {
         const group = await GroupModel.findOne(
             { _id: groupId },
             { members: 1, createdBy: 1 }
@@ -57,6 +57,7 @@ export class GroupRepository implements IGroupRepository {
           return {
             members: group.members.map((m: any) => m.toString()),
             createdBy: group.createdBy.toString(),
+            name : group.name
           };
     }
 }

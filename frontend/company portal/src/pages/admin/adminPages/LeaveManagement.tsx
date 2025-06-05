@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui
 import { Button } from "../../../components/ui/button";
 import { CheckCircle, } from "lucide-react";
 import { useSnackbar } from "notistack";
-import { getAllLeaveRequestsService, updateLeaveRequestStatusService } from "../../../services/admin/adminUserM";
+import { getAllLeaveRequestsService, updateLeaveRequestStatusService } from "../../../services/admin/adminService";
 import ShadTable from "../../../components/TableComponent";
 import Sidebar from "../../../components/SidebarComponent";
 import RejectLeaveRequestModal from "../../employee/modals/RejectLeaveRequest";

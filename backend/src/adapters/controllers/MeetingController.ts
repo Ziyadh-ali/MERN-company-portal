@@ -74,17 +74,14 @@ export class MeetingController {
                 });
             }
 
-            // Only proceed with the update if there are fields to update
             if (Object.keys(updateData).length === 0) {
                 res.status(HTTP_STATUS_CODES.BAD_REQUEST).json({
                     message: MESSAGES.ERROR.MEETING.MISSING_FIELDS,
                 });
             }
 
-            // Update the meeting using the collected updateData
-            await this.meetingUseCase.updateMeeting(meetingId, updateData);
+            const meeting = await this.meetingUseCase.updateMeeting(meetingId, updateData);
 
-            // Determine the success message based on which field was updated
             const successMessage =
                 link ? MESSAGES.SUCCESS.LINK_ADDED :
                     status === "completed" ? MESSAGES.SUCCESS.MEETING_COMPLETED :
@@ -92,6 +89,7 @@ export class MeetingController {
 
             res.status(HTTP_STATUS_CODES.OK).json({
                 message: successMessage,
+                meeting,
             });
         } catch (error) {
             console.log(error);

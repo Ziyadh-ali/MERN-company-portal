@@ -8,7 +8,7 @@ import { enqueueSnackbar } from "notistack";
 import { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 import { answerQuestionService } from "../../../services/user/userService";
-import { answerAdminQuestionService } from "../../../services/admin/adminUserM";
+import { answerAdminQuestionService } from "../../../services/admin/adminService";
 
 interface AnswerQuestionModalProps {
     open : boolean,
@@ -22,8 +22,6 @@ interface AnswerQuestionModalProps {
 const AnswerQuestionModal = ({
     open,
     questionId,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    questionText,
     existingAnswer,
     userRole,
     onClose,

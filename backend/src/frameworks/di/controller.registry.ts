@@ -15,6 +15,10 @@ import { MessageController } from "../../adapters/controllers/MessageController"
 import { ProjectController } from "../../adapters/controllers/ProjectController";
 import { GroupController } from "../../adapters/controllers/GroupController";
 import { QuestionController } from "../../adapters/controllers/QuestionController";
+import { MonthlySummaryController } from "../../adapters/controllers/MonthlySummaryController";
+import { PayrollController } from "../../adapters/controllers/PayrollController";
+import { PayslipPDFService } from "../../adapters/service/PayslipPDFService";
+import { PayslipController } from "../../adapters/controllers/PDFHandlerController";
 
 export class ControllerRegistry {
     static registerControllers() : void {
@@ -79,6 +83,22 @@ export class ControllerRegistry {
         });
         container.register("QuestionController",{
             useClass : QuestionController,
+        });
+
+        container.register("MonthlySummaryController",{
+            useClass : MonthlySummaryController,
+        });
+
+        container.register("PayrollController",{
+            useClass : PayrollController,
+        });
+
+        container.register("PayslipPDFService",{
+            useClass : PayslipPDFService,
+        });
+
+        container.register("PayslipController",{
+            useClass : PayslipController,
         });
     }
 }

@@ -26,7 +26,6 @@ export class GroupController {
                 name,
                 members,
                 createdBy,
-                type: "custom",
             });
 
             res.status(HTTP_STATUS_CODES.OK).json({

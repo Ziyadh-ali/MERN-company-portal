@@ -5,5 +5,4 @@ export interface IGroup {
     name: string;
     members: string[] | ObjectId[];
     createdBy: string | ObjectId;
-    type: "custom" | "project";
 }

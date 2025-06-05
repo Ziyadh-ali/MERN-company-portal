@@ -8,7 +8,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { adminLogin } from "../store/slices/adminSlice";
 import { employeeLogin } from "../store/slices/employeeSlice";
 import { loginSchema } from "../utils/login.validator";
-import { adminLoginService } from "../services/admin/adminUserM";
+import { adminLoginService } from "../services/admin/adminService";
 import { employeeLoginService } from "../services/user/userService";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";

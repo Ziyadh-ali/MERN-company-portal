@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui
 import { Button } from "../../../components/ui/button";
 import { CheckCircle, } from "lucide-react";
 import { useSnackbar } from "notistack";
-import { getAllLeaveRequestsService, updateLeaveRequestStatusService } from "../../../services/admin/adminUserM";
+import { getAllLeaveRequestsService, updateLeaveRequestStatusService } from "../../../services/admin/adminService";
 import ShadTable from "../../../components/TableComponent";
 import Sidebar from "../../../components/SidebarComponent";
 import { Header } from "../../../components/HeaderComponent";
@@ -27,7 +27,7 @@ export interface LeaveRequest {
     endDate: string;
     reason?: string;
     status?: "Pending" | "Approved" | "Rejected";
-    rejectionReason : string;
+    rejectionReason ?: string;
 }
 
 
@@ -59,6 +59,8 @@ const ManagerLeaveManagementPage = () => {
             }
         };
         fetchLeaveRequests();
+
+        //eslint-disable-next-line
     }, [ location]);
 
     // Handle approve/reject actions
