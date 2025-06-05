@@ -15,11 +15,14 @@ import { ResetPasswordController } from "../../adapters/controllers/employee/Res
 import { AttendanceController } from "../../adapters/controllers/AttendanceController";
 import { MeetingController } from "../../adapters/controllers/MeetingController";
 import { FaqController } from "../../adapters/controllers/FaqController";
-import { SocketManager } from "../../shared/socket/socketManager";
+// import { SocketManager } from "../../shared/socket/socketManager";
 import { MessageController } from "../../adapters/controllers/MessageController";
 import { ProjectController } from "../../adapters/controllers/ProjectController";
 import { GroupController } from "../../adapters/controllers/GroupController";
 import { QuestionController } from "../../adapters/controllers/QuestionController";
+import { MonthlySummaryController } from "../../adapters/controllers/MonthlySummaryController";
+import { PayrollController } from "../../adapters/controllers/PayrollController";
+import { PayslipController } from "../../adapters/controllers/PDFHandlerController";
 
 DependencyInjection.registerAll();
 
@@ -53,7 +56,7 @@ export const meetingController = container.resolve(MeetingController);
 
 export const faqController = container.resolve(FaqController);
 
-export const socketManager = container.resolve(SocketManager);
+// export const socketManager = container.resolve(SocketManager);
 
 export const messageController = container.resolve(MessageController);
 
@@ -62,3 +65,9 @@ export const projectController = container.resolve(ProjectController);
 export const groupController = container.resolve(GroupController);
 
 export const questionController = container.resolve(QuestionController);
+
+export const monthlySummaryController = container.resolve(MonthlySummaryController);
+
+export const payrollController = container.resolve(PayrollController);
+
+export const pdfController = container.resolve(PayslipController);

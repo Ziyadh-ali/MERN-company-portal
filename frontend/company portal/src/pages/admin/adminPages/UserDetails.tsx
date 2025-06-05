@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../../components/ui
 import { Button } from "../../../components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../../../components/ui/avatar";
 import { useEffect, useState } from "react";
-import { getUserDetails } from "../../../services/admin/adminUserM";
+import { getUserDetails } from "../../../services/admin/adminService";
 import { useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../../../components/SidebarComponent";
 import { Header } from "../../../components/HeaderComponent";
@@ -120,7 +120,7 @@ const UserDetailsPage = () => {
           </div>
         </div>
 
-        {/* Main Sections */}
+        Main Sections
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Section */}
           <div className="lg:col-span-2 space-y-6">
@@ -184,35 +184,6 @@ const UserDetailsPage = () => {
                   <span className="text-sm text-gray-600">
                     {user?.manager?.fullName || "Not assigned"}
                   </span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Activities */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm text-gray-600">
-                  Recent Activities
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-800">
-                    Completed Task: API Integration
-                  </p>
-                  <span className="text-xs text-gray-600">March 5, 2025</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-800">
-                    Submitted Leave Request
-                  </p>
-                  <span className="text-xs text-gray-600">March 3, 2025</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-800">
-                    Attended Team Meeting
-                  </p>
-                  <span className="text-xs text-gray-600">March 1, 2025</span>
                 </div>
               </CardContent>
             </Card>

@@ -20,6 +20,7 @@ import { AxiosError } from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "../../../components/SidebarComponent";
 import { Header } from "../../../components/HeaderComponent";
+import { useSocket } from "../../../context/SocketContext";
 
 interface Meeting {
     _id: string;
@@ -45,6 +46,7 @@ const MeetingPage = () => {
     const { employee } = useSelector((state: RootState) => state.employee);
     const [openModal, setOpenModal] = useState(false);
     const [meetings, setMeetings] = useState<Meeting[]>([]);
+    const { sendMeetingScheduled } = useSocket();
 
     useEffect(() => {
         const fetchMeetings = async () => {
@@ -71,7 +73,14 @@ const MeetingPage = () => {
             department?: string;
         }
     ) => {
-        await scheduleMeetingService(meeting, filter);
+        const response = await scheduleMeetingService(meeting, filter);
+        sendMeetingScheduled({
+            participants: response.createdMeeting.participants,
+            meetingId: response.createdMeeting._id,
+            meetingTitle: response.createdMeeting.title,
+            scheduledBy: response.createdMeeting.createdBy,
+            time: response.createdMeeting.startTime
+        });
     };
 
     const handleMarkAsCompleted = async (meetingId: string) => {
@@ -206,21 +215,21 @@ const MeetingPage = () => {
                         />
                     </div>
 
-                    <h2 className="text-xl font-semibold mb-3">Happened Meetings</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                        {happenedMeetings.length > 0 ? (
-                            happenedMeetings.map(renderMeetingCard)
-                        ) : (
-                            <p className="text-gray-500 col-span-full">No past meetings</p>
-                        )}
-                    </div>
-
                     <h2 className="text-xl font-semibold mb-3">Upcoming Meetings</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                         {upcomingMeetings.length > 0 ? (
                             upcomingMeetings.map(renderMeetingCard)
                         ) : (
                             <p className="text-gray-500 col-span-full">No upcoming meetings</p>
+                        )}
+                    </div>
+
+                    <h2 className="text-xl font-semibold mb-3">Happened Meetings</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {happenedMeetings.length > 0 ? (
+                            happenedMeetings.map(renderMeetingCard)
+                        ) : (
+                            <p className="text-gray-500 col-span-full">No past meetings</p>
                         )}
                     </div>
                 </div>

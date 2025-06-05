@@ -17,7 +17,7 @@ import { Header } from "./HeaderComponent";
 import Sidebar from "./SidebarComponent";
 import { IQuestion } from "../utils/Interfaces/interfaces";
 import { SubmitQuestionModal } from "../pages/employee/modals/SubmitQuestionModal";
-import { getQuestionsForAdminService } from "../services/admin/adminUserM";
+import { getQuestionsForAdminService } from "../services/admin/adminService";
 import AnswerQuestionModal from "../pages/employee/modals/AnswerQuestionModal";
 
 interface FAQCategory {

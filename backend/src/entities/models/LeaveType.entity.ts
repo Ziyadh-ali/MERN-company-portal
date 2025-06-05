@@ -5,6 +5,6 @@ export interface LeaveType {
     name: string,
     description?: string;
     maxDaysAllowed: number;
-    isPaid?: boolean;
+    isPaid: boolean;
     requiresApproval?: boolean;
 }

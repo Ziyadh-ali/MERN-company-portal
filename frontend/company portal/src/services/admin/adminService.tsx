@@ -1,4 +1,5 @@
 import { adminAxiosInstance } from "../../api/admin.axios";
+import { Employee, ILeaveRequest, IPayroll } from "../../utils/Interfaces/interfaces";
 
 export const adminLoginService = async (data: { email: string, password: string }) => {
     const response = await adminAxiosInstance.post("/login", data);
@@ -11,6 +12,7 @@ export const addUser = async (userData: {
     role: string;
     department: string;
     password: string;
+    salary: number;
 }) => {
     const response = await adminAxiosInstance.post("/users", { userData });
     return response.data;
@@ -26,7 +28,7 @@ export const getUsers = async (
     filter: EmployeeFilter,
     page: number,
     pageSize: number,
-) => {
+): Promise<{ data: Employee[], total: number, active: number, inactive: number, page: number, pageSize: number }> => {
     const response = await adminAxiosInstance.get(`/users?page=${page}&pageSize=${pageSize}`, {
         params: { ...filter }
     });
@@ -91,7 +93,7 @@ export const updateLeaveTypeService = async (
     return response.data;
 }
 
-export const getAllLeaveRequestsService = async () => {
+export const getAllLeaveRequestsService = async () : Promise<{leaveRequests : ILeaveRequest[] | []}> => {
     const response = await adminAxiosInstance.get("/leave/requests");
     return response.data;
 }
@@ -137,6 +139,62 @@ export const getQuestionsForAdminService = async () => {
 }
 
 export const answerAdminQuestionService = async (questionId: string, answer: string) => {
-  const response = await adminAxiosInstance.patch(`/question/${questionId}`, { answer });
-  return response.data;
+    const response = await adminAxiosInstance.patch(`/question/${questionId}`, { answer });
+    return response.data;
+}
+
+export const approveSummaryStatusService = async (summaryId: string) => {
+    const response = await adminAxiosInstance.patch(`/summary/approve/${summaryId}`,);
+    return response.data;
+}
+
+export const bulkApproveSummariesService = async (summaryIds: string[]) => {
+    const response = await adminAxiosInstance.patch(`/summary/bulk-approve`, { summaryIds });
+    return response.data;
+};
+
+export const rejectSummaryStatusService = async (summaryId: string, rejectionReason: string) => {
+    const response = await adminAxiosInstance.patch(`/summary/reject/${summaryId}`, { rejectionReason });
+    return response.data;
+}
+
+export const generateMonthlySummaryService = async (month: number, year: number, employeeId?: string) => {
+    const response = await adminAxiosInstance.post(`/summary`, { month, year, employeeId });
+    return response.data;
+}
+
+
+export const regenerateMonthlySummaryService = async (month: number, year: number, employeeId?: string) => {
+    const response = await adminAxiosInstance.post(`/summary/regenerate`, { month, year, employeeId });
+    return response.data;
+}
+
+export const getMonthlySummariesService = async (month: number, year: number) => {
+    const response = await adminAxiosInstance.get(`/summary?month=${month}&year=${year}`);
+    return response.data;
+}
+
+export const getPayrollRecordsService = async (month: number, year: number) => {
+    const response = await adminAxiosInstance.get(`/payroll?month=${month}&year=${year}&status=${status}`);
+    return response.data;
+}
+
+export const updatePayrollStatusService = async (payrollId: string) => {
+    const response = await adminAxiosInstance.patch(`/payroll/${payrollId}/status`);
+    return response.data;
+}
+
+export const generatePayrollService = async (month: number, year: number, taxPercentage: number, employeeId?: string,) => {
+    const response = await adminAxiosInstance.post("/payroll/generate", { month, year, employeeId, taxPercentage });
+    return response.data;
+}
+
+export const generateBulkPayrollService = async (month: number, year: number, taxPercentage: number) => {
+    const response = await adminAxiosInstance.post("/payroll/generate/bulk", { month, year, taxPercentage });
+    return response.data;
+}
+
+export const getAllPayrollsService = async () : Promise<{payrolls : IPayroll[] | []}> => {
+    const response = await adminAxiosInstance.get("/payrolls");
+    return response.data;
 }

@@ -31,15 +31,12 @@ export class NotificationRepository implements INotificationRepository {
         return notifications;
     }
 
-    async getUserNotifications(userId: string, limit: number, page: number): Promise<{ notifications: INotification[]; total: number; }> {
-        const skip = (page - 1) * limit;
+    async getUserNotifications(userId: string): Promise<{ notifications: INotification[]; total: number; }> {
 
         const [notifications, total] = await Promise.all([
             NotificationModel
                 .find({ recipient: userId })
                 .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
                 .populate("sender", "fullName email profilePic")
                 .lean()
                 .exec(),

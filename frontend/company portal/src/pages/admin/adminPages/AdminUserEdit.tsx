@@ -9,26 +9,10 @@ import { ErrorBoundary } from "react-error-boundary";
 
 // Assume these are the services for fetching and updating user data
 import { validationSchema } from "../../../utils/editValidation";
-import { getManagers, getUserDetails, updateUserService } from "../../../services/admin/adminUserM";
+import { getManagers, getUserDetails, updateUserService } from "../../../services/admin/adminService";
 import Sidebar from "../../../components/SidebarComponent";
+import { Employee } from "../../../utils/Interfaces/interfaces";
 
-// User interface
-export interface User {
-    _id?: string;
-    fullName: string;
-    email: string;
-    department: string;
-    role: "hr" | "developer" | "projectManager";
-    status: string;
-    password: string;
-    phone?: number;
-    address?: string;
-    joinedAt?: Date;
-    manager?: string;
-    profilePic?: string;
-    createdAt?: Date;
-    updatedAt?: Date;
-}
 
 
 
@@ -36,7 +20,7 @@ const AdminEditUserPage = () => {
     const navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
     const { userId } = useParams<{ userId: string }>();
-    const [Managers, setManagers] = useState<User[]>([]);
+    const [Managers, setManagers] = useState<Employee[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Formik setup
@@ -49,6 +33,7 @@ const AdminEditUserPage = () => {
             status: "",
             phone: "",
             address: "",
+            salary: "",
             manager: "",
             joinedAt: "",
             profilePic: null as File | null,
@@ -96,6 +81,7 @@ const AdminEditUserPage = () => {
                         phone: response.user.phone ? response.user.phone.toString() : "",
                         address: response.user.address || "",
                         manager: response.user.manager || "",
+                        salary : response.user.salary || "",
                         joinedAt: response.user.joinedAt
                             ? new Date(response.user.joinedAt).toISOString().split("T")[0]
                             : "",
@@ -120,6 +106,8 @@ const AdminEditUserPage = () => {
         }
         fetchUserProfile();
         fetchManagers();
+
+        //eslint-disable-next-line
     }, [userId]);
 
     return (
@@ -161,6 +149,13 @@ const AdminEditUserPage = () => {
                                 <Input {...formik.getFieldProps("department")} placeholder="Enter department" />
                                 {formik.touched.department && formik.errors.department && (
                                     <div className="text-red-500 text-sm">{formik.errors.department}</div>
+                                )}
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-700">Salary</label>
+                                <Input {...formik.getFieldProps("salary")} placeholder="Enter Salary" />
+                                {formik.touched.salary && formik.errors.salary && (
+                                    <div className="text-red-500 text-sm">{formik.errors.salary}</div>
                                 )}
                             </div>
                             <div>

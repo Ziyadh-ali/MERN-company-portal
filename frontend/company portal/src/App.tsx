@@ -21,15 +21,22 @@ import MeetingPage from "./pages/employee/employeePages/MeetingPage"
 import ChatPage from "./pages/employee/employeePages/ChatPage"
 import AdminHelpCenterPage from "./pages/admin/adminPages/AdminHelpCenter"
 import EmployeeHelpCenterPage from "./pages/employee/employeePages/HelpCentre"
-import ProjectManagementPage from "./pages/employee/employeePages/ProjectMangement"
 import ManagerDeveloperManagement from "./pages/employee/employeePages/ManagerUserManagement"
 import ManagerLeaveManagementPage from "./pages/employee/employeePages/ManagerLeaveRequest"
 import AdminAttendancePage from "./pages/admin/adminPages/AdminAttendncePage"
+import MonthlyAttendanceSummaryPage from "./pages/admin/adminPages/MonthlyAttendanceSummary"
+import PayrollManagementPage from "./pages/admin/adminPages/PayrollManagement"
+import PayslipPage from "./pages/employee/employeePages/PayslipPage"
+import { SocketProvider } from "./context/SocketContext";
+import { useSelector } from "react-redux"
+import { RootState } from "./store/store"
 
 function App() {
-
+  const { employee } = useSelector((state: RootState) => state.employee);
+  const {admin} = useSelector((state : RootState)=>state.admin)
   return (
     <>
+    <SocketProvider userId={employee?._id || admin?._id || ""}>
       <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: "bottom", horizontal: "center" }}>
         <Routes>
           <Route path="/">
@@ -38,7 +45,7 @@ function App() {
 
               <Route path="login" element={<EmployeeLogin />} />
 
-              <Route path="/reset-password" element={<ResetPasswordPage/>} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
 
             </Route>
 
@@ -46,26 +53,29 @@ function App() {
 
               <Route path="dashboard" element={<EmployeeDashBoard />} />
 
-              <Route path="profile/:id" element={<EditProfilePage/>} />
+              <Route path="profile/:id" element={<EditProfilePage />} />
 
-              <Route path="profile" element={<EmployeeProfilePage/>} />
+              <Route path="profile" element={<EmployeeProfilePage />} />
 
-              <Route path="leave" element={<LeavePage/>} />
+              <Route path="leave" element={<LeavePage />} />
 
-              <Route path="attendance" element={<AttendancePage/>} />
+              <Route path="attendance" element={<AttendancePage />} />
 
-              <Route path="meeting" element={<MeetingPage/>} />
+              <Route path="meeting" element={<MeetingPage />} />
 
-              <Route path="messages" element={<ChatPage/>} />
 
-              <Route path="help-desk" element={<EmployeeHelpCenterPage/>} />
+              <Route path="messages" element={<ChatPage />} />
 
-              <Route path="project" element={<ProjectManagementPage/>} />
+              <Route path="help-desk" element={<EmployeeHelpCenterPage />} />
 
-              <Route path="developers/developers-list" element={<ManagerDeveloperManagement/>} />
+              {/* <Route path="project" element={<ProjectManagementPage />} /> */}
 
-              <Route path="developers/leave" element={<ManagerLeaveManagementPage/>} />
-              
+              <Route path="developers/developers-list" element={<ManagerDeveloperManagement />} />
+
+              <Route path="developers/leave" element={<ManagerLeaveManagementPage />} />
+
+              <Route path="payslip" element={<PayslipPage />} />
+
             </Route>
 
           </Route>
@@ -98,6 +108,10 @@ function App() {
 
               <Route path="attendance" element={<AdminAttendancePage />} />
 
+              <Route path="attendance/summary" element={<MonthlyAttendanceSummaryPage />} />
+
+              <Route path="payroll" element={<PayrollManagementPage />} />
+
             </Route>
 
           </Route>
@@ -105,6 +119,7 @@ function App() {
         </Routes>
 
       </SnackbarProvider>
+      </SocketProvider>
     </>
   )
 }

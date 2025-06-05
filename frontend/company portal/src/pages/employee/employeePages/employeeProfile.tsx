@@ -6,11 +6,12 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import { changePasswordService, getProfileDetails } from "../../../services/user/userService";
-import  { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import ChangePasswordModal from "../modals/ChangePasswordModal";
 import { enqueueSnackbar } from "notistack";
 import Sidebar from "../../../components/SidebarComponent";
 import { Header } from "../../../components/HeaderComponent";
+import { Employee } from "../../../utils/Interfaces/interfaces";
 
 // User interface
 export interface User {
@@ -25,8 +26,8 @@ export interface User {
     address?: string;
     joinedAt?: Date;
     manager?: {
-        _id : string;
-        fullName : string;
+        _id: string;
+        fullName: string;
     };
     profilePic?: string;
     createdAt?: Date;
@@ -37,12 +38,13 @@ export interface User {
 const EmployeeProfilePage = () => {
     const naviagte = useNavigate();
     const { employee } = useSelector((state: RootState) => state.employee);
-    const [user, setUser] = useState<User>();
+    const [user, setUser] = useState<Employee>();
 
     useEffect(() => {
         const fetchUsers = async () => {
             try {
                 const response = await getProfileDetails(employee ? employee?._id : "");
+                console.log(response.details)
                 setUser(response.details);
             } catch (error) {
                 console.log(error);
@@ -59,7 +61,7 @@ const EmployeeProfilePage = () => {
             if (employee?._id) {
                 const response = await changePasswordService(employee?._id, updatedPass.currentPassword, updatedPass.newPassword);
                 enqueueSnackbar(response.message, { variant: "success" });
-                
+
             }
         } catch (error) {
             console.log(error);
@@ -92,7 +94,7 @@ const EmployeeProfilePage = () => {
 
             {/* Main Content */}
             <div className="flex-1 p-6">
-                <Header role="employee" heading="Profile Page"/>
+                <Header role="employee" heading="Profile Page" />
                 <div className="bg-white shadow-md rounded-lg p-6 mb-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
@@ -199,8 +201,9 @@ const EmployeeProfilePage = () => {
                                         Reports to:
                                     </span>
                                     <span className="text-sm text-gray-600">
-                                        {user?.manager?.fullName || "Not assigned"}
+                                        {!user?.manager ? "Not assigned" : user.manager.fullName}
                                     </span>
+
                                 </div>
                             </CardContent>
                         </Card>

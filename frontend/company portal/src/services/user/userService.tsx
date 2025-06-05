@@ -1,7 +1,7 @@
 import axios from "axios";
 import { employeeAxiosInstance } from "../../api/employee.axios";
 import { EditMeeting } from "../../pages/employee/modals/editMeetingModal";
-import { IGroup } from "../../utils/Interfaces/interfaces";
+import { Employee, IGroup, ILeaveRequest, IMeeting } from "../../utils/Interfaces/interfaces";
 
 
 
@@ -18,7 +18,7 @@ export const logoutService = async () => {
   return response.data;
 }
 
-export const getProfileDetails = async (userId: string) => {
+export const getProfileDetails = async (userId: string) : Promise<{details : Employee}> => {
   const response = await employeeAxiosInstance.get(`/profile/${userId}`);
   return response.data;
 }
@@ -54,7 +54,7 @@ export const addLeaveRequestService = async (data: {
   startDate: string;
   endDate: string;
   reason: string;
-}) => {
+}) : Promise<{message : string , leaveRequest : ILeaveRequest}> =>  {
   const response = await employeeAxiosInstance.post("/leave/request", {
     data,
   })
@@ -122,7 +122,7 @@ export const scheduleMeetingService = async (meeting: {
   date: string;
   startTime: string;
   duration: number;
-}, filter: { role?: string, department?: string }) => {
+}, filter: { role?: string, department?: string }) : Promise<{message : string , createdMeeting : IMeeting}> => {
   const response = await employeeAxiosInstance.post("/meeting", {
     meeting, filter
   });
@@ -134,7 +134,7 @@ export const getMeetingsService = async (employeeId: string) => {
   return response.data;
 }
 
-export const addMeetingLinkService = async (meetingId: string, link: string) => {
+export const addMeetingLinkService = async (meetingId: string, link: string) : Promise<{message : string , meeting : IMeeting}> => {
   const response = await employeeAxiosInstance.patch(`/meeting/${meetingId}/link`, { link });
   return response.data;
 }
@@ -310,6 +310,20 @@ export const addGroupMembersService = async (
 ) => {
   const response = await employeeAxiosInstance.patch(`/groups/${groupId}/members`, { userIds });
   return response.data;
+};
+
+export const getEmployeePayslipsService = async (employeeId: string) => {
+    const response = await employeeAxiosInstance.get(`/payslip/${employeeId}`);
+    return response.data;
+};
+
+export const downloadPayslipService = async (employeeId: string , month : number , year : number) => {
+    const response = await employeeAxiosInstance.get(`/payslip/download/pdf?employeeId=${employeeId}&month=${month}&year=${year}`,
+      {
+        responseType: 'blob',
+      }
+    );
+    return response.data;
 };
 
 

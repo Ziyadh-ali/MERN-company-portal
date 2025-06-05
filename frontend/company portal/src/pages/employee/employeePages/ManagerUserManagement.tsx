@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Input } from "../../../components/ui/input";
 import AddUserModal from "../../admin/modals/AddUserModal";
 import { enqueueSnackbar } from "notistack";
-import { addUser, deleteUser, getUsers } from "../../../services/admin/adminUserM";
+import { addUser, deleteUser, getUsers } from "../../../services/admin/adminService";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -12,6 +12,7 @@ import ShadTable from "../../../components/TableComponent";
 import { useConfirmModal } from "../../../components/useConfirm";
 import Sidebar from "../../../components/SidebarComponent";
 import { Header } from "../../../components/HeaderComponent";
+import { Employee } from "../../../utils/Interfaces/interfaces";
 
 interface EmployeeFilter {
   role?: string;
@@ -20,21 +21,6 @@ interface EmployeeFilter {
   [key: string]: string | undefined;
 }
 
-export interface Employee {
-  _id: string;
-  fullName: string;
-  email: string;
-  phone: number;
-  address: string;
-  profilePic: string;
-  department: string;
-  role: string;
-  status: "active" | "inactive";
-  manager: string;
-  joinedAt: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
 
 function ManagerDeveloperManagement() {
@@ -90,6 +76,7 @@ function ManagerDeveloperManagement() {
     role: string;
     department: string;
     password: string;
+    salary: number;
   }) => {
     try {
       const data = await addUser(userData);

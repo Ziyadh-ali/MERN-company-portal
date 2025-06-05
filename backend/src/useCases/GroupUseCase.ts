@@ -3,7 +3,7 @@ import { IGroupUseCase } from "../entities/useCaseInterface/IGroupUseCase";
 import { IGroup } from "../entities/models/IGroup.entities";
 import { IGroupRepository } from "../entities/repositoryInterfaces/IGroup.repository";
 import { ObjectId } from "mongoose";
-import { socketManager } from "../frameworks/di/resolver";
+// import { socketManager } from "../frameworks/di/resolver";
 
 
 @injectable()
@@ -15,7 +15,7 @@ export class GroupUseCase implements IGroupUseCase {
 
   async createGroup(data: IGroup): Promise<IGroup> {
     const group = await this.groupRepository.createGroup(data);
-    socketManager.emitGroupCreated(group);
+    // socketManager.emitGroupCreated(group);
     return group;
   }
 
@@ -30,11 +30,11 @@ export class GroupUseCase implements IGroupUseCase {
     const group = await this.groupRepository.getGroupDetails(groupId);
     if (!group) throw new Error('Group not found');
 
-    socketManager.emitMembersAdded(
-      groupId,
-      userIds,
-      group.members
-    );
+    // socketManager.emitMembersAdded(
+    //   groupId,
+    //   userIds,
+    //   group.members
+    // );
 
     return group;
   }

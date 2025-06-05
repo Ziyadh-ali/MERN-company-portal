@@ -7,14 +7,14 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { enqueueSnackbar } from "notistack";
 import { AxiosError } from "axios";
-import { updateLeaveRequestStatusService } from "../../../services/admin/adminUserM";
+import { updateLeaveRequestStatusService } from "../../../services/admin/adminService";
 import { useNavigate } from "react-router-dom";
 import { XCircle } from "lucide-react";
 import { useConfirmModal } from "../../../components/useConfirm";
 
 interface RejectProps {
     leaveRequestId: string;
-    role: "admin" | "employee"
+    role: "admin" | "employee" 
 }
 
 const RejectLeaveRequestModal = ({ leaveRequestId, role }: RejectProps) => {

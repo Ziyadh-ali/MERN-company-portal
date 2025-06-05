@@ -13,6 +13,8 @@ export interface Employee {
     joinedAt?: Date ,
     manager?: string,
     profilePic?: string,
+    salary : number;
+    salaryType : "hourly" | "monthly";
     createdAt?: Date;
     updatedAt?: Date;
 }

@@ -12,5 +12,7 @@ export const LeaveRequestSchema = new Schema<ILeaveRequest>(
         status: { type: String, enum: ["Pending", "Approved", "Rejected","Cancelled"], default: "Pending" },
         assignedManager: { type: Schema.Types.ObjectId, ref: "Employee" },
         rejectionReason: { type: String},
+    },{
+        timestamps: { createdAt: true, updatedAt: true },
     }
 );

@@ -15,7 +15,10 @@ import {
     messageController,
     projectController,
     groupController,
-    questionController
+    questionController,
+    monthlySummaryController,
+    payrollController,
+    pdfController
 } from "../di/resolver";
 import { verifyAuth } from "../../adapters/middlewares/authMiddleware";
 import upload from "../../adapters/service/multer";
@@ -294,6 +297,37 @@ export class UserRoute {
                 verifyAuth("employee"),
                 chatMediaUpload.single("file"),
                 (req: Request, res: Response) => messageController.uploadMedia(req, res),
+            )
+
+        this.router
+            .post(
+                "/summary",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => monthlySummaryController.generateSummary(req, res),
+            )
+            .post(
+                "/summary/regenerate",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => monthlySummaryController.regenerateSummary(req, res),
+            )
+            .get(
+                "/summary",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => monthlySummaryController.getSummaries(req, res),
+            )
+
+        this.router
+            .get(
+                "/payslip/:employeeId",
+                verifyAuth("employee"),
+                (req: Request, res: Response) => payrollController.getPayslipByEmployeeId(req, res),
+            )
+
+        this.router
+            .get(
+                '/payslip/download/pdf',
+                verifyAuth("employee"),
+                (req: Request, res: Response) => pdfController.downloadPayslip(req, res),
             )
     }
 

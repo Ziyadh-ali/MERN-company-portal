@@ -1,9 +1,7 @@
 import { Request, Response } from "express";
 import { HTTP_STATUS_CODES } from "../../shared/constants";
-import { MESSAGES } from "../../shared/constants";
 import { inject, injectable } from "tsyringe";
 import { IMessageUseCase } from "../../entities/useCaseInterface/IMessageUseCase";
-import { CustomRequest } from "../middlewares/authMiddleware";
 
 @injectable()
 export class MessageController {

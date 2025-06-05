@@ -20,7 +20,7 @@ import {
     DialogFooter,
 } from "../../../components/ui/dialog";
 import { Textarea } from "../../../components/ui/textarea";
-import { getAllAttendanceService, regularizeStatusService, updateAttendanceService } from "../../../services/admin/adminUserM";
+import { getAllAttendanceService, regularizeStatusService, updateAttendanceService } from "../../../services/admin/adminService";
 import { enqueueSnackbar } from "notistack";
 import { AxiosError } from "axios";
 
@@ -81,7 +81,7 @@ const AdminAttendancePage = () => {
 
     const handleSaveStatus = async (id: string, newStatus: Attendance["status"]) => {
         try {
-            const response = await updateAttendanceService(id, newStatus );
+            const response = await updateAttendanceService(id, newStatus);
             enqueueSnackbar(response.message, { variant: "success" });
             setAttendanceData((prevData) =>
                 prevData.map((item) => (item._id === id ? { ...item, status: newStatus } : item))
@@ -103,20 +103,20 @@ const AdminAttendancePage = () => {
     const handleRegularizationAction = async (status: "Approved" | "Rejected") => {
         if (!selectedAttendance) return;
         try {
-            const response = await regularizeStatusService(selectedAttendance._id , status,adminRemarks);
+            const response = await regularizeStatusService(selectedAttendance._id, status, adminRemarks);
             enqueueSnackbar(response.message, { variant: "success" });
             setAttendanceData((prev) =>
                 prev.map((item) =>
                     item._id === selectedAttendance._id
                         ? {
-                              ...item,
-                              isRegularized: status === "Approved",
-                              regularizationRequest: {
-                                  ...item.regularizationRequest!,
-                                  status,
-                                  adminRemarks,
-                              },
-                          }
+                            ...item,
+                            isRegularized: status === "Approved",
+                            regularizationRequest: {
+                                ...item.regularizationRequest!,
+                                status,
+                                adminRemarks,
+                            },
+                        }
                         : item
                 )
             );
@@ -186,10 +186,10 @@ const AdminAttendancePage = () => {
                                                 {att.date ? format(new Date(att.date), "MM/dd/yyyy") : "—"}
                                             </td>
                                             <td className="p-2 border">
-                                                {att.checkInTime ? format(new Date(+att.checkInTime), "hh:mm a") : "—"}
+                                                {att.checkInTime ? format(new Date(att.checkInTime), "hh:mm a") : "—"}
                                             </td>
                                             <td className="p-2 border">
-                                                {att.checkOutTime ? format(new Date(+att.checkOutTime), "hh:mm a") : "—"}
+                                                {att.checkOutTime ? format(new Date(att.checkOutTime), "hh:mm a") : "—"}
                                             </td>
                                             <td className="p-2 border">
                                                 <Select
@@ -218,7 +218,7 @@ const AdminAttendancePage = () => {
                                                 >
                                                     Save
                                                 </Button>
-                                                {att.isRegularizable &&att.regularizationRequest?.status === "Pending" && (
+                                                {att.isRegularizable && att.regularizationRequest?.status === "Pending" && (
                                                     <Button
                                                         size="sm"
                                                         variant="outline"
@@ -260,11 +260,10 @@ const AdminAttendancePage = () => {
                             <button
                                 key={i + 1}
                                 onClick={() => setCurrentPage(i + 1)}
-                                className={`px-3 py-1 text-sm rounded border ${
-                                    currentPage === i + 1
+                                className={`px-3 py-1 text-sm rounded border ${currentPage === i + 1
                                         ? "bg-blue-600 text-white"
                                         : "bg-white text-gray-800 hover:bg-gray-100"
-                                }`}
+                                    }`}
                             >
                                 {i + 1}
                             </button>

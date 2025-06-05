@@ -8,5 +8,5 @@ export interface IGroupRepository {
   removeMember(roomId: string | ObjectId, memberId: string | ObjectId): Promise<void>;
   isUserAdmin(groupId: string, userId: string): Promise<boolean>;
   addMembers(groupId: string, userIds: string[]): Promise<boolean>;
-  getGroupDetails(groupId: string): Promise<{members: string[], createdBy: string } | null>;
+  getGroupDetails(groupId: string): Promise<{ name : string ,members: string[], createdBy: string } | null>;
 }

@@ -18,7 +18,7 @@ export class MessageRepository implements IMessageRepository {
 
     async getMessagesByRoomId(roomId: string): Promise<IMessage[]> {
         return MessageModel.find({ roomId })
-            .populate("sender", "fullName email")
+            .populate("sender", "fullName email profilePic")
             .sort({ createdAt: 1 });
     }
 
@@ -29,7 +29,7 @@ export class MessageRepository implements IMessageRepository {
                 { sender: user2, recipient: user1 },
             ],
         })
-            .populate("sender", "fullName email")
+            .populate("sender", "fullName email profilePic")
             .sort({ createdAt: 1 });
     }
 

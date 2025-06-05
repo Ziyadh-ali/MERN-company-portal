@@ -33,6 +33,6 @@ export class ResetPasswordUseCase implements IResetPasswordUseCase {
 
         const hashedPassword = await this.passwordBcrypt.hash(newPassword);
 
-        await this.employeeRepository.updateEmployeeById(employee._id,{password : hashedPassword})
+        await this.employeeRepository.updateEmployeeById(employee._id ? employee._id.toString() : "",{password : hashedPassword})
     }
 }

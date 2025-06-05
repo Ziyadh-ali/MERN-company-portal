@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { useSnackbar } from "notistack";
 import { Edit, Trash2 } from "lucide-react";
 import { AddLeaveTypeModal, UpdateLeaveTypeModal } from "../modals/LeaveTypeKModal";
-import { createLeaveTypeService, deleteLeaveTypeService, getLeaveTypesService, updateLeaveTypeService } from "../../../services/admin/adminUserM";
+import { createLeaveTypeService, deleteLeaveTypeService, getLeaveTypesService, updateLeaveTypeService } from "../../../services/admin/adminService";
 import { useNavigate } from "react-router-dom";
 import { useConfirmModal } from "../../../components/useConfirm";
 import Sidebar from "../../../components/SidebarComponent";
@@ -40,6 +40,7 @@ const LeaveTypeManagementPage = () => {
             }
         };
         fetchLeaveTypes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleAddLeaveType = async (leaveType: Omit<LeaveType, "_id">) => {

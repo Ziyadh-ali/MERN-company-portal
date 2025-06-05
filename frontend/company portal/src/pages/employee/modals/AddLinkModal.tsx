@@ -9,6 +9,7 @@ import { enqueueSnackbar } from "notistack";
 import { AxiosError } from "axios";
 import { addMeetingLinkService } from "../../../services/user/userService";
 import { useNavigate } from "react-router-dom";
+import { useSocket } from "../../../context/SocketContext";
 
 
 interface AddMeetingLinkModalProps {
@@ -18,6 +19,8 @@ interface AddMeetingLinkModalProps {
 const AddMeetingLinkModal = ({ meetingId }: AddMeetingLinkModalProps) => {
     const navigate = useNavigate()
     const [open, setOpen] = useState(false);
+    const { sendMeetingUpdated } = useSocket()
+
 
     const formik = useFormik({
         initialValues: {
@@ -31,6 +34,13 @@ const AddMeetingLinkModal = ({ meetingId }: AddMeetingLinkModalProps) => {
         onSubmit: async (values) => {
             try {
                 const response = await addMeetingLinkService(meetingId, values.link);
+                sendMeetingUpdated({
+                    participants : response.meeting.participants,
+                    meetingId : response.meeting._id,
+                    meetingTitle : response.meeting.title,
+                    updatedBy : response.meeting.createdBy,
+                    changes : "Link Added"
+                })
                 enqueueSnackbar(response.message, { variant: "success" });
                 navigate("/meeting")
                 setOpen(false);
